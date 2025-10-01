@@ -2,7 +2,7 @@
     <div class="container mx-auto px-4 py-6">
         <h1 class="text-2xl font-bold mb-4">Attendance Monitoring</h1>
 
-        <form method="GET" action="{{ route('hr.attendance.monitor') }}" class="mb-4 space-x-4">
+        <form method="GET" action="{{ route('hr.monitor') }}" class="mb-4 space-x-4">
             <input type="date" name="date_from" value="{{ request('date_from') }}" class="border rounded p-2">
             <input type="date" name="date_to" value="{{ request('date_to') }}" class="border rounded p-2">
             <select name="user_id" class="border rounded p-2">

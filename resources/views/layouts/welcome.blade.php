@@ -135,14 +135,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link " href="{{ route('hr.approve') }}">Approve Attendance</a></li>
                                   <li class="nav-item"><a class="nav-link" href="{{ route('hr.attendance') }}">Monitor Attendance</a></li>
-                              <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveleave') }}">Approve Leave & Overtime</a></li>
+                              <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveleave.show') }}">Approve Leave</a></li>
+                              <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveOvertime.show') }}">Approve Overtime</a></li>
                               <li class="nav-item"><a class="nav-link" href="{{ route('hr.reports') }}">Generate Reports</a></li>
 
 
                             @elseif(auth()->user()->role === 'employee')
                                 <li class="nav-item"><a class="nav-link" href="{{ route('profile.edit') }}">My Profile</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('attendance.my') }}">My Attendance</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('attendance.requests') }}">Request Leave/Overtime</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('attendance.requests') }}">Request Leave</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('attendance.Overtime') }}">Overtime</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('payslip.index') }}">Payslips</a></li>
                             @endif
                         @endauth

@@ -9,8 +9,8 @@ class EmployeeController extends Controller
     public function index()
     {
         // Fetch users from DB, for example:
-        $users = \App\Models\user::all();
+        $employees = \App\Models\User::all();
 
-        return view('admin.index', compact('users'));
+        return view('admin.index', compact('employees'));
     }
 }

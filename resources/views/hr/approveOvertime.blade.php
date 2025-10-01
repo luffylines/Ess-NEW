@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="container mx-auto px-4 py-6">
-        <h1 class="text-2xl font-bold mb-6">Approve Leave Requests</h1>
+        <h1 class="text-2xl font-bold mb-6">Approve Overtime Requests</h1>
 
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -14,35 +14,35 @@
             </div>
         @endif
 
-        <!-- Leave Requests Section -->
+        <!-- Overtime Requests Section -->
         <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">Pending Leave Requests</h2>
+            <h2 class="text-xl font-semibold mb-4">Pending Overtime Requests</h2>
             
-            @if(count($leaveRequests) > 0)
+            @if(count($overtimeRequests) > 0)
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white border border-gray-300">
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="border px-4 py-2 text-left">Employee</th>
-                                <th class="border px-4 py-2 text-left">Leave Type</th>
-                                <th class="border px-4 py-2 text-left">Start Date</th>
-                                <th class="border px-4 py-2 text-left">End Date</th>
-                                <th class="border px-4 py-2 text-left">Days</th>
+                                <th class="border px-4 py-2 text-left">Date</th>
+                                <th class="border px-4 py-2 text-left">Start Time</th>
+                                <th class="border px-4 py-2 text-left">End Time</th>
+                                <th class="border px-4 py-2 text-left">Hours</th>
                                 <th class="border px-4 py-2 text-left">Reason</th>
                                 <th class="border px-4 py-2 text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($leaveRequests as $request)
+                            @foreach($overtimeRequests as $request)
                                 <tr>
                                     <td class="border px-4 py-2">{{ $request->user->name }}</td>
-                                    <td class="border px-4 py-2">{{ ucfirst(str_replace('_', ' ', $request->leave_type)) }}</td>
-                                    <td class="border px-4 py-2">{{ $request->start_date->format('Y-m-d') }}</td>
-                                    <td class="border px-4 py-2">{{ $request->end_date->format('Y-m-d') }}</td>
-                                    <td class="border px-4 py-2">{{ $request->total_days }}</td>
+                                    <td class="border px-4 py-2">{{ $request->overtime_date->format('Y-m-d') }}</td>
+                                    <td class="border px-4 py-2">{{ $request->start_time->format('H:i') }}</td>
+                                    <td class="border px-4 py-2">{{ $request->end_time->format('H:i') }}</td>
+                                    <td class="border px-4 py-2">{{ $request->total_hours }}</td>
                                     <td class="border px-4 py-2">{{ $request->reason }}</td>
                                     <td class="border px-4 py-2">
-                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="inline">
+                                        <form method="POST" action="{{ route('hr.approveOvertime') }}" class="inline">
                                             @csrf
                                             <input type="hidden" name="request_id" value="{{ $request->id }}">
                                             <input type="hidden" name="action" value="approve">
@@ -51,7 +51,7 @@
                                                 Approve
                                             </button>
                                         </form>
-                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="inline">
+                                        <form method="POST" action="{{ route('hr.approveOvertime') }}" class="inline">
                                             @csrf
                                             <input type="hidden" name="request_id" value="{{ $request->id }}">
                                             <input type="hidden" name="action" value="reject">
@@ -68,16 +68,16 @@
                 </div>
             @else
                 <div class="bg-gray-100 border border-gray-300 rounded p-4 text-center text-gray-600">
-                    No pending leave requests at this time.
+                    No pending overtime requests at this time.
                 </div>
             @endif
         </div>
 
         <!-- Quick Stats -->
-        <div class="bg-blue-100 border border-blue-300 rounded p-4">
-            <h3 class="text-lg font-semibold text-blue-800">Leave Requests</h3>
-            <p class="text-2xl font-bold text-blue-900">{{ count($leaveRequests) }}</p>
-            <p class="text-blue-700">Pending Approval</p>
+        <div class="bg-orange-100 border border-orange-300 rounded p-4">
+            <h3 class="text-lg font-semibold text-orange-800">Overtime Requests</h3>
+            <p class="text-2xl font-bold text-orange-900">{{ count($overtimeRequests) }}</p>
+            <p class="text-orange-700">Pending Approval</p>
         </div>
     </div>
 </x-app-layout>

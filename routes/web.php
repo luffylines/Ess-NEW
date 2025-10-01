@@ -6,6 +6,8 @@ use App\Http\Controllers\PayslipController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\OtpController;
+use App\Http\Controllers\OvertimeController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\HrAttendanceController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +51,12 @@ Route::post('/attendance/generateShiftSchedule', [AttendanceController::class, '
     // Payslip listing page
     Route::get('/payslips', [PayslipController::class, 'index'])->name('payslip.index');
 
+    // Overtime requests for employees
+    Route::resource('overtime', OvertimeController::class);
+    
+    // Leave requests for employees
+    Route::resource('leave', App\Http\Controllers\LeaveController::class);
+
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -60,17 +68,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::middleware(['web', 'auth', 'hr'])->group(function () {
-   Route::get('/hr/approve', function () {
-    return redirect()->route('hr.pending');
-});
+    Route::get('/hr/pending', [HrAttendanceController::class, 'pendingAttendance'])->name('hr.pending');
+    Route::get('/hr/approve', function () {
+        return redirect()->route('hr.pending');
+    });
 
-Route::post('/hr/approve', [HrAttendanceController::class, 'approveAttendance'])->name('hr.approve');
+    Route::post('/hr/approve', [HrAttendanceController::class, 'approveAttendance'])->name('hr.approve');
     Route::get('/hr/attendance', [HrAttendanceController::class, 'monitorAttendance'])->name('hr.attendance');
     Route::get('/hr/monitor', [HrAttendanceController::class, 'monitorAttendance'])->name('hr.monitor');
-    Route::post('/hr/approveleave', [HrAttendanceController::class, 'processLeaveOvertime'])->name('hr.approveleave');
+    Route::get('/hr/approveleave', [HrAttendanceController::class, 'showApproveLeave'])->name('hr.approveleave.show');
+    Route::post('/hr/approveleave', [HrAttendanceController::class, 'approveleave'])->name('hr.approveleave');
+    Route::get('/hr/approveOvertime', [HrAttendanceController::class, 'showApproveOvertime'])->name('hr.approveOvertime.show');
+    Route::post('/hr/approveOvertime', [HrAttendanceController::class, 'approveOvertime'])->name('hr.approveOvertime');
     Route::get('/hr/reports', [HrAttendanceController::class, 'monthlyReport'])->name('hr.reports');
     Route::get('/hr/reports/export', [HrAttendanceController::class, 'exportMonthlyReport'])->name('hr.reports.export');
-
 });
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');

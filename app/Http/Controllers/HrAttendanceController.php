@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
 
 class HrAttendanceController extends Controller
@@ -16,7 +17,7 @@ class HrAttendanceController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
-        return view('hr.attendance.pending', compact('attendances'));
+        return view('hr.approve', compact('attendances'));
     }
 
     // Approve or reject attendance
@@ -141,5 +142,73 @@ public function exportMonthlyReport(Request $request)
     };
 
     return Response::stream($callback, 200, $headers);
+    }
+
+    // Show the approve leave page
+    public function showApproveLeave()
+    {
+        // Get pending leave requests
+        $leaveRequests = \App\Models\LeaveRequest::where('status', 'pending')
+            ->with('user')
+            ->orderBy('start_date', 'asc')
+            ->get();
+        
+        return view('hr.approveleave', compact('leaveRequests'));
+    }
+
+    // Show the approve overtime page
+    public function showApproveOvertime()
+    {
+        // Get pending overtime requests
+        $overtimeRequests = \App\Models\OvertimeRequest::where('status', 'pending')
+            ->with('user')
+            ->orderBy('overtime_date', 'asc')
+            ->get();
+        
+        return view('hr.approveOvertime', compact('overtimeRequests'));
+    }
+
+    // Process leave approval/rejection
+    public function approveleave(Request $request)
+    {
+        $request->validate([
+            'request_id' => 'required|exists:leave_requests,id',
+            'action' => 'required|in:approve,reject',
+            'manager_remarks' => 'nullable|string|max:255',
+        ]);
+
+        $leaveRequest = \App\Models\LeaveRequest::findOrFail($request->request_id);
+        
+        $leaveRequest->update([
+            'status' => $request->action === 'approve' ? 'approved' : 'rejected',
+            'manager_remarks' => $request->manager_remarks,
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        $action = $request->action === 'approve' ? 'approved' : 'rejected';
+        return back()->with('success', "Leave request has been {$action} successfully.");
+    }
+
+    // Process overtime approval/rejection
+    public function approveOvertime(Request $request)
+    {
+        $request->validate([
+            'request_id' => 'required|exists:overtime_requests,id',
+            'action' => 'required|in:approve,reject',
+            'manager_remarks' => 'nullable|string|max:255',
+        ]);
+
+        $overtimeRequest = \App\Models\OvertimeRequest::findOrFail($request->request_id);
+        
+        $overtimeRequest->update([
+            'status' => $request->action === 'approve' ? 'approved' : 'rejected',
+            'manager_remarks' => $request->manager_remarks,
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        $action = $request->action === 'approve' ? 'approved' : 'rejected';
+        return back()->with('success', "Overtime request has been {$action} successfully.");
     }
 }
