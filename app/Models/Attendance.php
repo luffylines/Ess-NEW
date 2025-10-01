@@ -9,7 +9,7 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'date', 'time_in', 'time_out', 'status', 'remarks', 'created_by'];
+    protected $fillable = ['user_id', 'date', 'day_type', 'time_in', 'time_out', 'status', 'remarks', 'created_by'];
 
     // Use $casts instead of $dates for Laravel 7+
     protected $casts = [

@@ -24,6 +24,12 @@
                         <p>Employees</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.activity-logs.index') }}" class="nav-link">
+                        <i class="nav-icon fas fa-history"></i>
+                        <p>Activity Logs</p>
+                    </a>
+                </li>
                 <li class="nav-item dropdown">
                     <a id="deductionsToggle" class="nav-link dropdown-toggle" href="#">
                         Deductions & Contributions

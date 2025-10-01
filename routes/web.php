@@ -9,6 +9,7 @@ use App\Http\Controllers\OtpController;
 use App\Http\Controllers\OvertimeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\HrAttendanceController;
+use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -65,6 +66,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::view('/admin/loans/sss', 'loans.sss')->name('admin.loans.sss');
     Route::view('/admin/loans/pagibig', 'loans.pagibig')->name('admin.loans.pagibig');
     Route::view('/admin/loans/company', 'loans.company')->name('admin.loans.company');
+    
+    // Activity Logs
+    Route::get('/admin/activity-logs', [ActivityLogController::class, 'index'])->name('admin.activity-logs.index');
+    Route::get('/admin/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('admin.activity-logs.show');
+    Route::get('/admin/activity-logs/export/pdf/{id?}', [ActivityLogController::class, 'exportPdf'])->name('admin.activity-logs.export.pdf');
+    Route::get('/admin/activity-logs/export/csv/{id?}', [ActivityLogController::class, 'exportCsv'])->name('admin.activity-logs.export.csv');
 });
 
 Route::middleware(['web', 'auth', 'hr'])->group(function () {

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\User;
 use PDF;
@@ -11,40 +12,88 @@ use PDF;
 class AttendanceController extends Controller
 {
     // Show attendance records
-    public function myAttendance()
-{
-    $user = auth()->user();
+    public function myAttendance(Request $request)
+    {
+        $user = Auth::user();
 
-    $attendances = Attendance::where('user_id', $user->id)
-        ->orderBy('date', 'desc')
-        ->get()
-        ->map(function ($attendance) {
-            $status = 'Absent';
+        // Set timezone to Philippines
+        $timezone = 'Asia/Manila';
 
-            if ($attendance->time_in && $attendance->time_out) {
-                $status = 'Present';
-            } elseif ($attendance->time_in && !$attendance->time_out) {
-                $status = 'Time In only';
+        // Query with search filters
+        $query = Attendance::where('user_id', $user->id)
+                          ->with('createdByUser');
+
+        // Apply search filters
+        if ($request->search_created_by) {
+            $query->whereHas('createdByUser', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search_created_by . '%');
+            });
+        }
+
+        if ($request->date_from) {
+            $query->where('date', '>=', $request->date_from);
+        }
+
+        if ($request->date_to) {
+            $query->where('date', '<=', $request->date_to);
+        }
+
+        $attendances = $query->orderBy('date', 'desc')
+                           ->paginate(10)
+                           ->through(function ($attendance) use ($timezone) {
+                               // Calculate attendance status
+                               $status = $this->calculateAttendanceStatus($attendance);
+                               
+                               return [
+                                   'id' => $attendance->id,
+                                   'date' => Carbon::parse($attendance->date)->format('Y-m-d'),
+                                   'day_type' => ucfirst($attendance->day_type ?? 'regular'),
+                                   'time_in' => $attendance->time_in ? 
+                                       Carbon::parse($attendance->time_in)->setTimezone($timezone)->format('h:i A') : '-',
+                                   'time_out' => $attendance->time_out ? 
+                                       Carbon::parse($attendance->time_out)->setTimezone($timezone)->format('h:i A') : '-',
+                                   'status' => $status,
+                                   'remarks' => $attendance->remarks ?? '-',
+                                   'created_at' => $attendance->created_at ? 
+                                       $attendance->created_at->setTimezone($timezone)->format('Y-m-d H:i') : '-',
+                                   'created_by' => $attendance->createdByUser?->name ?? 'System',
+                                   'attendance_status' => $attendance->status, // for action buttons
+                               ];
+                           });
+
+        // Get today's attendance record if exists (in Philippines timezone)
+        $today = Carbon::now($timezone)->format('Y-m-d');
+        $todayAttendance = Attendance::where('user_id', $user->id)
+                                   ->where('date', $today)
+                                   ->first();
+
+        return view('attendance.my', compact('attendances', 'todayAttendance'));
+    }
+
+    // Helper method to calculate attendance status
+    private function calculateAttendanceStatus($attendance)
+    {
+        if (!$attendance->time_in && !$attendance->time_out) {
+            return 'Absent';
+        }
+        
+        if ($attendance->time_in && $attendance->time_out) {
+            // Check if late (assuming 8:00 AM start time)
+            $expectedTimeIn = Carbon::parse($attendance->date)->setTime(8, 0, 0); // 8:00 AM
+            $actualTimeIn = Carbon::parse($attendance->time_in);
+            
+            if ($actualTimeIn->gt($expectedTimeIn)) {
+                return 'Late';
             }
-
-            return [
-                'id' => $attendance->id, // add this line
-                'date' => Carbon::parse($attendance->date)->format('Y-m-d'),
-                'time_in' => $attendance->time_in ? Carbon::parse($attendance->time_in)->format('h:i A') : null,
-                'time_out' => $attendance->time_out ? Carbon::parse($attendance->time_out)->format('h:i A') : null,
-                'status' => $status,
-                'approved' => $attendance->status === 'approved',
-                'created_at' => $attendance->created_at ? $attendance->created_at->format('Y-m-d H:i') : null,
-                'created_by' => $attendance->createdByUser?->name ?? 'System',  // optional, load relation in query
-                'remarks' => $attendance->remarks,
-            ];
-        });
-    // Get today's attendance record if exists
-    $today = Carbon::today();
-    $todayAttendance = Attendance::where('user_id', $user->id)->where('date', $today)->first();
-
-    return view('attendance.my', compact('attendances', 'todayAttendance'));
-}
+            return 'Present';
+        }
+        
+        if ($attendance->time_in && !$attendance->time_out) {
+            return 'Time In Only';
+        }
+        
+        return 'Incomplete';
+    }
 
     // Show form/buttons for Time In/Out
     public function attendanceForm()
@@ -61,43 +110,45 @@ class AttendanceController extends Controller
 
     // Handle Time In / Time Out submission
     public function submitAttendance(Request $request)
-{
-    $user = auth()->user();
-    $today = Carbon::today();
+    {
+        $user = Auth::user();
+        $timezone = 'Asia/Manila';
+        $today = Carbon::now($timezone)->format('Y-m-d');
 
-    $attendance = Attendance::firstOrNew([
-        'user_id' => $user->id,
-        'date' => $today,
-    ]);
+        $attendance = Attendance::firstOrNew([
+            'user_id' => $user->id,
+            'date' => $today,
+        ]);
 
-    if ($attendance->status === 'approved') {
-        return back()->with('error', 'Attendance already approved and cannot be edited.');
-    }
-
-    $action = $request->input('action');
-
-    if ($action === 'time_in') {
-        if ($attendance->time_in) {
-            return back()->with('error', 'You already marked Time In today.');
+        if ($attendance->status === 'approved') {
+            return back()->with('error', 'Attendance already approved and cannot be edited.');
         }
-        $attendance->time_in = now();
-        $message = 'Time In marked successfully at ' . now()->format('h:i A');
-    } elseif ($action === 'time_out') {
-        if (!$attendance->time_in) {
-            return back()->with('error', 'Please mark Time In first.');
-        }
-        if ($attendance->time_out) {
-            return back()->with('error', 'You already marked Time Out today.');
-        }
-        $attendance->time_out = now();
-        $message = 'Time Out marked successfully at ' . now()->format('h:i A');
-    } else {
-        return back()->with('error', 'Invalid action.');
-    }
 
-    // Reset approval if any edit
-    $attendance->status = 'pending';
-    $attendance->save();
+        $action = $request->input('action');
+
+        if ($action === 'time_in') {
+            if ($attendance->time_in) {
+                return back()->with('error', 'You already marked Time In today.');
+            }
+            $attendance->time_in = Carbon::now($timezone);
+            $attendance->day_type = 'regular'; // Default day type
+            $message = 'Time In marked successfully at ' . Carbon::now($timezone)->format('h:i A');
+        } elseif ($action === 'time_out') {
+            if (!$attendance->time_in) {
+                return back()->with('error', 'Please mark Time In first.');
+            }
+            if ($attendance->time_out) {
+                return back()->with('error', 'You already marked Time Out today.');
+            }
+            $attendance->time_out = Carbon::now($timezone);
+            $message = 'Time Out marked successfully at ' . Carbon::now($timezone)->format('h:i A');
+        } else {
+            return back()->with('error', 'Invalid action.');
+        }
+
+        // Reset approval if any edit
+        $attendance->status = 'pending';
+        $attendance->save();
 
     return back()->with('success', $message);
 }
