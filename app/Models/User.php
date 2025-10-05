@@ -22,6 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'gender',
+        'address',
+        'profile_photo',
     ];
 
     /**
@@ -49,6 +53,30 @@ class User extends Authenticatable
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Get the user's profile photo URL
+     */
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo && file_exists(public_path('storage/profile_photos/' . $this->profile_photo))) {
+            return asset('storage/profile_photos/' . $this->profile_photo);
+        }
+        return null;
+    }
+
+    /**
+     * Get the user's initials for avatar fallback
+     */
+    public function getInitialsAttribute()
+    {
+        $words = explode(' ', $this->name);
+        $initials = '';
+        foreach ($words as $word) {
+            $initials .= strtoupper(substr($word, 0, 1));
+        }
+        return substr($initials, 0, 2);
     }
     
 }

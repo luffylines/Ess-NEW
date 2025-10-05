@@ -62,6 +62,9 @@ Route::post('/attendance/generateShiftSchedule', [AttendanceController::class, '
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [EmployeeController::class, 'index'])->name('admin.index');
+    Route::get('/admin/employees', [EmployeeController::class, 'index'])->name('admin.employees.index');
+    Route::get('/admin/employees/create', [EmployeeController::class, 'create'])->name('admin.employees.create');
+    Route::post('/admin/employees', [EmployeeController::class, 'store'])->name('admin.employees.store');
 
     Route::view('/admin/loans/sss', 'loans.sss')->name('admin.loans.sss');
     Route::view('/admin/loans/pagibig', 'loans.pagibig')->name('admin.loans.pagibig');
@@ -73,6 +76,25 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/activity-logs/export/pdf/{id?}', [ActivityLogController::class, 'exportPdf'])->name('admin.activity-logs.export.pdf');
     Route::get('/admin/activity-logs/export/csv/{id?}', [ActivityLogController::class, 'exportCsv'])->name('admin.activity-logs.export.csv');
 });
+
+// Public routes for employee profile completion
+Route::get('/employee/complete/{token}', [EmployeeController::class, 'completeForm'])->name('employees.complete');
+Route::post('/employee/complete/{token}', [EmployeeController::class, 'completeStore'])->name('employees.complete.store');
+
+// Test route for demonstration (remove in production)
+Route::get('/test-employee-invite', function() {
+    $testUser = \App\Models\User::create([
+        'name' => 'Test Employee',
+        'email' => 'test@example.com',
+        'role' => 'employee',
+        'password' => \Illuminate\Support\Facades\Hash::make('temppass'),
+        'remember_token' => \Illuminate\Support\Str::random(60),
+    ]);
+    
+    $inviteLink = route('employees.complete', ['token' => $testUser->remember_token]);
+    
+    return "Test employee created! Complete profile at: <a href='{$inviteLink}'>{$inviteLink}</a>";
+})->name('test.employee.invite');
 
 Route::middleware(['web', 'auth', 'hr'])->group(function () {
     Route::get('/hr/pending', [HrAttendanceController::class, 'pendingAttendance'])->name('hr.pending');

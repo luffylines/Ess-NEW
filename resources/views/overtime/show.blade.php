@@ -12,10 +12,10 @@
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-900">
+                        <h2 class="text-lg font-semibold">
                             Overtime Request #{{ $overtimeRequest->id }}
                         </h2>
-                        <p class="text-sm text-gray-600">
+                        <p class="text-sm">
                             Submitted on {{ $overtimeRequest->created_at->format('M d, Y \a\t H:i') }}
                         </p>
                     </div>

@@ -4,7 +4,7 @@
 
     <!-- General Error Message -->
     @if ($errors->any())
-        <div class="mb-4 text-red-600 bg-red-100 border border-red-300 p-3 rounded">
+        <div class="mb-4 text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-200 border border-red-300 dark:border-red-700 p-3 rounded">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -20,21 +20,21 @@
         <!-- Role Selection -->
         <div class="flex mb-6 gap-1">
             <div
-                class="role-box flex-1 h-12 flex p-4 items-center justify-center rounded-lg border border-gray-300 cursor-pointer transition duration-300 hover:bg-gray-100 text-gray-900"
+                class="role-box flex-1 h-12 flex p-4 items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer transition duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
                 id="admin"
                 onclick="selectRole('admin')"
             >
                 Admin
             </div>
             <div
-                class="role-box flex-1 h-12 flex p-4 items-center justify-center rounded-lg border border-gray-300 cursor-pointer transition duration-300 hover:bg-gray-100 text-gray-900"
+                class="role-box flex-1 h-12 flex p-4 items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer transition duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
                 id="employee"
                 onclick="selectRole('employee')"
             >
                 Employee
             </div>
             <div
-                class="role-box flex-1 h-12 flex p-4 items-center justify-center rounded-lg border border-gray-300 cursor-pointer transition duration-300 hover:bg-gray-100 text-gray-900"
+                class="role-box flex-1 h-12 flex p-4 items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer transition duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
                 id="hr"
                 onclick="selectRole('hr')"
             >
@@ -129,13 +129,13 @@
         function selectRole(role) {
             const roles = document.querySelectorAll('.role-box');
             roles.forEach(box => {
-                box.classList.remove('bg-blue-200', 'border-blue-400', 'text-white');
-                box.classList.add('border-gray-300', 'text-gray-900'); // Reset to default
+                box.classList.remove('bg-blue-200', 'dark:bg-blue-800', 'border-blue-400', 'dark:border-blue-500', 'text-blue-900', 'dark:text-blue-100');
+                box.classList.add('border-gray-300', 'dark:border-gray-600', 'text-gray-900', 'dark:text-gray-100');
             });
 
             const selectedBox = document.getElementById(role);
-            selectedBox.classList.add('bg-blue-200', 'border-blue-400', 'text-blue-900');
-            selectedBox.classList.remove('border-gray-300', 'text-gray-900');
+            selectedBox.classList.add('bg-blue-200', 'dark:bg-blue-800', 'border-blue-400', 'dark:border-blue-500', 'text-blue-900', 'dark:text-blue-100');
+            selectedBox.classList.remove('border-gray-300', 'dark:border-gray-600', 'text-gray-900', 'dark:text-gray-100');
 
             document.getElementById('role').value = role;
         }

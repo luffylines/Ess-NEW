@@ -24,12 +24,12 @@
                     <label for="overtime_date" class="block text-sm font-medium text-gray-700 mb-2">
                         Overtime Date <span class="text-red-500">*</span>
                     </label>
-                    <input type="date" id="overtime_date" name="overtime_date" 
-                           value="{{ old('overtime_date') }}" 
-                           min="{{ date('Y-m-d') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                           required>
-                </div>
+                        <input type="date" id="overtime_date" name="overtime_date" 
+                            value="{{ old('overtime_date') }}" 
+                            min="{{ date('Y-m-d') }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            required>
+                    </div>
 
                 <!-- Time Range -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

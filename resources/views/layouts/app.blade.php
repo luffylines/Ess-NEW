@@ -31,46 +31,133 @@
         }
 
         /* Light theme (default) */
-        body.light {
+        body.light,
+        html:not(.dark) body {
             background-color: #ffffff;
             color: #212529;
         }
 
         /* Dark theme */
-        body.dark {
+        body.dark,
+        html.dark body {
             background-color: #1a1a1a;
             color: #ffffff;
         }
 
-        body.dark .navbar {
+        /* Navbar styling */
+        body.dark .navbar,
+        html.dark .navbar {
             background-color: #2d2d2d !important;
         }
 
-        body.dark .card {
+        /* Card styling */
+        body.dark .card,
+        html.dark .card {
             background-color: #2d2d2d;
             border-color: #444;
             color: #ffffff;
         }
 
-        body.dark .table {
+        /* Table styling */
+        body.dark .table,
+        html.dark .table {
             --bs-table-bg: #2d2d2d;
             --bs-table-color: #ffffff;
         }
 
+        /* Form controls */
         body.dark .form-control,
-        body.dark .form-select {
+        body.dark .form-select,
+        html.dark .form-control,
+        html.dark .form-select {
             background-color: #3d3d3d;
             border-color: #555;
             color: #ffffff;
         }
 
-        body.dark .btn-outline-secondary {
+        body.dark .form-control:focus,
+        html.dark .form-control:focus {
+            background-color: #3d3d3d;
+            border-color: #0d6efd;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Button styling */
+        body.dark .btn-outline-secondary,
+        html.dark .btn-outline-secondary {
             color: #ffffff;
             border-color: #6c757d;
         }
 
-        body.dark .btn-outline-secondary:hover {
+        body.dark .btn-outline-secondary:hover,
+        html.dark .btn-outline-secondary:hover {
             background-color: #6c757d;
+            color: #ffffff;
+        }
+
+        /* Theme configuration offcanvas styling */
+        body.dark .offcanvas,
+        html.dark .offcanvas {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        body.dark .list-group-item,
+        html.dark .list-group-item {
+            background-color: #3d3d3d;
+            border-color: #555;
+            color: #ffffff;
+        }
+
+        body.dark .list-group-item:hover,
+        html.dark .list-group-item:hover {
+            background-color: #4d4d4d;
+        }
+
+        body.dark .form-check-input:checked,
+        html.dark .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        /* Dropdown and modal styling */
+        body.dark .dropdown-menu,
+        html.dark .dropdown-menu {
+            background-color: #2d2d2d;
+            border-color: #444;
+        }
+
+        body.dark .dropdown-item,
+        html.dark .dropdown-item {
+            color: #ffffff;
+        }
+
+        body.dark .dropdown-item:hover,
+        html.dark .dropdown-item:hover {
+            background-color: #3d3d3d;
+            color: #ffffff;
+        }
+
+        /* Alert styling */
+        body.dark .alert,
+        html.dark .alert {
+            background-color: #2d2d2d;
+            border-color: #444;
+            color: #ffffff;
+        }
+
+        /* Pagination styling */
+        body.dark .page-link,
+        html.dark .page-link {
+            background-color: #3d3d3d;
+            border-color: #555;
+            color: #ffffff;
+        }
+
+        body.dark .page-link:hover,
+        html.dark .page-link:hover {
+            background-color: #4d4d4d;
             color: #ffffff;
         }
 
@@ -96,8 +183,35 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Theme initialization script to prevent flash -->
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const body = document.body;
+            
+            if (savedTheme === 'auto') {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    html.classList.add('dark');
+                    body.classList.add('dark');
+                } else {
+                    body.classList.add('light');
+                }
+            } else if (savedTheme === 'dark') {
+                html.classList.add('dark');
+                body.classList.add('dark');
+            } else {
+                body.classList.add('light');
+            }
+        })();
+    </script>
 </head>
-<body class="light">
+    
+</head>
+<body>
     <div id="app">
         <!-- Navigation -->
         @if(isset($showNavigation) ? $showNavigation : true)
