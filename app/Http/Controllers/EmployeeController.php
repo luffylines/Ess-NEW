@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\InviteEmployee;
 
 class EmployeeController extends Controller
@@ -29,25 +30,36 @@ public function store(Request $request)
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
-        'role' => 'required|in:employee,hr',
+        'role' => 'required|in:employee,hr,manager',
     ]);
 
     $token = Str::random(60); // Unique token to send via email
+    
+    // Generate employee ID based on role
+    $employeeId = User::generateEmployeeId($request->role);
 
     $user = User::create([
         'name' => $request->name,
         'email' => $request->email,
         'role' => $request->role,
+        'employee_id' => $employeeId,
         'password' => Hash::make(Str::random(10)), // Temporary password
         'remember_token' => $token, // Use this token to validate account setup
     ]);
 
     // Send the email with the invitation link
     try {
+        // Verify token was saved
+        if (!$user->remember_token) {
+            throw new \Exception('Failed to generate invitation token');
+        }
+        
         Mail::to($user->email)->send(new InviteEmployee($user));
-        $message = 'Employee added and invitation email sent successfully!';
+        $message = "Employee added successfully! Employee ID: {$employeeId}. Invitation email sent to {$user->email}.";
     } catch (\Exception $e) {
-        $message = 'Employee added successfully! However, email could not be sent. Please provide the completion link manually: ' . route('employees.complete', ['token' => $user->remember_token]);
+        Log::error('Failed to send invitation email: ' . $e->getMessage());
+        $completionUrl = route('employees.complete', ['token' => $user->remember_token]);
+        $message = "Employee added successfully! Employee ID: {$employeeId}. However, email could not be sent. Please provide the completion link manually: {$completionUrl}";
     }
 
     return redirect()->route('admin.employees.index')->with('success', $message);
@@ -80,4 +92,29 @@ public function completeStore(Request $request, $token)
 
     return redirect()->route('login')->with('success', 'Account setup complete. You may now log in.');
 }
+
+
+    // Show edit form
+    public function edit($id)
+    {
+        $employee = User::findOrFail($id);
+        return view('admin.employees.edit', compact('employee'));
+    }
+
+    // Update employee record
+    public function update(Request $request, $id)
+    {
+        $employee = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'role' => 'required|string',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $employee->update($request->all());
+
+        return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully!');
+    }
 }

@@ -1,84 +1,95 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="fw-semibold h3 text-dark">
-            {{ __('Add New Employee') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="">
-        <div class="container-fluid mx-auto">
-            <div class="bg-white shadow-sm">
-                <div class="p-4">
-                    
-                    <!-- Back Button -->
-                    <div class="mb-4">
-                        <a href="{{ route('admin.employees.index') }}" 
-                           class="align-items-center px-4 py-2 border fw-semibold small text-white">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                            </svg>
-                            Back to Employees
-                        </a>
-                    </div>
+@section('content')
+<div class="container-fluid py-4">
+    <div class="mx-auto" style="max-width: 800px;">
+        
+        <!-- Header -->
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ route('admin.employees.index') }}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Employees
+            </a>
+            <h2 class="h4 fw-bold mb-0">Add New Employee</h2>
+        </div>
 
-                    <!-- Add Employee Form -->
-                    <div class="w-50">
+        <div class="row g-4">
+            <!-- Form Card -->
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
                         <form method="POST" action="{{ route('admin.employees.store') }}">
                             @csrf
 
                             <!-- Name -->
                             <div class="mb-3">
-                                <x-input-label for="name" :value="__('Employee Name')" />
-                                <x-text-input id="name" class="d-block mt-1 w-100" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                                <label for="name" class="form-label fw-semibold">Employee Name</label>
+                                <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror" 
+                                       value="{{ old('name') }}" required autofocus>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Email -->
                             <div class="mb-3">
-                                <x-input-label for="email" :value="__('Email Address')" />
-                                <x-text-input id="email" class="d-block mt-1 w-100" type="email" name="email" :value="old('email')" required autocomplete="username" />
-                                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                                <label for="email" class="form-label fw-semibold">Email Address</label>
+                                <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror" 
+                                       value="{{ old('email') }}" required>
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- Role -->
                             <div class="mb-4">
-                                <x-input-label for="role" :value="__('Role')" />
-                                <select id="role" name="role" class="d-block mt-1 w-100 border shadow-sm" required>
-                                    <option value="">{{ __('Select Role') }}</option>
-                                    <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>{{ __('Employee') }}</option>
-                                    <option value="hr" {{ old('role') == 'hr' ? 'selected' : '' }}>{{ __('HR') }}</option>
+                                <label for="role" class="form-label fw-semibold">Role</label>
+                                <select id="role" name="role" class="form-select @error('role') is-invalid @enderror" required>
+                                    <option value="">Select Role</option>
+                                    <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
+                                    <option value="hr" {{ old('role') == 'hr' ? 'selected' : '' }}>HR</option>
+                                    <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
                                 </select>
-                                <x-input-error :messages="$errors->get('role')" class="mt-2" />
+                                @error('role')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
-                            <div class="d-flex align-items-center justify-content-between">
-                                <x-primary-button>
-                                    {{ __('Add Employee & Send Invitation') }}
-                                </x-primary-button>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send"></i> Add Employee & Send Invitation
+                                </button>
                             </div>
                         </form>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Information Box -->
-                    <div class="p-3 bg-primary bg-opacity-10 border">
-                        <div class="d-flex">
-                            <div class="">
-                                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                </svg>
+            <!-- Information Card -->
+            <div class="col-md-4">
+                <div class="card bg-light border-primary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                            <div>
+                                <h5 class="card-title fw-bold text-primary mb-2">How it works</h5>
+                                <ul class="list-unstyled small text-muted mb-0">
+                                    <li class="mb-2">✅ Auto-generates unique employee ID</li>
+                                    <li class="mb-2">📧 Sends email invitation automatically</li>
+                                    <li class="mb-2">🔗 Employee clicks link to complete setup</li>
+                                    <li class="mb-2">🔑 Sets password and profile info</li>
+                                    <li class="mb-0">🚀 Ready to log in to the system</li>
+                                </ul>
                             </div>
-                            <div class="ml-3">
-                                <h3 class="small fw-medium">
-                                    How it works
-                                </h3>
-                                <div class="mt-2 small">
-                                    <ul class="mb-1">
-                                        <li>Employee will receive an email invitation</li>
-                                        <li>They can click the link to complete their profile</li>
-                                        <li>They'll set their password and update additional info</li>
-                                        <li>Once complete, they can log in to the system</li>
-                                    </ul>
-                                </div>
+                        </div>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="small">
+                            <strong class="text-primary">Employee ID Format:</strong>
+                            <div class="mt-1">
+                                <span class="badge bg-primary bg-opacity-25 text-primary me-1">emp01, emp02...</span> Employee<br>
+                                <span class="badge bg-success bg-opacity-25 text-success me-1">hr01, hr02...</span> HR<br>
+                                <span class="badge bg-warning bg-opacity-25 text-warning me-1">m01, m02...</span> Manager
                             </div>
                         </div>
                     </div>
@@ -86,4 +97,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection

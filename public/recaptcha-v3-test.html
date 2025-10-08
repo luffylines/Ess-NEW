@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>reCAPTCHA v3 Test</title>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lf1DOMrAAAAAPrvWSUuGlntxpG0EC1QdZcQIMuc"></script>
+</head>
+<body>
+    <h2>reCAPTCHA v3 Test Page</h2>
+    
+    <form id="testForm">
+        <button type="submit">Test reCAPTCHA v3</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            grecaptcha.ready(function() {
+                grecaptcha.execute('6Lf1DOMrAAAAAPrvWSUuGlntxpG0EC1QdZcQIMuc', {action: 'login'}).then(function(token) {
+                    document.getElementById('result').innerHTML = '<p style="color: green;">reCAPTCHA v3 Success! Token: ' + token.substring(0, 50) + '...</p>';
+                    console.log('reCAPTCHA v3 Success:', token);
+                }).catch(function(error) {
+                    document.getElementById('result').innerHTML = '<p style="color: red;">reCAPTCHA v3 Error: ' + error + '</p>';
+                    console.error('reCAPTCHA v3 Error:', error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

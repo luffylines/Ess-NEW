@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>reCAPTCHA Test</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+    <h2>reCAPTCHA Test Page</h2>
+    
+    <h3>Testing Site Key: 6Lf1DOMrAAAAAPrvWSUuGlntxpG0EC1QdZcQIMuc</h3>
+    
+    <form>
+        <div class="g-recaptcha" data-sitekey="6Lf1DOMrAAAAAPrvWSUuGlntxpG0EC1QdZcQIMuc" data-callback="onSuccess" data-error-callback="onError"></div>
+        <br>
+        <button type="submit">Test Submit</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        function onSuccess(response) {
+            document.getElementById('result').innerHTML = '<p style="color: green;">reCAPTCHA Success! Response: ' + response + '</p>';
+            console.log('reCAPTCHA Success:', response);
+        }
+
+        function onError() {
+            document.getElementById('result').innerHTML = '<p style="color: red;">reCAPTCHA Error: Invalid key type or configuration issue</p>';
+            console.error('reCAPTCHA Error');
+        }
+
+        // Check for any global reCAPTCHA errors
+        window.addEventListener('error', function(e) {
+            if (e.message.includes('recaptcha')) {
+                document.getElementById('result').innerHTML = '<p style="color: red;">JavaScript Error: ' + e.message + '</p>';
+            }
+        });
+    </script>
+</body>
+</html>

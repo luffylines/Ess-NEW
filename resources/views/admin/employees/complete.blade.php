@@ -1,88 +1,110 @@
-<x-guest-layout>
-    <div class="mb-3 text-center">
-        <h2 class="h2 fw-bold">Complete Your Profile</h2>
-        <p class="mt-2 small text-muted">
-            Welcome {{ $user->name }}! Please complete your profile setup to get started.
-        </p>
-    </div>
+@extends('layouts.guest')
 
-    <!-- Display Success/Error Messages -->
-    @if (session('success'))
-        <div class="mb-3 p-3 border rounded">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="mb-3 p-3 border rounded">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <form method="POST" action="{{ route('admin.employees.complete.store', $user->remember_token) }}">
-        @csrf
-
-        <!-- Password -->
-        <div class="mb-3">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="d-block mt-1 w-100" type="password" name="password" required autofocus autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mb-3">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input id="password_confirmation" class="d-block mt-1 w-100" type="password" name="password_confirmation" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <!-- Phone -->
-        <div class="mb-3">
-            <x-input-label for="phone" :value="__('Phone Number')" />
-            <x-text-input id="phone" class="d-block mt-1 w-100" type="tel" name="phone" :value="old('phone')" autocomplete="tel" />
-            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
-        </div>
-
-        <!-- Gender -->
-        <div class="mb-3">
-            <x-input-label for="gender" :value="__('Gender')" />
-            <select id="gender" name="gender" class="d-block mt-1 w-100 border shadow-sm">
-                <option value="">{{ __('-- Select --') }}</option>
-                <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>{{ __('Male') }}</option>
-                <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>{{ __('Female') }}</option>
-                <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>{{ __('Other') }}</option>
-            </select>
-            <x-input-error :messages="$errors->get('gender')" class="mt-2" />
-        </div>
-
-        <!-- Address -->
-        <div class="mb-4">
-            <x-input-label for="address" :value="__('Address')" />
-            <textarea id="address" name="address" rows="3" 
-                      class="d-block mt-1 w-100 border shadow-sm"
-                      placeholder="Enter your complete address">{{ old('address') }}</textarea>
-            <x-input-error :messages="$errors->get('address')" class="mt-2" />
-        </div>
-
-        <div class="d-flex align-items-center justify-content-center">
-            <x-primary-button class="w-100 justify-content-center">
-                {{ __('Complete Profile') }}
-            </x-primary-button>
-        </div>
-    </form>
-
-    <!-- Information -->
-    <div class="mt-4 p-3 bg-primary bg-opacity-10 border">
-        <div class="d-flex">
-            <div class="">
-                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-        </svg>
-        </div>
-        <div class="ml-3">
-            <p class="small dark:text-blue-300">
-                After completing your profile, you'll be redirected to the login page where you can sign in using your email and the password you just set.
+@section('content')
+<div class="card">
+    <div class="card-body">
+        <div class="text-center mb-4">
+            <h2 class="h3 fw-bold text-primary">Complete Your Profile</h2>
+            <p class="text-muted">
+                Welcome <strong>{{ $user->name }}</strong>! Please complete your profile setup to get started.
             </p>
+            @if($user->employee_id)
+                <div class="alert alert-info">
+                    <i class="bi bi-badge-check"></i> Your Employee ID: <strong>{{ $user->employee_id }}</strong>
+                </div>
+            @endif
+        </div>
+
+        <!-- Display Success/Error Messages -->
+        @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('employees.complete.store', $user->remember_token) }}">
+            @csrf
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold">Password</label>
+                <input id="password" name="password" type="password" class="form-control @error('password') is-invalid @enderror" 
+                       required autofocus>
+                @error('password')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label for="password_confirmation" class="form-label fw-semibold">Confirm Password</label>
+                <input id="password_confirmation" name="password_confirmation" type="password" 
+                       class="form-control @error('password_confirmation') is-invalid @enderror" required>
+                @error('password_confirmation')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-3">
+                <label for="phone" class="form-label fw-semibold">Phone Number</label>
+                <input id="phone" name="phone" type="tel" class="form-control @error('phone') is-invalid @enderror" 
+                       value="{{ old('phone') }}">
+                @error('phone')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Gender -->
+            <div class="mb-3">
+                <label for="gender" class="form-label fw-semibold">Gender</label>
+                <select id="gender" name="gender" class="form-select @error('gender') is-invalid @enderror">
+                    <option value="">-- Select --</option>
+                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                    <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                </select>
+                @error('gender')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Address -->
+            <div class="mb-4">
+                <label for="address" class="form-label fw-semibold">Address</label>
+                <textarea id="address" name="address" rows="3" 
+                          class="form-control @error('address') is-invalid @enderror"
+                          placeholder="Enter your complete address">{{ old('address') }}</textarea>
+                @error('address')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Complete Profile
+                </button>
+            </div>
+        </form>
+
+        <!-- Information -->
+        <div class="mt-4 alert alert-info">
+            <div class="d-flex align-items-start">
+                <i class="bi bi-info-circle me-2 mt-1"></i>
+                <div>
+                    <strong>Next Steps:</strong>
+                    <p class="mb-0 small">
+                        After completing your profile, you'll be redirected to the login page where you can sign in using your email and the password you just set.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-</x-guest-layout>
+</div>
+@endsection

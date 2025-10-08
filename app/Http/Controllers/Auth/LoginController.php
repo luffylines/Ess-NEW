@@ -23,9 +23,9 @@ class LoginController extends Controller
     {
         // Validate request including reCAPTCHA
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-            'g-recaptcha-response' => 'required',
+            'login' => 'required|string',
+            'password' => 'required|string',
+            'g-recaptcha-response' => 'required|string',
         ]);
 
         // Verify Google reCAPTCHA
@@ -40,37 +40,38 @@ class LoginController extends Controller
             return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed.']);
         }
 
-        // Check credentials
-        $credentials = $request->only('email', 'password');
+        // Determine if login input is email or employee_id
+        $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'employee_id';
 
-        if (Auth::validate($credentials)) {
-            $user = User::where('email', $request->email)->first();
+        // Attempt to find the user
+        $user = User::where($loginType, $request->login)->first();
 
-            // Generate OTP (6 digits)
-            $otp = rand(100000, 999999);
-
-            // Save OTP valid for 5 minutes (adjust as needed)
-            Otp::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'otp_code' => $otp,
-                    'expires_at' => Carbon::now()->addMinutes(5),
-                ]
-            );
-
-            // Send OTP email
-            Mail::to($user->email)->send(new SendOtpMail($otp));
-
-            // Temporarily store user ID and credentials in session
-            session([
-                'temp_user_id' => $user->id,
-                'temp_password' => $request->password,
-            ]);
-
-            return redirect()->route('otp.verify')->with('email', $user->email);
+        if (!$user || !Auth::validate(['email' => $user->email, 'password' => $request->password])) {
+            return back()->withErrors(['login' => 'Invalid credentials']);
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials']);
+        // Generate OTP (6 digits)
+        $otp = rand(100000, 999999);
+
+        // Save OTP valid for 5 minutes
+        Otp::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'otp_code' => $otp,
+                'expires_at' => Carbon::now()->addMinutes(5),
+            ]
+        );
+
+        // Send OTP email
+        Mail::to($user->email)->send(new SendOtpMail($otp));
+
+        // Temporarily store user ID and credentials in session
+        session([
+            'temp_user_id' => $user->id,
+            'temp_password' => $request->password,
+        ]);
+
+        return redirect()->route('otp.verify')->with('email', $user->email);
     }
 
     public function verifyOtpForm()
@@ -88,7 +89,7 @@ class LoginController extends Controller
         $password = session('temp_password');
 
         if (!$userId) {
-            return redirect()->route('login')->withErrors(['email' => 'Session expired. Please login again.']);
+            return redirect()->route('login')->withErrors(['login' => 'Session expired. Please login again.']);
         }
 
         $otp = Otp::where('user_id', $userId)
@@ -109,6 +110,5 @@ class LoginController extends Controller
         session()->forget(['temp_user_id', 'temp_password']);
 
         return redirect()->intended('/dashboard');
-        
     }
 }

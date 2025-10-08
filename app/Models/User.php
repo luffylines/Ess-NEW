@@ -26,6 +26,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'gender',
         'address',
         'profile_photo',
+        'employee_id',
+        'role',
+        'remember_token',
     ];
 
     /**
@@ -78,5 +81,34 @@ class User extends Authenticatable implements MustVerifyEmail
         }
         return substr($initials, 0, 2);
     }
-    
+
+    /**
+     * Generate unique employee ID based on role
+     */
+    public static function generateEmployeeId($role)
+    {
+        $prefix = match($role) {
+            'employee' => 'emp',
+            'hr' => 'hr',
+            'manager' => 'm',
+            'admin' => 'admin',
+            default => 'emp'
+        };
+
+        // Get the highest existing number for this role
+        $lastEmployee = static::where('employee_id', 'like', $prefix . '%')
+            ->orderByRaw('CAST(SUBSTRING(employee_id, ' . (strlen($prefix) + 1) . ') AS UNSIGNED) DESC')
+            ->first();
+
+        if ($lastEmployee) {
+            // Extract number from existing ID and increment
+            $lastNumber = (int) substr($lastEmployee->employee_id, strlen($prefix));
+            $nextNumber = $lastNumber + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        // Format with leading zeros (2 digits)
+        return $prefix . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
+    }
 }

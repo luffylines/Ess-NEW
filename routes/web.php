@@ -10,6 +10,7 @@ use App\Http\Controllers\OvertimeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\HrAttendanceController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -74,10 +75,14 @@ Route::post('/attendance/generateShiftSchedule', [AttendanceController::class, '
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin', [EmployeeController::class, 'index'])->name('admin.index');
     Route::get('/admin/employees', [EmployeeController::class, 'index'])->name('admin.employees.index');
     Route::get('/admin/employees/create', [EmployeeController::class, 'create'])->name('admin.employees.create');
     Route::post('/admin/employees', [EmployeeController::class, 'store'])->name('admin.employees.store');
+    Route::get('/admin/employees/{id}/edit', [EmployeeController::class, 'edit'])->name('admin.employees.edit');
+    Route::put('/admin/employees/{id}', [EmployeeController::class, 'update'])->name('admin.employees.update');
+    Route::delete('/admin/employees/{id}', [EmployeeController::class, 'destroy'])->name('admin.employees.destroy');
 
     Route::view('/admin/loans/sss', 'loans.sss')->name('admin.loans.sss');
     Route::view('/admin/loans/pagibig', 'loans.pagibig')->name('admin.loans.pagibig');
