@@ -7,7 +7,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
@@ -22,41 +25,91 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Update the user's profile information (name, phone, address, gender, profile_photo).
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $user = $request->user();
-        $validated = $request->validated();
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'gender' => ['nullable', 'in:male,female,other'],
+            'profile_photo' => ['nullable', 'file', 'image', 'max:2048'],
+        ]);
 
-        // Handle profile photo upload
+        $user = $request->user();
+
+        // ✅ Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
-            // Delete old profile photo if exists
-            if ($user->profile_photo && file_exists(public_path('storage/profile_photos/' . $user->profile_photo))) {
-                unlink(public_path('storage/profile_photos/' . $user->profile_photo));
+            // Delete old photo safely if it exists
+            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+                Storage::disk('public')->delete($user->profile_photo);
             }
 
             $file = $request->file('profile_photo');
             $filename = time() . '_' . $user->id . '.' . $file->getClientOriginalExtension();
-            
-            // Create directory if it doesn't exist
-            if (!file_exists(public_path('storage/profile_photos'))) {
-                mkdir(public_path('storage/profile_photos'), 0755, true);
-            }
-            
-            $file->move(public_path('storage/profile_photos'), $filename);
-            $validated['profile_photo'] = $filename;
+
+            // Store the new file in storage/app/public/profile_photos
+            $path = $file->storeAs('profile_photos', $filename, 'public');
+
+            // Save relative path in DB (e.g. "profile_photos/filename.jpg")
+            $validated['profile_photo'] = $path;
         }
 
-        $user->fill($validated);
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
-        $user->save();
+        // Update user info
+        $user->fill([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'profile_photo' => $validated['profile_photo'] ?? $user->profile_photo,
+        ])->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Update the user's email address.
+     */
+    public function updateEmail(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
+        ]);
+
+        $user = $request->user();
+
+        if ($validated['email'] !== $user->email) {
+            $user->forceFill([
+                'email' => $validated['email'],
+                'email_verified_at' => null,
+            ])->save();
+
+            if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
+                $user->sendEmailVerificationNotification();
+                return Redirect::route('profile.edit')->with('status', 'verification-link-sent');
+            }
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'email-updated');
+    }
+
+    /**
+     * Update the user's password.
+     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validateWithBag('updatePassword', [
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', Password::defaults(), 'confirmed'],
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return Redirect::route('profile.edit')->with('status', 'password-updated');
     }
 
     /**
@@ -70,13 +123,17 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
+        // Delete profile photo if exists
+        if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+            Storage::disk('public')->delete($user->profile_photo);
+        }
 
+        Auth::logout();
         $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return Redirect::to('/')->with('status', 'Your account has been deleted.');
     }
 }

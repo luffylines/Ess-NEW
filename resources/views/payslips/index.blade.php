@@ -3,7 +3,7 @@
     <div class="container">
         <h1>My Payslips</h1>
 
-        <table class="table table-bordered">
+        <table class="">
             <thead>
                 <tr>
                     <th>Month</th>

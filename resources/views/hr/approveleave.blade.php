@@ -1,35 +1,35 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="text-2xl font-bold mb-6">Approve Leave Requests</h1>
+    <div class="mx-auto px-4 py-4">
+        <h1 class="h2 fw-bold mb-4">Approve Leave Requests</h1>
 
         @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <div class="border px-4 rounded mb-3">
                 {{ session('success') }}
             </div>
         @endif
 
         @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div class="border px-4 rounded mb-3">
                 {{ session('error') }}
             </div>
         @endif
 
         <!-- Leave Requests Section -->
         <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">Pending Leave Requests</h2>
+            <h2 class="h3 fw-semibold mb-3">Pending Leave Requests</h2>
             
             @if(count($leaveRequests) > 0)
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border border-gray-300">
-                        <thead class="bg-gray-100">
+                    <table class="bg-white border">
+                        <thead class="bg-light">
                             <tr>
-                                <th class="border px-4 py-2 text-left">Employee</th>
-                                <th class="border px-4 py-2 text-left">Leave Type</th>
-                                <th class="border px-4 py-2 text-left">Start Date</th>
-                                <th class="border px-4 py-2 text-left">End Date</th>
-                                <th class="border px-4 py-2 text-left">Days</th>
-                                <th class="border px-4 py-2 text-left">Reason</th>
-                                <th class="border px-4 py-2 text-left">Actions</th>
+                                <th class="border px-4 py-2 text-start">Employee</th>
+                                <th class="border px-4 py-2 text-start">Leave Type</th>
+                                <th class="border px-4 py-2 text-start">Start Date</th>
+                                <th class="border px-4 py-2 text-start">End Date</th>
+                                <th class="border px-4 py-2 text-start">Days</th>
+                                <th class="border px-4 py-2 text-start">Reason</th>
+                                <th class="border px-4 py-2 text-start">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -42,21 +42,21 @@
                                     <td class="border px-4 py-2">{{ $request->total_days }}</td>
                                     <td class="border px-4 py-2">{{ $request->reason }}</td>
                                     <td class="border px-4 py-2">
-                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="inline">
+                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="d-inline">
                                             @csrf
                                             <input type="hidden" name="request_id" value="{{ $request->id }}">
                                             <input type="hidden" name="action" value="approve">
-                                            <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 text-sm mb-1 w-full">
-                                            <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 w-full mb-1">
+                                            <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 small mb-1 w-100">
+                                            <button type="submit" class="text-white px-3 py-1 rounded small w-100 mb-1">
                                                 Approve
                                             </button>
                                         </form>
-                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="inline">
+                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="d-inline">
                                             @csrf
                                             <input type="hidden" name="request_id" value="{{ $request->id }}">
                                             <input type="hidden" name="action" value="reject">
-                                            <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 text-sm mb-1 w-full">
-                                            <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 w-full">
+                                            <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 small mb-1 w-100">
+                                            <button type="submit" class="text-white px-3 py-1 rounded small w-100">
                                                 Reject
                                             </button>
                                         </form>
@@ -67,16 +67,16 @@
                     </table>
                 </div>
             @else
-                <div class="bg-gray-100 border border-gray-300 rounded p-4 text-center text-gray-600">
+                <div class="bg-light border rounded p-3 text-center text-muted">
                     No pending leave requests at this time.
                 </div>
             @endif
         </div>
 
         <!-- Quick Stats -->
-        <div class="bg-blue-100 border border-blue-300 rounded p-4">
-            <h3 class="text-lg font-semibold text-blue-800">Leave Requests</h3>
-            <p class="text-2xl font-bold text-blue-900">{{ count($leaveRequests) }}</p>
+        <div class="border rounded p-3">
+            <h3 class="h4 fw-semibold">Leave Requests</h3>
+            <p class="h2 fw-bold">{{ count($leaveRequests) }}</p>
             <p class="text-blue-700">Pending Approval</p>
         </div>
     </div>

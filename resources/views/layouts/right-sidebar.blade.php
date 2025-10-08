@@ -1,25 +1,25 @@
 <!-- THEME config -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="demo_config">
-  <div class="position-absolute top-50 end-100 visible">
-    <button type="button" class="btn btn-primary btn-icon translate-middle-y rounded-end-0" data-bs-toggle="offcanvas" data-bs-target="#demo_config">
+  <div class="">
+    <button type="button" class="" data-bs-toggle="offcanvas" data-bs-target="#demo_config">
       <img src="/img/settings.gif" alt="Settings" style="width:24px; height:24px;">
     </button>
   </div>
 
-  <div class="offcanvas-header border-bottom py-0">
+  <div class="">
     <h5 class="offcanvas-title py-3">Theme Configuration</h5>
-    <button type="button" class="btn btn-light btn-sm btn-icon border-transparent rounded-pill" data-bs-dismiss="offcanvas">
-      <i class="ph-x"></i>
+    <button type="button" class="" data-bs-dismiss="offcanvas">
+      <i class="bi bi-x"></i>
     </button>
   </div>
 
   <div class="offcanvas-body">
-    <div class="fw-semibold mb-2">Color mode</div>
-    <div class="list-group mb-3">
+    <div class="mb-2">Color mode</div>
+    <div class="mb-3">
 
-      <label class="list-group-item list-group-item-action form-check border-width-1 rounded mb-2">
-        <div class="d-flex flex-fill my-1">
-          <div class="form-check-label d-flex me-2 align-items-center">
+      <label class="rounded mb-2">
+        <div class="">
+          <div class="">
             <img src="/img/light-on.png" alt="Light Theme" style="width:24px; height:24px; margin-right:12px;">
             <div>
               <span class="fw-bold">Light theme</span>
@@ -30,9 +30,9 @@
         </div>
       </label>
 
-      <label class="list-group-item list-group-item-action form-check border-width-1 rounded mb-2">
-        <div class="d-flex flex-fill my-1">
-          <div class="form-check-label d-flex me-2 align-items-center">
+      <label class="rounded mb-2">
+        <div class="">
+          <div class="">
             <img src="/img/light-off.png" alt="Dark Theme" style="width:24px; height:24px; margin-right:12px;">
             <div>
               <span class="fw-bold">Dark theme</span>
@@ -43,9 +43,9 @@
         </div>
       </label>
 
-      <label class="list-group-item list-group-item-action form-check border-width-1 rounded mb-0">
-        <div class="d-flex flex-fill my-1">
-          <div class="form-check-label d-flex me-2 align-items-center">
+      <label class="rounded">
+        <div class="">
+          <div class="">
             <img src="/img/settings.gif" alt="Auto Theme" style="width:24px; height:24px; margin-right:12px;">
             <div>
               <span class="fw-bold">Auto theme</span>
@@ -58,11 +58,11 @@
 
     </div>
 
-    <div class="fw-semibold mb-2">Direction</div>
-    <div class="list-group mb-3">
-      <label class="list-group-item list-group-item-action form-check border-width-1 rounded mb-0">
-        <div class="d-flex flex-fill my-1">
-          <div class="form-check-label d-flex me-2 align-items-center">
+    <div class="mb-2">Direction</div>
+    <div class="mb-3">
+      <label class="rounded">
+        <div class="">
+          <div class="">
             <img src="/img/direction.png" alt="RTL Direction" style="width:24px; height:24px; margin-right:12px;">
             <div>
               <span class="fw-bold">RTL direction</span>
@@ -140,6 +140,17 @@
       radio.addEventListener('change', () => {
         applyTheme(radio.value);
         localStorage.setItem('theme', radio.value);
+        
+        // Update the navbar toggle button icon
+        const themeToggleIcon = document.getElementById('themeIcon');
+        if (themeToggleIcon) {
+          themeToggleIcon.classList.remove('ph-moon', 'ph-sun');
+          if (radio.value === 'dark') {
+            themeToggleIcon.classList.add('ph-sun');
+          } else {
+            themeToggleIcon.classList.add('ph-moon');
+          }
+        }
       });
     });
 

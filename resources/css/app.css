@@ -1,3 +1,342 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Bootstrap 5.3 Custom Styles & Theme System */
+
+/* Theme Variables */
+:root {
+    --bs-primary: #0d6efd;
+    --bs-secondary: #6c757d;
+    --bs-success: #198754;
+    --bs-info: #0dcaf0;
+    --bs-warning: #ffc107;
+    --bs-danger: #dc3545;
+    --bs-light: #f8f9fa;
+    --bs-dark: #212529;
+}
+
+/* ============= LIGHT THEME (DEFAULT) ============= */
+body.light,
+html:not(.dark) body {
+    background-color: #ffffff;
+    color: #212529;
+}
+
+/* ============= DARK THEME ============= */
+body.dark,
+html.dark body {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+/* ============= NAVBAR STYLING ============= */
+body.dark .navbar,
+html.dark .navbar {
+    background-color: #2d2d2d !important;
+}
+
+body.dark .navbar-nav .nav-link,
+html.dark .navbar-nav .nav-link {
+    color: #ffffff !important;
+}
+
+body.dark .navbar-brand,
+html.dark .navbar-brand {
+    color: #ffffff !important;
+}
+
+body.dark .navbar-toggler,
+html.dark .navbar-toggler {
+    border-color: #ffffff;
+}
+
+body.dark .navbar-toggler-icon,
+html.dark .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+/* ============= CARD STYLING ============= */
+body.dark .card,
+html.dark .card {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #ffffff;
+}
+
+/* ============= TABLE STYLING ============= */
+body.dark .table,
+html.dark .table {
+    --bs-table-bg: #2d2d2d;
+    --bs-table-color: #ffffff;
+    --bs-table-border-color: #444;
+}
+
+body.dark .table-light,
+html.dark .table-light {
+    background-color: #3d3d3d !important;
+    color: #ffffff !important;
+}
+
+body.dark table,
+html.dark table {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+body.dark .table-striped > tbody > tr:nth-of-type(odd) > td,
+html.dark .table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: #333;
+}
+
+/* ============= FORM CONTROLS ============= */
+body.dark .form-control,
+body.dark .form-select,
+html.dark .form-control,
+html.dark .form-select {
+    background-color: #3d3d3d;
+    border-color: #555;
+    color: #ffffff;
+}
+
+body.dark .form-control:focus,
+body.dark .form-select:focus,
+html.dark .form-control:focus,
+html.dark .form-select:focus {
+    background-color: #3d3d3d;
+    border-color: #0d6efd;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+body.dark .form-check-input,
+html.dark .form-check-input {
+    background-color: #3d3d3d;
+    border-color: #555;
+}
+
+body.dark .form-check-input:checked,
+html.dark .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* ============= BUTTON STYLING ============= */
+body.dark .btn-outline-secondary,
+html.dark .btn-outline-secondary {
+    color: #ffffff;
+    border-color: #6c757d;
+}
+
+body.dark .btn-outline-secondary:hover,
+html.dark .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+/* ============= THEME TOGGLE BUTTON ============= */
+#themeToggle {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#themeToggle:hover {
+    transform: scale(1.1);
+}
+
+#themeIcon {
+    font-size: 1.2rem;
+}
+
+/* Light theme button */
+body.light #themeToggle {
+    color: #495057;
+    border-color: #dee2e6;
+}
+
+body.light #themeToggle:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+/* Dark theme button */
+body.dark #themeToggle {
+    color: #ffffff;
+    border-color: #6c757d;
+}
+
+body.dark #themeToggle:hover {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+/* ============= DROPDOWN STYLING ============= */
+body.dark .dropdown-menu,
+html.dark .dropdown-menu {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+body.dark .dropdown-item,
+html.dark .dropdown-item {
+    color: #ffffff;
+}
+
+body.dark .dropdown-item:hover,
+html.dark .dropdown-item:hover {
+    background-color: #3d3d3d;
+    color: #ffffff;
+}
+
+/* ============= ALERT STYLING ============= */
+body.dark .alert,
+html.dark .alert {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #ffffff;
+}
+
+body.dark .alert-info,
+html.dark .alert-info {
+    background-color: #1f3a5f;
+    border-color: #0c5460;
+    color: #b8daff;
+}
+
+body.dark .alert-success,
+html.dark .alert-success {
+    background-color: #0f2419;
+    border-color: #0a3622;
+    color: #a3cfbb;
+}
+
+body.dark .alert-danger,
+html.dark .alert-danger {
+    background-color: #2c0b0e;
+    border-color: #842029;
+    color: #ea868f;
+}
+
+/* ============= PAGINATION STYLING ============= */
+body.dark .page-link,
+html.dark .page-link {
+    background-color: #3d3d3d;
+    border-color: #555;
+    color: #ffffff;
+}
+
+body.dark .page-link:hover,
+html.dark .page-link:hover {
+    background-color: #4d4d4d;
+    color: #ffffff;
+}
+
+/* ============= ADDITIONAL BOOTSTRAP UTILITY CLASSES ============= */
+.d-flex { display: flex !important; }
+.flex-wrap { flex-wrap: wrap !important; }
+.flex-nowrap { flex-wrap: nowrap !important; }
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+
+/* ============= CUSTOM UTILITY CLASSES ============= */
+.max-w-7xl { max-width: 80rem !important; }
+.max-w-4xl { max-width: 56rem !important; }
+.max-w-2xl { max-width: 42rem !important; }
+.max-w-xl { max-width: 36rem !important; }
+.max-w-md { max-width: 28rem !important; }
+
+.text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+.text-xl { font-size: 1.25rem !important; line-height: 1.75rem !important; }
+.text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+
+.transition-colors { transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out !important; }
+
+/* ============= SPACING CLASSES ============= */
+.space-y-1 > * + * { margin-top: 0.25rem !important; }
+.space-y-2 > * + * { margin-top: 0.5rem !important; }
+.space-y-3 > * + * { margin-top: 1rem !important; }
+.space-y-4 > * + * { margin-top: 1.5rem !important; }
+.space-y-6 > * + * { margin-top: 3rem !important; }
+
+.space-x-1 > * + * { margin-left: 0.25rem !important; }
+.space-x-2 > * + * { margin-left: 0.5rem !important; }
+.space-x-3 > * + * { margin-left: 1rem !important; }
+.space-x-4 > * + * { margin-left: 1.5rem !important; }
+
+/* ============= CUSTOM BUTTON VARIANTS ============= */
+.btn-emerald {
+    color: #fff;
+    background-color: #10b981;
+    border-color: #10b981;
+}
+.btn-emerald:hover {
+    background-color: #059669;
+    border-color: #059669;
+    color: #fff;
+}
+
+.btn-purple {
+    color: #fff;
+    background-color: #8b5cf6;
+    border-color: #8b5cf6;
+}
+.btn-purple:hover {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+    color: #fff;
+}
+
+/* ============= ADDITIONAL LAYOUT UTILITIES ============= */
+.container-centered {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Bootstrap overrides for better spacing */
+.px-4 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+.py-6 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+.mt-6 { margin-top: 3rem !important; }
+
+/* Hide/show utilities */
+.d-none { display: none !important; }
+.hidden { display: none !important; } /* Tailwind compatibility */
+
+/* ============= SMOOTH TRANSITIONS ============= */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card, .navbar, .form-control, .form-select, .table {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============= RTL SUPPORT ============= */
+[dir="rtl"] {
+    text-align: right;
+}
+
+[dir="rtl"] .offcanvas-end {
+    right: auto;
+    left: 0;
+}
+
+/* ============= RESPONSIVE DESIGN IMPROVEMENTS ============= */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 1.25rem !important;
+    }
+}

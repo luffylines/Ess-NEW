@@ -16,9 +16,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Test route for theme toggle
+Route::get('/test-theme', function () {
+    return view('test-theme');
+})->name('test.theme');
+
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::patch('/profile/update-email', [ProfileController::class, 'updateEmail'])
+    ->middleware(['auth'])
+    ->name('profile.updateEmail');
+
+Route::patch('/profile/update-password', [ProfileController::class, 'updatePassword'])
+    ->middleware(['auth'])
+    ->name('profile.updatePassword');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

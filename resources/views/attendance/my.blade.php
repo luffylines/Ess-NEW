@@ -1,92 +1,92 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
-        <h1 class="text-2xl font-bold mb-4">My Attendance</h1>
+    <div class="px-4">
+        <h1 class="mb-3">My Attendance</h1>
 
         {{-- Flash Messages --}}
         @if(session('success'))
-            <div class="alert alert-success mb-4">{{ session('success') }}</div>
+            <div class="mb-3">{{ session('success') }}</div>
         @endif
         @if(session('error'))
-            <div class="alert alert-danger mb-4">{{ session('error') }}</div>
+            <div class="mb-3">{{ session('error') }}</div>
         @endif
 
         {{-- === TOOLBAR ABOVE TABLE === --}}
-        <div class="flex flex-wrap justify-between items-center mb-4 gap-2 text-sm">
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('attendance.generateShiftSchedule') }}" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors">
+        <div class="d-flex flex-wrap mb-3 gap-2">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('attendance.generateShiftSchedule') }}" class="btn btn-primary btn-sm">
                     Generate
                 </a>
-                <button class="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 transition-colors">New</button>
-                <button class="btn btn-primary px-4 py-2 rounded hover:bg-blue-600 transition-all duration-300">Advance Sched</button>
-                <button id="selectAllBtn" class="btn btn-secondary px-4 py-2 rounded hover:bg-gray-700 transition-all duration-300">Select All</button>
-                <button class="btn btn-info px-4 py-2 rounded hover:bg-teal-700 transition-all duration-300">Refresh</button>
-                <button id="enableFilteringBtn" class="btn btn-dark px-4 py-2 rounded hover:bg-indigo-700 transition-all duration-300">Enable Filtering</button>
-                <a href="{{ route('attendance.pdf') }}" target="_blank" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors flex items-center gap-1">
-                    <img src="{{ asset('img/pdf.png') }}" alt="PDF" class="w-4 h-4"> PDF Print All
+                <button class="btn btn-emerald btn-sm">New</button>
+                <button class="btn btn-primary btn-sm">Advance Sched</button>
+                <button id="selectAllBtn" class="btn btn-secondary btn-sm">Select All</button>
+                <button class="btn btn-info btn-sm">Refresh</button>
+                <button id="enableFilteringBtn" class="btn btn-dark btn-sm">Enable Filtering</button>
+                <a href="{{ route('attendance.pdf') }}" target="_blank" class="gap-1">
+                    <img src="{{ asset('img/pdf.png') }}" alt="PDF" style="width: 16px; height: 16px;"> PDF Print All
                 </a>
-                <button id="printSelectedBtn" class="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition-colors" disabled>
+                <button id="printSelectedBtn" class="btn btn-purple btn-sm" disabled>
                     <i class="fas fa-print"></i> Print Selected
                 </button>
-                <button id="downloadSelectedBtn" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors" disabled>
+                <button id="downloadSelectedBtn" class="btn btn-success btn-sm" disabled>
                     <i class="fas fa-download"></i> Download Selected
                 </button>
             </div>
-            <div id="selectedCount" class="text-sm text-gray-600 hidden">
+            <div id="selectedCount" class="small text-muted d-none">
                 Selected: <span id="selectedCountNumber">0</span> records
             </div>
         </div>
 
         {{-- === SEARCH & FILTER FORM === --}}
-        <form method="GET" action="{{ route('attendance.my') }}" class="flex flex-wrap gap-3 items-end mb-4">
+        <form method="GET" action="{{ route('attendance.my') }}" class="d-flex flex-wrap gap-3 mb-3">
             {{-- Search by Created By --}}
             <div>
-                <label for="search_created_by" class="text-sm font-medium">Search by Created:</label>
+                <label for="search_created_by" class="form-label small fw-medium">Search by Created:</label>
                 <input type="text" name="search_created_by" id="search_created_by" value="{{ request('search_created_by') }}"
-                       class="border rounded px-2 py-1 text-sm" placeholder="Enter Created By..." />
+                       class="form-control form-control-sm" placeholder="Enter Created By..." />
             </div>
 
             {{-- Date From --}}
             <div>
-                <label for="date_from" class="text-sm font-medium">From:</label>
+                <label for="date_from" class="form-label small fw-medium">From:</label>
                 <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
-                       class="border rounded px-2 py-1 text-sm" />
+                       class="form-control form-control-sm" />
             </div>
 
             {{-- Date To --}}
             <div>
-                <label for="date_to" class="font-medium">To:</label>
+                <label for="date_to" class="form-label fw-medium">To:</label>
                 <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
-                       class="border rounded px-2 py-1 text-sm" />
+                       class="form-control form-control-sm" />
             </div>
 
                         {{-- Submit and Clear buttons --}}
-            <div class="flex gap-2">
+            <div class="gap-2">
                 <!-- Search Button -->
-                <button type="submit" class="text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300 text-sm" style="background-color: #3b82f6;">
+                <button type="submit" class="btn btn-primary btn-sm">
                     Search
                 </button>
 
                 <!-- Clear Button -->
-                <a href="{{ route('attendance.my') }}" class="text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-300 text-sm" style="background-color: #6b7280;">
+                <a href="{{ route('attendance.my') }}" class="btn btn-secondary btn-sm">
                     Clear
                 </a>
             </div>
         </form>
 
         {{-- === ADVANCED FILTERING SECTION === --}}
-        <div id="advancedFiltering" class="bg-gray-50 border rounded-lg p-4 mb-4 hidden">
-            <h3 class="text-lg font-semibold mb-3">Advanced Filtering</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div id="advancedFiltering" class="border rounded p-3 mb-3">
+            <h3 class="mb-3">Advanced Filtering</h3>
+            <div class="row">
                 <!-- Date Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                    <input type="date" id="filterDate" class="w-full px-3 py-1 border rounded text-sm">
+                <div class="col-md-3">
+                    <label class="mb-1">Date</label>
+                    <input type="date" id="filterDate" class="form-control form-control-sm">
                 </div>
                 
                 <!-- Day Type Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Day Type</label>
-                    <select id="filterDayType" class="w-full px-3 py-1 border rounded text-sm">
+                <div class="col-md-3">
+                    <label class="mb-1">Day Type</label>
+                    <select id="filterDayType" class="form-select">
                         <option value="">All Day Types</option>
                         <option value="Regular">Regular</option>
                         <option value="Holiday">Holiday</option>
@@ -96,9 +96,9 @@
                 </div>
                 
                 <!-- Status Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="filterStatus" class="w-full px-3 py-1 border rounded text-sm">
+                <div class="col-md-3">
+                    <label class="mb-1">Status</label>
+                    <select id="filterStatus" class="form-select">
                         <option value="">All Statuses</option>
                         <option value="Present">Present</option>
                         <option value="Late">Late</option>
@@ -109,34 +109,34 @@
                 </div>
                 
                 <!-- Created By Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Created By</label>
-                    <input type="text" id="filterCreatedBy" placeholder="Enter name..." class="w-full px-3 py-1 border rounded text-sm">
+                <div class="col-md-3">
+                    <label class="mb-1">Created By</label>
+                    <input type="text" id="filterCreatedBy" placeholder="Enter name..." class="form-control form-control-sm">
                 </div>
                 
                 <!-- Time In Range -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Time In From</label>
-                    <input type="time" id="filterTimeInFrom" class="w-full px-3 py-1 border rounded text-sm">
+                <div class="col-md-3">
+                    <label class="mb-1">Time In From</label>
+                    <input type="time" id="filterTimeInFrom" class="form-control form-control-sm">
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Time In To</label>
-                    <input type="time" id="filterTimeInTo" class="w-full px-3 py-1 border rounded text-sm">
+                <div class="col-md-3">
+                    <label class="mb-1">Time In To</label>
+                    <input type="time" id="filterTimeInTo" class="form-control form-control-sm">
                 </div>
                 
                 <!-- Remarks Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
-                    <input type="text" id="filterRemarks" placeholder="Search remarks..." class="w-full px-3 py-1 border rounded text-sm">
+                <div class="col-md-3">
+                    <label class="mb-1">Remarks</label>
+                    <input type="text" id="filterRemarks" placeholder="Search remarks..." class="form-control form-control-sm">
                 </div>
                 
                 <!-- Filter Actions -->
-                <div class="flex items-end space-x-2">
-                    <button id="applyFiltersBtn" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-sm">
+                <div class="gap-2">
+                    <button id="applyFiltersBtn" class="btn btn-primary btn-sm">
                         Apply Filters
                     </button>
-                    <button id="clearFiltersBtn" class="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 text-sm">
+                    <button id="clearFiltersBtn" class="btn btn-secondary btn-sm">
                         Clear All
                     </button>
                 </div>
@@ -144,26 +144,26 @@
         </div>
 
         {{-- === ATTENDANCE TABLE === --}}
-<table class="table-auto w-full border-collapse border border-gray-300 text-sm" id="attendanceTable">
-    <thead>
-        <tr class="bg-gray-100 text-left">
-            <th class="border border-gray-300 px-4 py-2">
-                <input type="checkbox" id="selectAllCheckbox" class="form-checkbox">
+<table class="" id="attendanceTable">
+    <thead class="table-light">
+        <tr>
+            <th class="border px-4 py-2">
+                <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
             </th>
-            <th class="border border-gray-300 px-4 py-2">Date</th>
-            <th class="border border-gray-300 px-4 py-2">Day Type</th>
-            <th class="border border-gray-300 px-4 py-2">Time In</th>
-            <th class="border border-gray-300 px-4 py-2">Time Out</th>
-            <th class="border border-gray-300 px-4 py-2">Status</th>
-            <th class="border border-gray-300 px-4 py-2">Remarks</th>
-            <th class="border border-gray-300 px-4 py-2">Created At</th>
-            <th class="border border-gray-300 px-4 py-2">Created By</th>
-            <th class="border border-gray-300 px-4 py-2">Action</th>
+            <th>Date</th>
+            <th>Day Type</th>
+            <th>Time In</th>
+            <th>Time Out</th>
+            <th>Status</th>
+            <th>Remarks</th>
+            <th>Created At</th>
+            <th>Created By</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
         @forelse($attendances as $attendance)
-            <tr class="hover:bg-gray-50 attendance-row" 
+            <tr class="attendance-row" 
                 data-date="{{ $attendance['date'] }}"
                 data-day-type="{{ $attendance['day_type'] }}"
                 data-time-in="{{ $attendance['time_in'] }}"
@@ -172,81 +172,81 @@
                 data-remarks="{{ $attendance['remarks'] }}"
                 data-created-at="{{ $attendance['created_at'] }}"
                 data-created-by="{{ $attendance['created_by'] }}">
-                <td class="border border-gray-300 px-4 py-2">
-                    <input type="checkbox" class="row-checkbox form-checkbox" value="{{ $attendance['id'] }}">
+                <td>
+                    <input type="checkbox" class="row-checkbox form-check-input" value="{{ $attendance['id'] }}">
                 </td>
-                <td class="border border-gray-300 px-4 py-2">{{ $attendance['date'] }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ $attendance['day_type'] }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ $attendance['time_in'] }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ $attendance['time_out'] }}</td>
-                <td class="border border-gray-300 px-4 py-2">
+                <td>{{ $attendance['date'] }}</td>
+                <td>{{ $attendance['day_type'] }}</td>
+                <td>{{ $attendance['time_in'] }}</td>
+                <td>{{ $attendance['time_out'] }}</td>
+                <td>
                     @php
                         $status = $attendance['status'];
                         $attendanceStatus = $attendance['attendance_status'] ?? 'pending';
                     @endphp
                     
                     {{-- Display attendance status with approval status --}}
-                    <div class="flex flex-col">
+                    <div class="">
                         @if($status === 'Present')
-                            <span class="text-green-600 font-medium">{{ $status }}</span>
+                            <span class="text-success fw-medium">{{ $status }}</span>
                         @elseif($status === 'Late')
-                            <span class="text-orange-600 font-medium">{{ $status }}</span>
+                            <span class="text-warning fw-medium">{{ $status }}</span>
                         @elseif($status === 'Absent')
-                            <span class="text-red-600 font-medium">{{ $status }}</span>
+                            <span class="text-danger fw-medium">{{ $status }}</span>
                         @else
-                            <span class="text-gray-600 font-medium">{{ $status }}</span>
+                            <span class="text-muted fw-medium">{{ $status }}</span>
                         @endif
                         
                         {{-- Show approval status --}}
                         @if($attendanceStatus === 'approved')
-                            <span class="text-xs text-green-500">✓ Approved</span>
+                            <span class="small text-success">✓ Approved</span>
                         @elseif($attendanceStatus === 'rejected')
-                            <span class="text-xs text-red-500">✗ Rejected</span>
+                            <span class="small text-danger">✗ Rejected</span>
                         @else
-                            <span class="text-xs text-yellow-500">⏳ Pending</span>
+                            <span class="small text-warning">⏳ Pending</span>
                         @endif
                     </div>
                 </td>
-                <td class="border border-gray-300 px-4 py-2">{{ $attendance['remarks'] }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ $attendance['created_at'] }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ $attendance['created_by'] }}</td>
-                <td class="border border-gray-300 px-4 py-2">
+                <td>{{ $attendance['remarks'] }}</td>
+                <td>{{ $attendance['created_at'] }}</td>
+                <td>{{ $attendance['created_by'] }}</td>
+                <td>
                     @php
                         $attendanceId = $attendance['id'];
                         $attendanceStatus = $attendance['attendance_status'] ?? 'pending';
                     @endphp
                     @if($attendanceStatus !== 'approved')
-                        <div class="flex space-x-1">
-                            <a href="{{ route('attendance.edit', $attendanceId) }}" class="inline-block" title="Edit">
-                                <img src="{{ asset('img/edit.png') }}" alt="Edit" class="w-5 h-5 hover:opacity-70" />
+                        <div class="gap-1">
+                            <a href="{{ route('attendance.edit', $attendanceId) }}" class="" title="Edit">
+                                <img src="{{ asset('img/edit.png') }}" alt="Edit" style="width: 20px; height: 20px;" />
                             </a>
-                            <a href="{{ route('attendance.delete', $attendanceId) }}" class="inline-block" title="Delete" 
+                            <a href="{{ route('attendance.delete', $attendanceId) }}" class="" title="Delete" 
                                onclick="return confirm('Are you sure you want to delete this record?')">
-                                <img src="{{ asset('img/delete1.png') }}" alt="Delete" class="w-5 h-5 hover:opacity-70" />
+                                <img src="{{ asset('img/delete1.png') }}" alt="Delete" style="width: 20px; height: 20px;" />
                             </a>
                         </div>
                     @else
-                        <span class="text-gray-400 text-xs">🔒 Approved</span>
+                        <span class="text-muted small">🔒 Approved</span>
                     @endif
                 </td>
             </tr>
         @empty
             <tr>
-                <td colspan="10" class="text-center py-8 text-gray-500">
+                <td colspan="10" class="text-center py-3">
                     @if(request()->hasAny(['search_created_by', 'date_from', 'date_to']))
-                        <div class="flex flex-col items-center">
-                            <img src="{{ asset('img/no-results.png') }}" alt="No Results" class="w-16 h-16 mb-3 opacity-50">
-                            <p class="text-lg font-medium">No search results found</p>
-                            <p class="text-sm">Try adjusting your search criteria</p>
-                            <a href="{{ route('attendance.my') }}" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">
+                        <div class="">
+                            <img src="{{ asset('img/no-results.png') }}" alt="No Results" style="width: 64px; height: 64px;" class="mb-3">
+                            <p class="h5 fw-medium">No search results found</p>
+                            <p class="small">Try adjusting your search criteria</p>
+                            <a href="{{ route('attendance.my') }}" class="mt-3">
                                 Clear Search
                             </a>
                         </div>
                     @else
-                        <div class="flex flex-col items-center">
-                            <img src="{{ asset('img/no-data.png') }}" alt="No Data" class="w-16 h-16 mb-3 opacity-50">
-                            <p class="text-lg font-medium">No attendance records found</p>
-                            <p class="text-sm">Start by marking your attendance below</p>
+                        <div class="">
+                            <img src="{{ asset('img/no-data.png') }}" alt="No Data" style="width: 64px; height: 64px;" class="mb-3">
+                            <p class="h5 fw-medium">No attendance records found</p>
+                            <p class="small">Start by marking your attendance below</p>
                         </div>
                     @endif
                 </td>
@@ -257,35 +257,35 @@
 
 {{-- === PAGINATION === --}}
 @if($attendances->hasPages())
-    <div class="mt-4">
+    <div class="mt-3">
         {{ $attendances->appends(request()->query())->links() }}
     </div>
 @endif
         {{-- === MARK ATTENDANCE === --}}
-        <div class="bg-gray-100 p-4 rounded max-w-md mx-auto mt-6">
-            <h2 class="text-xl font-semibold mb-3">Mark Attendance</h2>
+        <div class="p-3 rounded mx-auto mt-3" style="max-width: 400px;">
+            <h2 class="mb-3">Mark Attendance</h2>
             @if($todayAttendance)
                 @if(!$todayAttendance->time_in)
                     <form method="POST" action="{{ route('attendance.submit') }}">
                         @csrf
-                        <button type="submit" name="action" value="time_in" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                        <button type="submit" name="action" value="time_in" class="btn btn-success w-100">
                             Mark Time In
                         </button>
                     </form>
                 @elseif(!$todayAttendance->time_out)
                     <form method="POST" action="{{ route('attendance.submit') }}">
                         @csrf
-                        <button type="submit" name="action" value="time_out" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full">
+                        <button type="submit" name="action" value="time_out" class="btn btn-danger w-100">
                             Mark Time Out
                         </button>
                     </form>
                 @else
-                    <p class="text-green-700 font-semibold">You have completed attendance for today.</p>
+                    <p class="text-success fw-semibold">You have completed attendance for today.</p>
                 @endif
             @else
                 <form method="POST" action="{{ route('attendance.submit') }}">
                     @csrf
-                    <button type="submit" name="action" value="time_in" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                    <button type="submit" name="action" value="time_in" class="btn btn-success w-100">
                         Mark Time In
                     </button>
                 </form>
@@ -310,24 +310,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Toggle Advanced Filtering
     enableFilteringBtn.addEventListener('click', function() {
-        const isHidden = advancedFiltering.classList.contains('hidden');
+        const isHidden = advancedFiltering.classList.contains('d-none');
         if (isHidden) {
-            advancedFiltering.classList.remove('hidden');
+            advancedFiltering.classList.remove('d-none');
             enableFilteringBtn.textContent = 'Hide Filtering';
-            enableFilteringBtn.classList.add('bg-red-600');
-            enableFilteringBtn.classList.remove('btn-dark');
+            enableFilteringBtn.className = 'btn btn-danger btn-sm';
         } else {
-            advancedFiltering.classList.add('hidden');
+            advancedFiltering.classList.add('d-none');
             enableFilteringBtn.textContent = 'Enable Filtering';
-            enableFilteringBtn.classList.remove('bg-red-600');
-            enableFilteringBtn.classList.add('btn-dark');
+            enableFilteringBtn.className = 'btn btn-dark btn-sm';
         }
     });
     
     // Select All functionality
     function updateSelectAll() {
         const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
-            !cb.closest('tr').classList.contains('hidden')
+            !cb.closest('tr').classList.contains('d-none')
         );
         const checkedBoxes = visibleCheckboxes.filter(cb => cb.checked);
         
@@ -339,24 +337,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update count and button states
         selectedCountNumber.textContent = checkedBoxes.length;
         if (checkedBoxes.length > 0) {
-            selectedCount.classList.remove('hidden');
+            selectedCount.classList.remove('d-none');
             printSelectedBtn.disabled = false;
             downloadSelectedBtn.disabled = false;
-            printSelectedBtn.classList.remove('opacity-50');
-            downloadSelectedBtn.classList.remove('opacity-50');
         } else {
-            selectedCount.classList.add('hidden');
+            selectedCount.classList.add('d-none');
             printSelectedBtn.disabled = true;
             downloadSelectedBtn.disabled = true;
-            printSelectedBtn.classList.add('opacity-50');
-            downloadSelectedBtn.classList.add('opacity-50');
         }
     }
     
     // Select All checkbox
     selectAllCheckbox.addEventListener('change', function() {
         const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
-            !cb.closest('tr').classList.contains('hidden')
+            !cb.closest('tr').classList.contains('d-none')
         );
         visibleCheckboxes.forEach(cb => cb.checked = this.checked);
         updateSelectAll();
@@ -365,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Select All button
     selectAllBtn.addEventListener('click', function() {
         const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
-            !cb.closest('tr').classList.contains('hidden')
+            !cb.closest('tr').classList.contains('d-none')
         );
         const allChecked = visibleCheckboxes.every(cb => cb.checked);
         visibleCheckboxes.forEach(cb => cb.checked = !allChecked);
@@ -433,9 +427,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show/hide row
             if (show) {
-                row.classList.remove('hidden');
+                row.classList.remove('d-none');
             } else {
-                row.classList.add('hidden');
+                row.classList.add('d-none');
                 row.querySelector('.row-checkbox').checked = false;
             }
         });
@@ -468,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('filterRemarks').value = '';
         
         document.querySelectorAll('.attendance-row').forEach(row => {
-            row.classList.remove('hidden');
+            row.classList.remove('d-none');
         });
         
         updateSelectAll();

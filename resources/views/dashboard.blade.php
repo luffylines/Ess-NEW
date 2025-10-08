@@ -1,8 +1,8 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg shadow">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+    <div class="py-3">
+        <div class="px-4">
+            <div class="card">
+                <div class="card-body">
                     @if(Auth::user()->role === 'admin')
                         @include('admin.dashboard')
                     @elseif(Auth::user()->role === 'hr')

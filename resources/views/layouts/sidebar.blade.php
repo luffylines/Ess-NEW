@@ -1,177 +1,259 @@
-<aside class="main-sidebar sidebar-dark-primary elevation-4 collapsed" id="sidebar">
-    <div class="brand-container d-flex justify-content-between align-items-center px-3" style="height: 56px;">
-        <a href="{{ url('/') }}" class="brand-link m-0 p-0">
-            <span class="brand-text font-weight-light">ESS</span>
+<aside class="main-sidebar" id="sidebar">
+    <!-- Brand Logo and Toggle Button -->
+    <div class="brand-container d-flex justify-content-between align-items-center px-3">
+        <a href="{{ url('/') }}" class="brand-link text-decoration-none d-flex align-items-center">
+            <img src="{{ asset('img/logo.png') }}" alt="ESS Logo" class="brand-logo me-2">
+            <span class="brand-text fw-bold">ESS</span>
         </a>
-        <button id="sidebarToggle">
+        <button id="sidebarToggle" type="button" title="Toggle Sidebar">
             <img src="{{ asset('img/menu.png') }}" alt="Toggle Sidebar" width="24" height="24" />
         </button>
     </div>
-    <div class="sidebar">
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column">
+
+    <!-- User Profile Section -->
+    <div class="user-panel text-center mt-3 mb-3" id="userPanel">
+       @if(auth()->user()->profile_photo && file_exists(public_path('storage/' . auth()->user()->profile_photo)))
+            <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" 
+                class="img-circle profile-pic" 
+                alt="User Image">
+        @else
+            <img src="{{ asset('img/default-profile.png') }}" 
+                class="img-circle profile-pic" 
+                alt="Default Profile">
+        @endif
+        <div class="info mt-2">
+            <span class="fw-semibold d-block">{{ auth()->user()->name }}</span>
+            <small class="text-muted">Employee ID: {{ auth()->user()->employee_id }}</small>
+        </div>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar mt-2 flex-grow-1">
+        <nav>
+            <ul class="nav flex-column">
+
                 {{-- ADMIN ONLY --}}
-                @if(auth()->user()->role == 'admin')
-                <li class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.index') }}" class="nav-link">
-                        <i class="nav-icon fas fa-users"></i>
-                        <p>Employees</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.activity-logs.index') }}" class="nav-link">
-                        <i class="nav-icon fas fa-history"></i>
-                        <p>Activity Logs</p>
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a id="deductionsToggle" class="nav-link dropdown-toggle" href="#">
-                        Deductions & Contributions
-                    </a>
-                    <ul class="nav nav-treeview ms-3" id="deductionsMenu" style="display: none;">
-                        <li class="nav-item">
-                            <a href="{{ route('admin.loans.sss') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>SSS Loan</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('admin.loans.pagibig') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Pag-Ibig Loan</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('admin.loans.company') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Company Loan</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                @if(auth()->user()->role === 'admin')
+                    <li class="nav-item">
+                        <a href="{{ route('dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.index') }}" class="nav-link">
+                            <i class="fas fa-users nav-icon me-2"></i> Employees
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.activity-logs.index') }}" class="nav-link">
+                            <i class="fas fa-history nav-icon me-2"></i> Activity Logs
+                        </a>
+                    </li>
                 @endif
 
                 {{-- HR ONLY --}}
-                @if(auth()->user()->role == 'hr')
-                <li class="nav-item"><a class="nav-link" href="{{ route('hr.approve') }}">Approve Attendance</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('hr.attendance') }}">Monitor Attendance</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveleave.show') }}">Approve Leave</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveOvertime.show') }}">Approve Overtime</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('hr.reports') }}">Generate Reports</a></li>
+                @if(auth()->user()->role === 'hr')
+                    <li class="nav-item"><a href="{{ route('hr.approve') }}" class="nav-link"><i class="fas fa-user-check me-2"></i>Approve Attendance</a></li>
+                    <li class="nav-item"><a href="{{ route('hr.attendance') }}" class="nav-link"><i class="fas fa-calendar-check me-2"></i>Monitor Attendance</a></li>
+                    <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i>Approve Leave</a></li>
+                    <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="fas fa-clock me-2"></i>Approve Overtime</a></li>
+                    <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="fas fa-file-alt me-2"></i>Generate Reports</a></li>
                 @endif
 
-                {{-- EMPLOYEE --}}
-                @if(auth()->user()->role == 'employee')
-                <li class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('profile.edit') }}">My Profile</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('attendance.my') }}">My Attendance</a></li>
-                 <li class="nav-item"><a class="nav-link" href="{{ route('overtime.index') }}">My Overtime</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('leave.index') }}">My Leave Requests</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('payslip.index') }}">Payslips</a></li>
+                {{-- EMPLOYEE ONLY --}}
+                @if(auth()->user()->role === 'employee')
+                    <li class="nav-item">
+                        <a href="{{ route('dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item"><a href="{{ route('profile.edit') }}" class="nav-link"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                    <li class="nav-item"><a href="{{ route('attendance.my') }}" class="nav-link"><i class="fas fa-calendar-check me-2"></i>My Attendance</a></li>
+                    <li class="nav-item"><a href="{{ route('overtime.index') }}" class="nav-link"><i class="fas fa-business-time me-2"></i>My Overtime</a></li>
+                    <li class="nav-item"><a href="{{ route('leave.index') }}" class="nav-link"><i class="fas fa-plane me-2"></i>My Leave Requests</a></li>
+                    <li class="nav-item"><a href="{{ route('payslip.index') }}" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i>Payslips</a></li>
+                    
+                    <!-- Deductions Dropdown -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link dropdown-toggle" id="deductionsToggle">
+                            <i class="fas fa-coins nav-icon me-2"></i> Deductions & Contributions
+                        </a>
+                        <ul class="nav flex-column ms-4" id="deductionsMenu" style="display: none;">
+                            <li class="nav-item"><a href="{{ route('admin.loans.sss') }}" class="nav-link"><i class="far fa-circle me-2"></i>SSS Loan</a></li>
+                            <li class="nav-item"><a href="{{ route('admin.loans.pagibig') }}" class="nav-link"><i class="far fa-circle me-2"></i>Pag-IBIG Loan</a></li>
+                            <li class="nav-item"><a href="{{ route('admin.loans.company') }}" class="nav-link"><i class="far fa-circle me-2"></i>Company Loan</a></li>
+                        </ul>
+                    </li>
+                    
                 @endif
+
             </ul>
         </nav>
     </div>
+
+   <!-- Logout Button -->
+    <div class="logout-container mt-auto mb-3 text-center" id="logoutSection">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-danger btn-sm px-4">
+                <i class="fas fa-sign-out-alt me-2"></i> <span class="menu-text">Logout</span>
+            </button>
+        </form>
+    </div>
 </aside>
 
+{{-- ✅ Sidebar Styles --}}
 <style>
+.main-sidebar {
+    width: 60px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #f8f9fa;
+    color: #212529;
+    border-right: 1px solid #dee2e6;
+    transition: width 0.3s ease, all 0.3s ease;
+    overflow: hidden;
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Expanded on hover (desktop) */
+.main-sidebar.expanded {
+    width: 250px;
+}
+
+/* Hide all details when collapsed */
+.main-sidebar:not(.expanded) #userPanel,
+.main-sidebar:not(.expanded) .menu-text,
+.main-sidebar:not(.expanded) #logoutSection {
+    display: none;
+}
+
+/* Keep icons visible when collapsed */
+.nav-link i {
+    width: 40px;
+    text-align: center;
+}
+
+/* Brand */
+.brand-container {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand-logo {
+    width: 28px;
+    height: 28px;
+}
+
+/* Toggle button */
+#sidebarToggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+/* Profile section */
+.user-panel {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.profile-pic {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #0d6efd;
+}
+
+/* Menu links */
+.nav-link {
+    color: inherit !important;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+    font-size: 15px;
+}
+
+.nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.2);
+}
+
+/* Logout button */
+.logout-container button {
+    width: 80%;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+/* Dark mode support */
+body.dark .main-sidebar {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    border-right: 1px solid #2c2c2c;
+}
+
+/* Responsive (mobile view) */
+@media (max-width: 768px) {
     .main-sidebar {
+        left: -250px;
         width: 250px;
-        background-color: #343a40;
-        color: white;
-        height: 100vh;
-        position: fixed;
-        top: 0;
+        transition: left 0.3s ease;
+    }
+
+    .main-sidebar.active {
         left: 0;
-        transition: all 0.3s ease;
-        overflow-x: hidden;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
     }
+}
 
-    .brand-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        height: 56px;
-        background-color: #23272b;
-        flex-shrink: 0;
-    }
-
-    .main-sidebar.collapsed {
-        width: 50px;
-    }
-
-    .main-sidebar.collapsed .brand-text {
-        display: none;
-    }
-
-    .main-sidebar.collapsed .sidebar {
-        display: none;
-    }
-
-    .main-sidebar.collapsed .brand-container {
-        justify-content: center;
-    }
-
-    #sidebarToggle {
-        cursor: pointer;
-        border: none;
-        background: none;
-        color: white;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 </style>
 
+{{-- ✅ Sidebar Script --}}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('sidebarToggle');
-    let hideTimeout;
 
-    // Function to show sidebar
-    function showSidebar() {
-        sidebar.classList.remove('collapsed');
-        clearTimeout(hideTimeout);
+    // 🖥️ Desktop hover behavior
+    function enableHoverBehavior() {
+        sidebar.classList.remove('expanded');
+        sidebar.addEventListener('mouseenter', () => sidebar.classList.add('expanded'));
+        sidebar.addEventListener('mouseleave', () => sidebar.classList.remove('expanded'));
     }
 
-    // Function to hide sidebar after delay
-    function hideSidebar() {
-        hideTimeout = setTimeout(() => {
-            sidebar.classList.add('collapsed');
-        }, 300); // adjust delay as needed
+    // 📱 Mobile toggle behavior
+    function enableClickBehavior() {
+        sidebar.classList.remove('expanded');
+        sidebar.classList.remove('active');
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
     }
 
-    // Show sidebar when hovering over toggle
-    toggleBtn.addEventListener('mouseenter', showSidebar);
-    // Keep sidebar open while hovering over it
-    sidebar.addEventListener('mouseenter', showSidebar);
+    // Check screen width to set correct behavior
+    function checkViewport() {
+        if (window.innerWidth > 768) {
+            enableHoverBehavior();
+        } else {
+            enableClickBehavior();
+        }
+    }
 
-    // Hide when mouse leaves both toggle and sidebar
-    toggleBtn.addEventListener('mouseleave', hideSidebar);
-    sidebar.addEventListener('mouseleave', hideSidebar);
+    checkViewport();
 
-    // Deductions dropdown toggle
-    const deductionsToggle = document.getElementById('deductionsToggle');
-    const deductionsMenu = document.getElementById('deductionsMenu');
-
-    deductionsToggle.addEventListener('click', function (e) {
-        e.preventDefault();
-        deductionsMenu.style.display = deductionsMenu.style.display === 'none' ? 'block' : 'none';
+    // Re-check when resizing window
+    window.addEventListener('resize', () => {
+        sidebar.classList.remove('expanded', 'active');
+        checkViewport();
     });
+});
 </script>

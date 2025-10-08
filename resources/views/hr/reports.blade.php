@@ -1,35 +1,35 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="text-2xl font-bold mb-4">Monthly Attendance Report</h1>
+    <div class="mx-auto px-4 py-4">
+        <h1 class="h2 fw-bold mb-3">Monthly Attendance Report</h1>
 
-        <form method="GET" action="{{ route('hr.reports') }}" class="mb-4 space-x-4">
-            <input type="number" name="year" value="{{ $year }}" class="border rounded p-2" placeholder="Year">
-            <input type="number" name="month" value="{{ $month }}" class="border rounded p-2" placeholder="Month (1-12)">
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">View</button>
+        <form method="GET" action="{{ route('hr.reports') }}" class="mb-3 gap-3">
+            <input type="number" name="year" value="{{ $year }}" class="border rounded" placeholder="Year">
+            <input type="number" name="month" value="{{ $month }}" class="border rounded" placeholder="Month (1-12)">
+            <button type="submit" class="px-4 py-2 bg-primary text-white rounded">View</button>
             <a href="{{ route('hr.reports.export', ['year' => $year, 'month' => $month]) }}"
-               class="px-4 py-2 bg-green-600 text-white rounded">Export CSV</a>
+               class="px-4 py-2 bg-success text-white rounded">Export CSV</a>
         </form>
 
-        <table class="min-w-full border-collapse border border-gray-300">
+        <table class="border">
             <thead>
-                <tr class="bg-gray-100">
-                    <th class="border p-2">User ID</th>
-                    <th class="border p-2">Name</th>
-                    <th class="border p-2">Present</th>
-                    <th class="border p-2">Absent</th>
-                    <th class="border p-2">Time In Only</th>
-                    <th class="border p-2">Total Days</th>
+                <tr class="bg-light">
+                    <th class="border">User ID</th>
+                    <th class="border">Name</th>
+                    <th class="border">Present</th>
+                    <th class="border">Absent</th>
+                    <th class="border">Time In Only</th>
+                    <th class="border">Total Days</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($report as $row)
                     <tr>
-                        <td class="border p-2">{{ $row['user_id'] }}</td>
-                        <td class="border p-2">{{ $row['name'] }}</td>
-                        <td class="border p-2">{{ $row['present'] }}</td>
-                        <td class="border p-2">{{ $row['absent'] }}</td>
-                        <td class="border p-2">{{ $row['in_only'] }}</td>
-                        <td class="border p-2">{{ $row['total_days'] }}</td>
+                        <td class="border">{{ $row['user_id'] }}</td>
+                        <td class="border">{{ $row['name'] }}</td>
+                        <td class="border">{{ $row['present'] }}</td>
+                        <td class="border">{{ $row['absent'] }}</td>
+                        <td class="border">{{ $row['in_only'] }}</td>
+                        <td class="border">{{ $row['total_days'] }}</td>
                     </tr>
                 @endforeach
             </tbody>

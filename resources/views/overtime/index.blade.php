@@ -1,66 +1,66 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-6">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">My Overtime Requests</h1>
-            <a href="{{ route('overtime.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    <div class="mx-auto px-4 py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2 fw-bold">My Overtime Requests</h1>
+            <a href="{{ route('overtime.create') }}" class="text-white px-4 py-2 rounded">
                 <i class="fas fa-plus mr-2"></i>New Overtime Request
             </a>
         </div>
 
         @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <div class="border px-4 rounded mb-3">
                 {{ session('success') }}
             </div>
         @endif
 
         @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div class="border px-4 rounded mb-3">
                 {{ session('error') }}
             </div>
         @endif
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-white rounded shadow">
             @if($overtimeRequests->count() > 0)
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="divide-y divide-gray-200">
+                        <thead class="bg-light">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="text-start small fw-medium text-muted">Date</th>
+                                <th class="text-start small fw-medium text-muted">Time</th>
+                                <th class="text-start small fw-medium text-muted">Hours</th>
+                                <th class="text-start small fw-medium text-muted">Reason</th>
+                                <th class="text-start small fw-medium text-muted">Status</th>
+                                <th class="text-start small fw-medium text-muted">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white">
                             @foreach($overtimeRequests as $request)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="py-3 small">
                                         {{ $request->overtime_date->format('M d, Y') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="py-3 small">
                                         {{ $request->start_time->format('H:i') }} - {{ $request->end_time->format('H:i') }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td class="py-3 small">
                                         {{ $request->total_hours }} hrs
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="py-3 small">
                                         {{ \Illuminate\Support\Str::limit($request->reason, 50) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $request->statusBadge }}">
+                                    <td class="py-3">
+                                        <span class="px-2 py-1 small fw-semibold rounded-circle">
                                             {{ ucfirst($request->status) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="{{ route('overtime.show', $request) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                                    <td class="py-3 small fw-medium">
+                                        <a href="{{ route('overtime.show', $request) }}" class="text-primary mr-3">View</a>
                                         @if($request->status === 'pending')
                                             <a href="{{ route('overtime.edit', $request) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                            <form method="POST" action="{{ route('overtime.destroy', $request) }}" class="inline">
+                                            <form method="POST" action="{{ route('overtime.destroy', $request) }}" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure?')">Delete</button>
+                                                <button type="submit" class="text-danger" onclick="return confirm('Are you sure?')">Delete</button>
                                             </form>
                                         @endif
                                     </td>
@@ -71,15 +71,15 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="px-6 py-3 border-t border-gray-200">
+                <div class="border">
                     {{ $overtimeRequests->links() }}
                 </div>
             @else
-                <div class="text-center py-12">
-                    <i class="fas fa-clock text-gray-400 text-4xl mb-4"></i>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">No overtime requests yet</h3>
-                    <p class="text-gray-500 mb-4">You haven't submitted any overtime requests.</p>
-                    <a href="{{ route('overtime.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <div class="text-center">
+                    <i class="text-muted mb-3"></i>
+                    <h3 class="h4 fw-medium mb-2">No overtime requests yet</h3>
+                    <p class="text-muted mb-3">You haven't submitted any overtime requests.</p>
+                    <a href="{{ route('overtime.create') }}" class="text-white px-4 py-2 rounded">
                         Submit Your First Request
                     </a>
                 </div>

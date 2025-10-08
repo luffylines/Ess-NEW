@@ -12,22 +12,22 @@
     };
 @endphp
 
-<div class="flex items-center space-x-3">
+<div class="d-flex align-items-center">
     @if($user->profile_photo_url)
         <img src="{{ $user->profile_photo_url }}" 
              alt="{{ $user->name }}" 
-             class="{{ $sizeClasses }} rounded-full object-cover border-2 border-gray-300 dark:border-gray-600">
+             class="rounded-circle border">
     @else
-        <div class="{{ $sizeClasses }} rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center border-2 border-gray-300 dark:border-gray-600">
-            <span class="font-semibold text-white">{{ $user->initials }}</span>
+        <div class="rounded-circle d-flex align-items-center justify-content-center border">
+            <span class="fw-semibold text-white">{{ $user->initials }}</span>
         </div>
     @endif
     
     @if($showName)
         <div>
-            <p class="font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</p>
+            <p class="fw-medium">{{ $user->name }}</p>
             @if($user->email)
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
+                <p class="small text-muted">{{ $user->email }}</p>
             @endif
         </div>
     @endif

@@ -1,36 +1,36 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto p-4">
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Activity Logs</h2>
-            <div class="flex space-x-2">
+<div class="mx-auto p-3">
+    <div class="bg-white rounded p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h2 fw-bold text-dark">Activity Logs</h2>
+            <div class="d-flex gap-2">
                 <a href="{{ route('admin.activity-logs.export.pdf') }}" 
-                   class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                   class="bg-danger text-white px-4 py-2 rounded d-flex align-items-center">
                     <i class="fas fa-file-pdf mr-2"></i>Export All PDF
                 </a>
                 <a href="{{ route('admin.activity-logs.export.csv') }}" 
-                   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                   class="bg-success text-white px-4 py-2 rounded d-flex align-items-center">
                     <i class="fas fa-file-csv mr-2"></i>Export All CSV
                 </a>
             </div>
         </div>
 
         {{-- Filters --}}
-        <div class="bg-gray-50 rounded-lg p-4 mb-6">
-            <form method="GET" action="{{ route('admin.activity-logs.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-light rounded p-3 mb-4">
+            <form method="GET" action="{{ route('admin.activity-logs.index') }}" class="row gap-3">
                 <div>
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <label for="search" class="d-block small fw-medium text-secondary mb-1">Search</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" 
                            placeholder="Type to filter..." 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-100 px-3 py-2 border">
                 </div>
                 
                 <div>
-                    <label for="action_type" class="block text-sm font-medium text-gray-700 mb-1">Action Type</label>
+                    <label for="action_type" class="d-block small fw-medium text-secondary mb-1">Action Type</label>
                     <select name="action_type" id="action_type" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-100 px-3 py-2 border">
                         <option value="">All Types</option>
                         @foreach($actionTypes as $type)
                             <option value="{{ $type }}" {{ request('action_type') == $type ? 'selected' : '' }}>
@@ -41,9 +41,9 @@
                 </div>
                 
                 <div>
-                    <label for="user_id" class="block text-sm font-medium text-gray-700 mb-1">User</label>
+                    <label for="user_id" class="d-block small fw-medium text-secondary mb-1">User</label>
                     <select name="user_id" id="user_id" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-100 px-3 py-2 border">
                         <option value="">All Users</option>
                         @foreach($users as $user)
                             <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
@@ -54,24 +54,24 @@
                 </div>
                 
                 <div>
-                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+                    <label for="date_from" class="d-block small fw-medium text-secondary mb-1">Date From</label>
                     <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-100 px-3 py-2 border">
                 </div>
                 
                 <div>
-                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+                    <label for="date_to" class="d-block small fw-medium text-secondary mb-1">Date To</label>
                     <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                           class="w-100 px-3 py-2 border">
                 </div>
                 
-                <div class="flex items-end space-x-2 lg:col-span-5">
+                <div class="d-flex align-items-end gap-2">
                     <button type="submit" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-200">
+                            class="bg-primary text-white py-2 rounded">
                         <i class="fas fa-search mr-2"></i>Filter
                     </button>
                     <a href="{{ route('admin.activity-logs.index') }}" 
-                       class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition duration-200">
+                       class="text-white py-2 rounded">
                         <i class="fas fa-times mr-2"></i>Clear
                     </a>
                 </div>
@@ -79,14 +79,14 @@
         </div>
 
         {{-- Results Info --}}
-        <div class="flex justify-between items-center mb-4">
-            <p class="text-sm text-gray-600">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="small text-muted">
                 Showing {{ $logs->firstItem() ?? 0 }} to {{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }} results
             </p>
-            <div class="flex items-center space-x-2">
-                <label for="per_page" class="text-sm text-gray-600">Show:</label>
+            <div class="d-flex align-items-center gap-2">
+                <label for="per_page" class="small text-muted">Show:</label>
                 <select id="per_page" onchange="changePerPage(this.value)" 
-                        class="px-2 py-1 border border-gray-300 rounded text-sm">
+                        class="px-2 py-1 border rounded small">
                     <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10</option>
                     <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
                     <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
@@ -97,73 +97,73 @@
 
         {{-- Activity Logs Table --}}
         <div class="overflow-x-auto">
-            <table id="activityLogsTable" class="min-w-full table-auto border-collapse border border-gray-300">
+            <table id="activityLogsTable" class="border">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <tr class="bg-light">
+                        <th class="border px-4 text-start small fw-medium text-muted">
                             Action Type
                         </th>
-                        <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="border px-4 text-start small fw-medium text-muted">
                             Description
                         </th>
-                        <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="border px-4 text-start small fw-medium text-muted">
                             Action Date
                         </th>
-                        <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="border px-4 text-start small fw-medium text-muted">
                             Time Elapsed
                         </th>
-                        <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="border px-4 text-start small fw-medium text-muted">
                             IP Address
                         </th>
-                        <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="border px-4 text-start small fw-medium text-muted">
                             User
                         </th>
-                        <th class="border border-gray-300 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th class="border px-4 text-start small fw-medium text-muted">
                             Actions
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white">
                     @forelse($logs as $log)
-                        <tr class="hover:bg-gray-50">
-                            <td class="border border-gray-300 px-4 py-4 whitespace-nowrap">
+                        <tr class="">
+                            <td class="border px-4 py-3">
                                 {!! $log->getActionTypeBadge() !!}
                             </td>
-                            <td class="border border-gray-300 px-4 py-4">
-                                <div class="text-sm text-gray-900">{{ $log->description }}</div>
+                            <td class="border px-4 py-3">
+                                <div class="small">{{ $log->description }}</div>
                             </td>
-                            <td class="border border-gray-300 px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td class="border px-4 py-3 small">
                                 {{ $log->formatted_date }}
                             </td>
-                            <td class="border border-gray-300 px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="border px-4 py-3 small text-muted">
                                 {{ $log->time_elapsed }}
                             </td>
-                            <td class="border border-gray-300 px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
+                            <td class="border px-4 py-3 small">
                                 {{ $log->ip_address }}
                             </td>
-                            <td class="border border-gray-300 px-4 py-4 whitespace-nowrap">
+                            <td class="border px-4 py-3">
                                 @if($log->user)
-                                    <div class="text-sm text-gray-900">{{ $log->user->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $log->user->email }}</div>
+                                    <div class="small">{{ $log->user->name }}</div>
+                                    <div class="small text-muted">{{ $log->user->email }}</div>
                                 @else
-                                    <span class="text-sm text-gray-400">Unknown User</span>
+                                    <span class="small text-muted">Unknown User</span>
                                 @endif
                             </td>
-                            <td class="border border-gray-300 px-4 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-1">
+                            <td class="border px-4 py-3 small fw-medium">
+                                <div class="d-flex gap-1">
                                     <a href="{{ route('admin.activity-logs.show', $log) }}" 
-                                       class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors" 
+                                       class="align-items-center px-2 py-1 rounded small" 
                                        title="View full details of this activity log">
                                         <i class="fas fa-eye mr-1"></i>View
                                     </a>
                                     <a href="{{ route('admin.activity-logs.export.pdf', $log->id) }}" 
-                                       class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition-colors" 
+                                       class="align-items-center px-2 py-1 rounded small" 
                                        title="Download this activity log as PDF file"
                                        onclick="showDownloadMessage('PDF')">
                                         <i class="fas fa-file-pdf mr-1"></i>PDF
                                     </a>
                                     <a href="{{ route('admin.activity-logs.export.csv', $log->id) }}" 
-                                       class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 transition-colors" 
+                                       class="align-items-center px-2 py-1 rounded small" 
                                        title="Download this activity log as CSV file"
                                        onclick="showDownloadMessage('CSV')">
                                         <i class="fas fa-file-csv mr-1"></i>CSV
@@ -173,11 +173,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="border border-gray-300 px-4 py-8 text-center text-gray-500">
-                                <div class="flex flex-col items-center">
-                                    <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
-                                    <p class="text-lg font-medium">No activity logs found</p>
-                                    <p class="text-sm">Try adjusting your search criteria</p>
+                            <td colspan="7" class="border px-4 text-center text-muted">
+                                <div class="d-flex d-flex flex-column align-items-center">
+                                    <i class="mb-3"></i>
+                                    <p class="h4 fw-medium">No activity logs found</p>
+                                    <p class="small">Try adjusting your search criteria</p>
                                 </div>
                             </td>
                         </tr>
@@ -188,7 +188,7 @@
 
         {{-- Pagination --}}
         @if($logs->hasPages())
-            <div class="mt-6">
+            <div class="mt-4">
                 {{ $logs->appends(request()->query())->links() }}
             </div>
         @endif
@@ -196,8 +196,8 @@
 </div>
 
 {{-- Download Notification --}}
-<div id="downloadNotification" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg hidden z-50">
-    <div class="flex items-center">
+<div id="downloadNotification" class="position-fixed text-white px-4 py-2 rounded shadow-lg d-none">
+    <div class="d-flex align-items-center">
         <i class="fas fa-download mr-2"></i>
         <span id="downloadMessage">Download started...</span>
     </div>
