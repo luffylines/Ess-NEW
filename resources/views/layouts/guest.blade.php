@@ -14,21 +14,6 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
-        <!-- Theme initialization script to prevent flash -->
-        <script>
-            // Apply saved theme immediately to prevent flash
-            (function() {
-                const savedTheme = localStorage.getItem('theme') || 'light';
-                const html = document.documentElement;
-                
-                if (savedTheme === 'auto') {
-                    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    if (isDark) html.classList.add('dark');
-                } else if (savedTheme === 'dark') {
-                    html.classList.add('dark');
-                }
-            })();
-        </script>
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">

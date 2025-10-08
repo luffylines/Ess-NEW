@@ -86,20 +86,12 @@
     const navbar = document.querySelector('.navbar');
 
     function applyTheme(theme) {
-      // Remove existing theme classes from both body and html
+      // Remove existing theme classes
       body.classList.remove('light', 'dark');
-      html.classList.remove('dark');
 
       if (theme === 'auto') {
         const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        // Apply to both body (Bootstrap) and html (Tailwind)
-        if (isDark) {
-          body.classList.add('dark');
-          html.classList.add('dark');
-        } else {
-          body.classList.add('light');
-        }
+        body.classList.add(isDark ? 'dark' : 'light');
 
         // Update navbar classes for dark/light
         if (navbar) {
@@ -112,10 +104,8 @@
         // Listen for system theme changes
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         mediaQuery.addEventListener('change', (e) => {
-          // Update both body and html
           body.classList.toggle('dark', e.matches);
           body.classList.toggle('light', !e.matches);
-          html.classList.toggle('dark', e.matches);
           
           if (navbar) {
             navbar.classList.toggle('navbar-dark', e.matches);
@@ -125,11 +115,7 @@
           }
         });
       } else {
-        // Apply theme to both body (Bootstrap) and html (Tailwind)
         body.classList.add(theme);
-        if (theme === 'dark') {
-          html.classList.add('dark');
-        }
         
         // Update navbar classes
         if (navbar) {

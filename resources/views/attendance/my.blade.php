@@ -203,7 +203,7 @@
                         @elseif($attendanceStatus === 'rejected')
                             <span class="text-xs text-red-500">✗ Rejected</span>
                         @else
-                            <span class="text-xs text-yellow-500">⏳ Pending HR</span>
+                            <span class="text-xs text-yellow-500">⏳ Pending</span>
                         @endif
                     </div>
                 </td>
