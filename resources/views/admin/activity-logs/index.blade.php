@@ -2,183 +2,131 @@
 
 @section('content')
 <div class="mx-auto p-3">
-    <div class="bg-white rounded p-4">
+    <div class="bg-white rounded shadow-sm p-4 card-shadow">
+
+        {{-- Header --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="h2 fw-bold text-dark">Activity Logs</h2>
-            <div class="d-flex gap-2">
-                <a href="{{ route('admin.activity-logs.export.pdf') }}" 
-                   class="bg-danger text-white px-4 py-2 rounded d-flex align-items-center">
-                    <i class="fas fa-file-pdf mr-2"></i>Export All PDF
-                </a>
-                <a href="{{ route('admin.activity-logs.export.csv') }}" 
-                   class="bg-success text-white px-4 py-2 rounded d-flex align-items-center">
-                    <i class="fas fa-file-csv mr-2"></i>Export All CSV
-                </a>
+            <div>
+                <button class="btn btn-outline-primary btn-sm" id="toggleFiltersBtn">
+                    <i class="fas fa-filter me-1"></i>Enable Filtering
+                </button>
             </div>
         </div>
 
         {{-- Filters --}}
-        <div class="bg-light rounded p-3 mb-4">
-            <form method="GET" action="{{ route('admin.activity-logs.index') }}" class="row gap-3">
-                <div>
-                    <label for="search" class="d-block small fw-medium text-secondary mb-1">Search</label>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                           placeholder="Type to filter..." 
-                           class="w-100 px-3 py-2 border">
-                </div>
-                
-                <div>
-                    <label for="action_type" class="d-block small fw-medium text-secondary mb-1">Action Type</label>
-                    <select name="action_type" id="action_type" 
-                            class="w-100 px-3 py-2 border">
-                        <option value="">All Types</option>
-                        @foreach($actionTypes as $type)
-                            <option value="{{ $type }}" {{ request('action_type') == $type ? 'selected' : '' }}>
-                                {{ ucfirst($type) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="user_id" class="d-block small fw-medium text-secondary mb-1">User</label>
-                    <select name="user_id" id="user_id" 
-                            class="w-100 px-3 py-2 border">
-                        <option value="">All Users</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                {{ $user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="date_from" class="d-block small fw-medium text-secondary mb-1">Date From</label>
-                    <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" 
-                           class="w-100 px-3 py-2 border">
-                </div>
-                
-                <div>
-                    <label for="date_to" class="d-block small fw-medium text-secondary mb-1">Date To</label>
-                    <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" 
-                           class="w-100 px-3 py-2 border">
-                </div>
-                
-                <div class="d-flex align-items-end gap-2">
-                    <button type="submit" 
-                            class="bg-primary text-white py-2 rounded">
-                        <i class="fas fa-search mr-2"></i>Filter
-                    </button>
-                    <a href="{{ route('admin.activity-logs.index') }}" 
-                       class="text-white py-2 rounded">
-                        <i class="fas fa-times mr-2"></i>Clear
-                    </a>
-                </div>
-            </form>
-        </div>
+        <form method="GET" action="{{ route('admin.activity-logs.index') }}" class="mb-4">
+            <div class="row g-3 align-items-end">
 
-        {{-- Results Info --}}
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <p class="small text-muted">
-                Showing {{ $logs->firstItem() ?? 0 }} to {{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }} results
-            </p>
-            <div class="d-flex align-items-center gap-2">
-                <label for="per_page" class="small text-muted">Show:</label>
-                <select id="per_page" onchange="changePerPage(this.value)" 
-                        class="px-2 py-1 border rounded small">
-                    <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10</option>
-                    <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
-                    <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                    <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
-                </select>
+                {{-- Search Bar (always visible) --}}
+                <div class="col-md-6">
+                    <label for="search" class="form-label fw-medium text-secondary">Search</label>
+                    <input type="text" name="search" id="search" value="{{ request('search') }}"
+                           placeholder="Type to filter..." 
+                           class="form-control form-control-sm rounded-pill">
+                </div>
+
+                {{-- Hidden Filters --}}
+                <div id="advancedFilters" class="row g-3 d-none filter-transition">
+
+                    <div class="col-md-3">
+                        <label for="action_type" class="form-label fw-medium text-secondary">Action Type</label>
+                        <select name="action_type" id="action_type" class="form-select form-select-sm rounded-pill">
+                            <option value="">All Types</option>
+                            @foreach($actionTypes as $type)
+                                <option value="{{ $type }}" {{ request('action_type') == $type ? 'selected' : '' }}>
+                                    {{ ucfirst($type) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="user_id" class="form-label fw-medium text-secondary">User</label>
+                        <select name="user_id" id="user_id" class="form-select form-select-sm rounded-pill">
+                            <option value="">All Users</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                    {{ $user->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="date_from" class="form-label fw-medium text-secondary">Date From</label>
+                        <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}"
+                               class="form-control form-control-sm rounded-pill">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="date_to" class="form-label fw-medium text-secondary">Date To</label>
+                        <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}"
+                               class="form-control form-control-sm rounded-pill">
+                    </div>
+
+                    <div class="col-12 d-flex gap-2 mt-2">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill">
+                            <i class="fas fa-search me-1"></i>Filter
+                        </button>
+                        <a href="{{ route('admin.activity-logs.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                            <i class="fas fa-times me-1"></i>Clear
+                        </a>
+                    </div>
+
+                </div>
             </div>
-        </div>
+        </form>
 
         {{-- Activity Logs Table --}}
-        <div class="overflow-x-auto">
-            <table id="activityLogsTable" class="border">
-                <thead>
-                    <tr class="bg-light">
-                        <th class="border px-4 text-start small fw-medium text-muted">
-                            Action Type
-                        </th>
-                        <th class="border px-4 text-start small fw-medium text-muted">
-                            Description
-                        </th>
-                        <th class="border px-4 text-start small fw-medium text-muted">
-                            Action Date
-                        </th>
-                        <th class="border px-4 text-start small fw-medium text-muted">
-                            Time Elapsed
-                        </th>
-                        <th class="border px-4 text-start small fw-medium text-muted">
-                            IP Address
-                        </th>
-                        <th class="border px-4 text-start small fw-medium text-muted">
-                            User
-                        </th>
-                        <th class="border px-4 text-start small fw-medium text-muted">
-                            Actions
-                        </th>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-sm align-middle">
+                <thead class="table-light text-secondary small">
+                    <tr>
+                        <th>Action Type</th>
+                        <th>Description</th>
+                        <th>Action Date</th>
+                        <th>Time Elapsed</th>
+                        <th>IP Address</th>
+                        <th>User</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white">
+                <tbody>
                     @forelse($logs as $log)
-                        <tr class="">
-                            <td class="border px-4 py-3">
-                                {!! $log->getActionTypeBadge() !!}
-                            </td>
-                            <td class="border px-4 py-3">
-                                <div class="small">{{ $log->description }}</div>
-                            </td>
-                            <td class="border px-4 py-3 small">
-                                {{ $log->formatted_date }}
-                            </td>
-                            <td class="border px-4 py-3 small text-muted">
-                                {{ $log->time_elapsed }}
-                            </td>
-                            <td class="border px-4 py-3 small">
-                                {{ $log->ip_address }}
-                            </td>
-                            <td class="border px-4 py-3">
+                        <tr class="table-row-hover">
+                            <td>{!! $log->getActionTypeBadge() !!}</td>
+                            <td class="small">{{ $log->description }}</td>
+                            <td class="small">{{ $log->formatted_date }}</td>
+                            <td class="small text-muted">{{ $log->time_elapsed }}</td>
+                            <td class="small">{{ $log->ip_address }}</td>
+                            <td class="small">
                                 @if($log->user)
-                                    <div class="small">{{ $log->user->name }}</div>
-                                    <div class="small text-muted">{{ $log->user->email }}</div>
+                                    {{ $log->user->name }} <br>
+                                    <span class="text-muted small">{{ $log->user->email }}</span>
                                 @else
-                                    <span class="small text-muted">Unknown User</span>
+                                    <span class="text-muted">Unknown User</span>
                                 @endif
                             </td>
-                            <td class="border px-4 py-3 small fw-medium">
+                            <td>
                                 <div class="d-flex gap-1">
-                                    <a href="{{ route('admin.activity-logs.show', $log) }}" 
-                                       class="align-items-center px-2 py-1 rounded small" 
-                                       title="View full details of this activity log">
-                                        <i class="fas fa-eye mr-1"></i>View
+                                    <a href="{{ route('admin.activity-logs.show', $log) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i>View
                                     </a>
-                                    <a href="{{ route('admin.activity-logs.export.pdf', $log->id) }}" 
-                                       class="align-items-center px-2 py-1 rounded small" 
-                                       title="Download this activity log as PDF file"
-                                       onclick="showDownloadMessage('PDF')">
-                                        <i class="fas fa-file-pdf mr-1"></i>PDF
+                                    <a href="{{ route('admin.activity-logs.export.pdf', $log->id) }}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF
                                     </a>
-                                    <a href="{{ route('admin.activity-logs.export.csv', $log->id) }}" 
-                                       class="align-items-center px-2 py-1 rounded small" 
-                                       title="Download this activity log as CSV file"
-                                       onclick="showDownloadMessage('CSV')">
-                                        <i class="fas fa-file-csv mr-1"></i>CSV
+                                    <a href="{{ route('admin.activity-logs.export.csv', $log->id) }}" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-file-csv me-1"></i>CSV
                                     </a>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="border px-4 text-center text-muted">
-                                <div class="d-flex d-flex flex-column align-items-center">
-                                    <i class="mb-3"></i>
-                                    <p class="h4 fw-medium">No activity logs found</p>
-                                    <p class="small">Try adjusting your search criteria</p>
-                                </div>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <div>No activity logs found</div>
+                                <div class="small">Try adjusting your search criteria</div>
                             </td>
                         </tr>
                     @endforelse
@@ -187,71 +135,42 @@
         </div>
 
         {{-- Pagination --}}
-        @if($logs->hasPages())
-            <div class="mt-4">
-                {{ $logs->appends(request()->query())->links() }}
-            </div>
-        @endif
+        <div class="mt-3">
+            {{ $logs->appends(request()->query())->links() }}
+        </div>
     </div>
 </div>
 
-{{-- Download Notification --}}
-<div id="downloadNotification" class="position-fixed text-white px-4 py-2 rounded shadow-lg d-none">
-    <div class="d-flex align-items-center">
-        <i class="fas fa-download mr-2"></i>
-        <span id="downloadMessage">Download started...</span>
-    </div>
-</div>
-
+{{-- Toggle Filters Script --}}
 <script>
-function changePerPage(value) {
-    const url = new URL(window.location);
-    url.searchParams.set('per_page', value);
-    url.searchParams.delete('page'); // Reset to first page
-    window.location.href = url.toString();
-}
+document.getElementById('toggleFiltersBtn').addEventListener('click', function() {
+    const filters = document.getElementById('advancedFilters');
+    filters.classList.toggle('d-none');
 
-function showDownloadMessage(format) {
-    const notification = document.getElementById('downloadNotification');
-    const message = document.getElementById('downloadMessage');
-    
-    message.textContent = `Downloading ${format} file...`;
-    notification.classList.remove('hidden');
-    
-    // Hide notification after 3 seconds
-    setTimeout(() => {
-        notification.classList.add('hidden');
-    }, 3000);
-}
-
-// Auto-submit form on input change for real-time filtering
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search');
-    const actionTypeSelect = document.getElementById('action_type');
-    const userSelect = document.getElementById('user_id');
-    const dateFromInput = document.getElementById('date_from');
-    const dateToInput = document.getElementById('date_to');
-    
-    let searchTimeout;
-    
-    // Debounced search
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            this.form.submit();
-        }, 500);
-    });
-    
-    // Immediate submit on select changes
-    [actionTypeSelect, userSelect, dateFromInput, dateToInput].forEach(element => {
-        element.addEventListener('change', function() {
-            this.form.submit();
-        });
-    });
+    if(filters.classList.contains('d-none')) {
+        this.innerHTML = '<i class="fas fa-filter me-1"></i>Enable Filtering';
+    } else {
+        this.innerHTML = '<i class="fas fa-filter me-1"></i>Disable Filtering';
+    }
 });
 </script>
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+.card-shadow {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.filter-transition {
+    transition: all 0.4s ease;
+}
+
+.table-row-hover:hover {
+    background-color: #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+</style>
 @endpush
 @endsection

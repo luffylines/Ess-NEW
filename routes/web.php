@@ -11,16 +11,14 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\HrAttendanceController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\GuestPageController;
+use App\Http\Controllers\FeedbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Test route for theme toggle
-Route::get('/test-theme', function () {
-    return view('test-theme');
-})->name('test.theme');
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -33,6 +31,14 @@ Route::patch('/profile/update-email', [ProfileController::class, 'updateEmail'])
 Route::patch('/profile/update-password', [ProfileController::class, 'updatePassword'])
     ->middleware(['auth'])
     ->name('profile.updatePassword');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/about', [GuestPageController::class, 'about'])->name('about');
+    Route::get('/contact', [GuestPageController::class, 'contact'])->name('contact');
+    Route::post('/submit-feedback', [FeedbackController::class, 'submit'])->name('submitFeedback');
+    Route::get('/terms', [GuestPageController::class, 'terms'])->name('terms');
+    Route::get('/system-info', [GuestPageController::class, 'systemInfo'])->name('system-info');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -99,20 +105,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::get('/employee/complete/{token}', [EmployeeController::class, 'completeForm'])->name('employees.complete');
 Route::post('/employee/complete/{token}', [EmployeeController::class, 'completeStore'])->name('employees.complete.store');
 
-// Test route for demonstration (remove in production)
-Route::get('/test-employee-invite', function() {
-    $testUser = \App\Models\User::create([
-        'name' => 'Test Employee',
-        'email' => 'test@example.com',
-        'role' => 'employee',
-        'password' => \Illuminate\Support\Facades\Hash::make('temppass'),
-        'remember_token' => \Illuminate\Support\Str::random(60),
-    ]);
-    
-    $inviteLink = route('employees.complete', ['token' => $testUser->remember_token]);
-    
-    return "Test employee created! Complete profile at: <a href='{$inviteLink}'>{$inviteLink}</a>";
-})->name('test.employee.invite');
 
 Route::middleware(['web', 'auth', 'hr'])->group(function () {
     Route::get('/hr/pending', [HrAttendanceController::class, 'pendingAttendance'])->name('hr.pending');

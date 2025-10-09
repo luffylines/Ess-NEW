@@ -3,36 +3,61 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
     public function index()
     {
-        // Total registered users
+        // Summary counts
         $totalUsers = User::count();
+        $activeSessions = DB::table('sessions')->count();
+        $totalAttendances = DB::table('attendances')->count();
+        $totalActivities = DB::table('activity_logs')->count();
 
-        // Active sessions (examples):
-        //  - If you're using the "database" session driver and have sessions table:
-        try {
-            $activeSessions = config('session.driver') === 'database'
-                ? DB::table(config('session.table', 'sessions'))->count()
-                : Cache::get('active_sessions_count', 0); // fallback cached value
-        } catch (\Throwable $e) {
-            $activeSessions = Cache::get('active_sessions_count', 0);
-        }
+        // Recent activity logs (last 5)
+        $recentActivities = DB::table('activity_logs')
+            ->select('id', 'user_id', 'action', 'created_at')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
 
-        // Page views: placeholder or read from your analytics integration
-        $pageViews = Cache::get('page_views_last_7_days', 870);
+        // Attendance chart (last 7 days)
+        $attendanceData = DB::table('attendances')
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->where('created_at', '>=', Carbon::now()->subDays(6))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
-        // Traffic data for Chart.js (mock/example). Replace this with real GA API data if needed.
-        $trafficData = [
-            'labels' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            'pageViews' => [120, 150, 170, 140, 200, 180, 220],
+        $attendanceChart = [
+            'labels' => $attendanceData->pluck('date')->map(fn($d) => date('D', strtotime($d)))->toArray(),
+            'totals' => $attendanceData->pluck('total')->toArray(),
         ];
 
-        return view('admin.dashboard', compact('totalUsers', 'activeSessions', 'pageViews', 'trafficData'));
+        // Activity chart (last 7 days)
+        $activityData = DB::table('activity_logs')
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->where('created_at', '>=', Carbon::now()->subDays(6))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $activityChart = [
+            'labels' => $activityData->pluck('date')->map(fn($d) => date('D', strtotime($d)))->toArray(),
+            'totals' => $activityData->pluck('total')->toArray(),
+        ];
+
+        return view('admin.dashboard', compact(
+            'totalUsers',
+            'activeSessions',
+            'totalAttendances',
+            'totalActivities',
+            'recentActivities',
+            'attendanceChart',
+            'activityChart'
+        ));
     }
 }

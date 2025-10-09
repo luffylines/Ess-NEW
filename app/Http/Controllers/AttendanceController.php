@@ -150,6 +150,17 @@ class AttendanceController extends Controller
         $attendance->status = 'pending';
         $attendance->save();
 
+        // Log the attendance activity
+        $user->logActivity(
+            'attendance_' . $action,
+            "Marked {$action} at " . Carbon::now($timezone)->format('h:i A'),
+            [
+                'attendance_id' => $attendance->id,
+                'date' => $today,
+                'timestamp' => Carbon::now($timezone)->toISOString()
+            ]
+        );
+
     return back()->with('success', $message);
 }
 

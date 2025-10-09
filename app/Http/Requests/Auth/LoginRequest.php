@@ -74,6 +74,10 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Log successful login activity
+        $user = Auth::user();
+        $user->logLogin($loginField); // Log with the login method used (email or employee_id)
+
         RateLimiter::clear($this->throttleKey());
     }
 

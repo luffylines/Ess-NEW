@@ -145,12 +145,11 @@
                     <!-- Right Side -->
                     <ul class="navbar-nav ms-auto">
                         @guest
-                            @if(Route::has('about'))
-                                <li class="nav-item"><a class="nav-link" href="{{ route('about') }}">About</a></li>
-                            @endif
-                            @if(Route::has('contact'))
-                                <li class="nav-item"><a class="nav-link" href="{{ route('contact') }}">Contact Us</a></li>
-                            @endif
+                            <li class="nav-item"><a class="nav-link" href="{{ route('about') }}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('contact') }}">Contact Us</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('terms') }}">Terms & Conditions</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('system-info') }}">System Info</a></li>
+                       
                             @if(Route::has('login'))
                                 <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
                             @endif
@@ -191,6 +190,44 @@
     <!-- Optional Right Sidebar -->
     @includeWhen(View::exists('layouts.right-sidebar'), 'layouts.right-sidebar')
 
+
+    <!-- Footer (Guest Only) -->
+        @guest
+        <footer>
+            <div class="container">
+                <div class="row text-center text-md-start">
+                    <div class="col-md-3 mb-3">
+                        <h5>About ESS</h5>
+                        <p>Employee Self-Service (ESS) system by Christian Baynado Aring. Streamline employee attendance, reports, and tasks efficiently.</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <h5>Links</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="{{ route('about') }}">About</a></li>
+                            <li><a href="{{ route('contact') }}">Contact Us</a></li>
+                            <li><a href="{{ route('terms') }}">Terms & Conditions</a></li>
+                            <li><a href="{{ route('system-info') }}">System Info</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <h5>Developer</h5>
+                        <p>Christian Aring</p>
+                        <p>Email: <a href="mailto:chba.aring.sjc@phinmaed.com">chba.aring.sjc@phinmaed.com</a></p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <h5>Social</h5>
+                        <a href="#" class="me-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    &copy; {{ date('Y') }} ESS. All rights reserved.
+                </div>
+            </div>
+        </footer>
+        @endguest
+    </div>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

@@ -47,6 +47,19 @@ public function store(Request $request)
         'remember_token' => $token, // Use this token to validate account setup
     ]);
 
+    // Log employee creation activity (by the admin who created it)
+    $admin = \Illuminate\Support\Facades\Auth::user();
+    $admin->logActivity(
+        'employee_created',
+        "Created new employee: {$user->name} (ID: {$employeeId})",
+        [
+            'employee_id' => $user->id,
+            'employee_email' => $user->email,
+            'employee_role' => $user->role,
+            'generated_employee_id' => $employeeId
+        ]
+    );
+
     // Send the email with the invitation link
     try {
         // Verify token was saved
@@ -89,6 +102,16 @@ public function completeStore(Request $request, $token)
         'gender' => $request->gender,
         'address' => $request->address,
     ]);
+
+    // Log profile completion activity
+    $user->logActivity(
+        'profile_completed',
+        "Completed profile setup and activated account",
+        [
+            'employee_id' => $user->employee_id,
+            'completion_timestamp' => now()->toISOString()
+        ]
+    );
 
     return redirect()->route('login')->with('success', 'Account setup complete. You may now log in.');
 }
