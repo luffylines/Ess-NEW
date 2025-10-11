@@ -25,9 +25,9 @@ class DashboardController extends Controller
             $data = $this->getHrDashboardData();
             return view('hr.dashboard', $data);
         } else {
-            // Get data for employee dashboard
-            $data = $this->getEmployeeDashboardData();
-            return view('dashboard', $data);
+            // Redirect to EmployeeDashboardController for employees
+            $employeeDashboard = new \App\Http\Controllers\EmployeeDashboardController();
+            return $employeeDashboard->index();
         }
     }
 

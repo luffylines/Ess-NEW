@@ -50,4 +50,9 @@ return [
         'api_key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
     ],
+
+    'calendarific' => [
+        'api_key' => env('CALENDARIFIC_API_KEY'),
+        'country' => env('CALENDARIFIC_COUNTRY', 'PH'),
+    ],
 ];
