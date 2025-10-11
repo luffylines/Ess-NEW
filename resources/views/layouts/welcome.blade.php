@@ -126,13 +126,41 @@
                                 </li>
 
                             @elseif(auth()->user()->role === 'hr' || auth()->user()->role === 'manager')
-                                <li class="nav-item"><a class="nav-link" href="{{ route('hr.approve') }}">Approve Attendance</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('hr.attendance') }}">Monitor Attendance</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveleave.show') }}">Approve Leave</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveOvertime.show') }}">Approve Overtime</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{ route('hr.reports') }}">Generate Reports</a></li>
-
-                            @elseif(auth()->user()->role === 'employee')
+                                                    <li class="nav-item">
+                        <a href="#" class="nav-link dropdown-toggle" id="attendanceToggle">
+                            <i class="fas fa-calendar-check nav-icon me-2"></i> Attendance Management
+                        </a>
+                        <ul class="nav flex-column ms-4" id="attendanceMenu" style="display: none;">
+                            <li class="nav-item">
+                                <a href="{{ route('hr.pending-approvals') }}" class="nav-link">
+                                    <i class="far fa-circle me-2"></i>Pending Approvals
+                                    @php
+                                        $pendingCount = \App\Models\Attendance::where('status', 'pending')->count();
+                                    @endphp
+                                    @if($pendingCount > 0)
+                                        <span class="badge bg-warning text-dark ms-1">{{ $pendingCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('hr.create-for-employee.form') }}" class="nav-link">
+                                    <i class="far fa-circle me-2"></i>Create for Employee
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('hr.attendance') }}" class="nav-link">
+                                    <i class="far fa-circle me-2"></i>Monitor Attendance
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i>Approve Leave</a></li>
+                    <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="fas fa-clock me-2"></i>Approve Overtime</a></li>
+                    <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="fas fa-file-alt me-2"></i>Generate Reports</a></li>
+               
+               
+                    @elseif(auth()->user()->role === 'employee')
                                 <li class="nav-item"><a class="nav-link" href="{{ route('profile.edit') }}">My Profile</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('attendance.my') }}">My Attendance</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('attendance.requests') }}">Request Leave</a></li>

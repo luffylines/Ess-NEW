@@ -44,7 +44,27 @@
         {{-- === TOOLBAR ABOVE TABLE === --}}
         <div class="d-flex flex-wrap mb-3 gap-2">
             <div class="d-flex flex-wrap gap-2">
-                <button id="enableFilteringBtn" class="btn btn-dark btn-sm">Enable Filtering</button>
+                <button id="refreshBtn" class="btn btn-info btn-sm">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button id="enableFilteringBtn" class="btn btn-dark btn-sm">
+                    <i class="fas fa-filter"></i> Enable Filtering
+                </button>
+                <button id="selectAllBtn" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-check-double"></i> Select All
+                </button>
+                <a href="{{ route('attendance.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-file-pdf"></i> PDF Print All
+                </a>
+                <button id="printSelectedBtn" class="btn btn-purple btn-sm" disabled>
+                    <i class="fas fa-print"></i> Print Selected
+                </button>
+                <button id="downloadSelectedBtn" class="btn btn-success btn-sm" disabled>
+                    <i class="fas fa-download"></i> Download Selected
+                </button>
+            </div>
+            <div id="selectedCount" class="small text-muted d-none">
+                <i class="fas fa-check-circle"></i> Selected: <span id="selectedCountNumber">0</span> records
             </div>
         </div>
 
@@ -111,7 +131,7 @@
                 <div class="col-md-3">
                     <label class="mb-1">Status</label>
                     <select id="filterStatus" class="form-select">
-                        <option value="">All Statuses</option>
+                        <option value="">All Status</option>
                         <option value="Present">Present</option>
                         <option value="Late">Late</option>
                         <option value="Absent">Absent</option>
@@ -156,90 +176,187 @@
         </div>
 
         {{-- === ATTENDANCE TABLE === --}}
-<table class="" id="attendanceTable">
-    <thead class="table-light">
-        <tr>
-            <th>Date</th>
-            <th>Day Type</th>
-            <th>Time In</th>
-            <th>Time Out</th>
-            <th>Status</th>
-            <th>Remarks</th>
-            <th>Created At</th>
-            <th>Created By</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse($attendances as $attendance)
-            <tr class="attendance-row" 
-                data-date="{{ $attendance['date'] }}"
-                data-day-type="{{ $attendance['day_type'] }}"
-                data-time-in="{{ $attendance['time_in'] }}"
-                data-time-out="{{ $attendance['time_out'] }}"
-                data-status="{{ $attendance['status'] }}"
-                data-remarks="{{ $attendance['remarks'] }}"
-                data-created-at="{{ $attendance['created_at'] }}"
-                data-created-by="{{ $attendance['created_by'] }}">
-                <td>{{ $attendance['date'] }}</td>
-                <td>{{ $attendance['day_type'] }}</td>
-                <td>{{ $attendance['time_in'] }}</td>
-                <td>{{ $attendance['time_out'] }}</td>
-                <td>
-                    @php
-                        $status = $attendance['status'];
-                        $attendanceStatus = $attendance['attendance_status'] ?? 'pending';
-                    @endphp
-                    
-                    {{-- Display attendance status with approval status --}}
-                    <div class="">
-                        @if($status === 'Present')
-                            <span class="text-success fw-medium">{{ $status }}</span>
-                        @elseif($status === 'Late')
-                            <span class="text-warning fw-medium">{{ $status }}</span>
-                        @elseif($status === 'Absent')
-                            <span class="text-danger fw-medium">{{ $status }}</span>
-                        @else
-                            <span class="text-muted fw-medium">{{ $status }}</span>
-                        @endif
-                        
-                        {{-- Show approval status --}}
-                        @if($attendanceStatus === 'approved')
-                            <span class="small text-success">✓ Approved</span>
-                        @elseif($attendanceStatus === 'rejected')
-                            <span class="small text-danger">✗ Rejected</span>
-                        @else
-                            <span class="small text-warning">⏳ Pending</span>
-                        @endif
-                    </div>
-                </td>
-                <td>{{ $attendance['remarks'] }}</td>
-                <td>{{ $attendance['created_at'] }}</td>
-                <td>{{ $attendance['created_by'] }}</td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="8" class="text-center py-3">
-                    @if(request()->hasAny(['search_created_by', 'date_from', 'date_to']))
-                        <div class="">
-                            <img src="{{ asset('img/no-results.png') }}" alt="No Results" style="width: 64px; height: 64px;" class="mb-3">
-                            <p class="h5 fw-medium">No search results found</p>
-                            <p class="small">Try adjusting your search criteria</p>
-                            <a href="{{ route('attendance.my') }}" class="mt-3">
-                                Clear Search
-                            </a>
-                        </div>
-                    @else
-                        <div class="">
-                            <img src="{{ asset('img/no-data.png') }}" alt="No Data" style="width: 64px; height: 64px;" class="mb-3">
-                            <p class="h5 fw-medium">No attendance records found</p>
-                            <p class="small">Start by marking your attendance below</p>
-                        </div>
-                    @endif
-                </td>
-            </tr>
-        @endforelse
-    </tbody>
-</table>
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-check me-2"></i>
+                    My Attendance Records
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0" id="attendanceTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center" style="width: 50px;">
+                                    <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
+                                </th>
+                                <th><i class="fas fa-calendar-day me-1"></i>Date</th>
+                                <th><i class="fas fa-tags me-1"></i>Day Type</th>
+                                <th><i class="fas fa-clock me-1"></i>Time In</th>
+                                <th><i class="fas fa-clock me-1"></i>Time Out</th>
+                                <th><i class="fas fa-user-check me-1"></i>Status</th>
+                                <th><i class="fas fa-comment me-1"></i>Remarks</th>
+                                <th><i class="fas fa-calendar-plus me-1"></i>Created At</th>
+                                <th><i class="fas fa-user me-1"></i>Created By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($attendances as $attendance)
+                                <tr class="attendance-row" 
+                                    data-date="{{ $attendance['date'] }}"
+                                    data-day-type="{{ $attendance['day_type'] }}"
+                                    data-time-in="{{ $attendance['time_in'] }}"
+                                    data-time-out="{{ $attendance['time_out'] }}"
+                                    data-status="{{ $attendance['status'] }}"
+                                    data-remarks="{{ $attendance['remarks'] }}"
+                                    data-created-at="{{ $attendance['created_at'] }}"
+                                    data-created-by="{{ $attendance['created_by'] }}">
+                                    <td class="text-center">
+                                        <input type="checkbox" class="row-checkbox form-check-input" value="{{ $attendance['id'] }}">
+                                    </td>
+                                    <td>
+                                        <span class="fw-medium">{{ \Carbon\Carbon::parse($attendance['date'])->format('M d, Y') }}</span>
+                                        <br><small class="text-muted">{{ \Carbon\Carbon::parse($attendance['date'])->format('D') }}</small>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $dayTypeClass = '';
+                                            switch($attendance['day_type']) {
+                                                case 'Holiday':
+                                                    $dayTypeClass = 'badge bg-danger';
+                                                    break;
+                                                case 'Rest Day':
+                                                    $dayTypeClass = 'badge bg-warning';
+                                                    break;
+                                                case 'Overtime':
+                                                    $dayTypeClass = 'badge bg-info';
+                                                    break;
+                                                default:
+                                                    $dayTypeClass = 'badge bg-secondary';
+                                            }
+                                        @endphp
+                                        <span class="{{ $dayTypeClass }}">{{ $attendance['day_type'] }}</span>
+                                    </td>
+                                    <td>
+                                        @if($attendance['time_in'])
+                                            <span class="text-success fw-medium">
+                                                <i class="fas fa-sign-in-alt me-1"></i>{{ $attendance['time_in'] }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($attendance['time_out'])
+                                            <span class="text-danger fw-medium">
+                                                <i class="fas fa-sign-out-alt me-1"></i>{{ $attendance['time_out'] }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $status = $attendance['status'];
+                                            $attendanceStatus = $attendance['attendance_status'] ?? 'pending';
+                                        @endphp
+                                        
+                                        {{-- Display attendance status with approval status --}}
+                                        <div>
+                                            @if($status === 'Present')
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>{{ $status }}
+                                                </span>
+                                            @elseif($status === 'Late')
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>{{ $status }}
+                                                </span>
+                                            @elseif($status === 'Absent')
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>{{ $status }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary">{{ $status }}</span>
+                                            @endif
+                                            
+                                            {{-- Show approval status --}}
+                                            <br>
+                                            @if($attendanceStatus === 'approved')
+                                                <small class="text-success">
+                                                    <i class="fas fa-check-circle me-1"></i>Approved
+                                                </small>
+                                            @elseif($attendanceStatus === 'rejected')
+                                                <small class="text-danger">
+                                                    <i class="fas fa-times-circle me-1"></i>Rejected
+                                                </small>
+                                            @else
+                                                <small class="text-warning">
+                                                    <i class="fas fa-hourglass-half me-1"></i>Pending
+                                                </small>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if($attendance['remarks'])
+                                            <span class="text-dark">{{ $attendance['remarks'] }}</span>
+                                        @else
+                                            <span class="text-muted fst-italic">No remarks</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ \Carbon\Carbon::parse($attendance['created_at'])->format('M d, Y') }}
+                                            <br>{{ \Carbon\Carbon::parse($attendance['created_at'])->format('h:i A') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $createdByCurrentUser = $attendance['created_by'] === Auth::user()->name;
+                                        @endphp
+                                        
+                                        <div>
+                                            <span class="fw-medium">{{ $attendance['created_by'] }}</span>
+                                            <br>
+                                            @if($createdByCurrentUser)
+                                                <small class="text-success">
+                                                    <i class="fas fa-user-check me-1"></i>Self-marked
+                                                </small>
+                                            @else
+                                                <small class="text-warning">
+                                                    <i class="fas fa-user-cog me-1"></i>Created by HR/Manager
+                                                </small>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="text-center py-5">
+                                        @if(request()->hasAny(['search_created_by', 'date_from', 'date_to']))
+                                            <div class="py-4">
+                                                <img src="{{ asset('img/no-results.png') }}" alt="No Results" style="width: 64px; height: 64px;" class="mb-3">
+                                                <h5 class="fw-medium text-muted">No search results found</h5>
+                                                <p class="small text-muted">Try adjusting your search criteria</p>
+                                                <a href="{{ route('attendance.my') }}" class="btn btn-outline-primary btn-sm mt-2">
+                                                    <i class="fas fa-times me-1"></i>Clear Search
+                                                </a>
+                                            </div>
+                                        @else
+                                            <div class="py-4">
+                                                <img src="{{ asset('img/no-data.png') }}" alt="No Data" style="width: 64px; height: 64px;" class="mb-3">
+                                                <h5 class="fw-medium text-muted">No attendance records found</h5>
+                                                <p class="small text-muted">Start by marking your attendance above</p>
+                                            </div>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
 {{-- === PAGINATION === --}}
 @if($attendances->hasPages())
@@ -249,11 +366,49 @@
 @endif
     </div>
 
+<style>
+    .btn-purple {
+        background-color: #6f42c1;
+        border-color: #6f42c1;
+        color: white;
+    }
+    .btn-purple:hover {
+        background-color: #5a359a;
+        border-color: #5a359a;
+        color: white;
+    }
+    .btn-purple:disabled {
+        background-color: #9b59b6;
+        border-color: #9b59b6;
+        opacity: 0.6;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+    
+    .attendance-row {
+        transition: all 0.2s ease;
+    }
+    
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const enableFilteringBtn = document.getElementById('enableFilteringBtn');
     const advancedFiltering = document.getElementById('advancedFiltering');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const selectedCount = document.getElementById('selectedCount');
+    const selectedCountNumber = document.getElementById('selectedCountNumber');
+    const printSelectedBtn = document.getElementById('printSelectedBtn');
+    const downloadSelectedBtn = document.getElementById('downloadSelectedBtn');
     const applyFiltersBtn = document.getElementById('applyFiltersBtn');
     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
     
@@ -262,15 +417,68 @@ document.addEventListener('DOMContentLoaded', function() {
         const isHidden = advancedFiltering.classList.contains('d-none');
         if (isHidden) {
             advancedFiltering.classList.remove('d-none');
-            enableFilteringBtn.textContent = 'Hide Filtering';
+            enableFilteringBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Filtering';
             enableFilteringBtn.className = 'btn btn-danger btn-sm';
         } else {
             advancedFiltering.classList.add('d-none');
-            enableFilteringBtn.textContent = 'Enable Filtering';
+            enableFilteringBtn.innerHTML = '<i class="fas fa-filter"></i> Enable Filtering';
             enableFilteringBtn.className = 'btn btn-dark btn-sm';
         }
     });
     
+    // Select All functionality
+    function updateSelectAll() {
+        const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
+            !cb.closest('tr').classList.contains('d-none')
+        );
+        const checkedBoxes = visibleCheckboxes.filter(cb => cb.checked);
+        
+        selectAllCheckbox.checked = visibleCheckboxes.length > 0 && 
+                                   checkedBoxes.length === visibleCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && 
+                                        checkedBoxes.length < visibleCheckboxes.length;
+        
+        // Update count and button states
+        selectedCountNumber.textContent = checkedBoxes.length;
+        if (checkedBoxes.length > 0) {
+            selectedCount.classList.remove('d-none');
+            printSelectedBtn.disabled = false;
+            downloadSelectedBtn.disabled = false;
+        } else {
+            selectedCount.classList.add('d-none');
+            printSelectedBtn.disabled = true;
+            downloadSelectedBtn.disabled = true;
+        }
+    }
+    
+    // Select All checkbox
+    selectAllCheckbox.addEventListener('change', function() {
+        const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
+            !cb.closest('tr').classList.contains('d-none')
+        );
+        visibleCheckboxes.forEach(cb => cb.checked = this.checked);
+        updateSelectAll();
+    });
+    
+    // Select All button
+    selectAllBtn.addEventListener('click', function() {
+        const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
+            !cb.closest('tr').classList.contains('d-none')
+        );
+        const allChecked = visibleCheckboxes.every(cb => cb.checked);
+        visibleCheckboxes.forEach(cb => cb.checked = !allChecked);
+        updateSelectAll();
+    });
+    
+    // Individual checkboxes
+    rowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectAll);
+    });
+    
+    // Refresh button
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        location.reload();
+    });
     // Filtering functionality
     function applyFilters() {
         const filterDate = document.getElementById('filterDate').value;
@@ -330,8 +538,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.classList.remove('d-none');
             } else {
                 row.classList.add('d-none');
+                row.querySelector('.row-checkbox').checked = false;
             }
         });
+        
+        updateSelectAll();
     }
     
     // Convert 12-hour time to 24-hour format
@@ -361,11 +572,139 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.attendance-row').forEach(row => {
             row.classList.remove('d-none');
         });
+        
+        updateSelectAll();
     }
     
     // Event listeners for filters
     applyFiltersBtn.addEventListener('click', applyFilters);
     clearFiltersBtn.addEventListener('click', clearFilters);
+    
+    // Print selected records
+    printSelectedBtn.addEventListener('click', function() {
+        const selectedIds = Array.from(rowCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        if (selectedIds.length === 0) {
+            alert('Please select at least one record to print.');
+            return;
+        }
+        
+        // Create a new window for printing
+        const printWindow = window.open('', '_blank');
+        const selectedRows = Array.from(rowCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.closest('tr'));
+        
+        let printContent = `
+            <html>
+            <head>
+                <title>Attendance Records</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 12px; }
+                    th { background-color: #f0f0f0; font-weight: bold; }
+                    h1 { text-align: center; margin-bottom: 20px; }
+                    .print-info { margin-bottom: 20px; }
+                </style>
+            </head>
+            <body>
+                <h1>Attendance Records</h1>
+                <div class="print-info">
+                    <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+                    <p><strong>Records:</strong> ${selectedIds.length}</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day Type</th>
+                            <th>Time In</th>
+                            <th>Time Out</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>Created At</th>
+                            <th>Created By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        selectedRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            printContent += '<tr>';
+            // Skip checkbox column (index 0)
+            for (let i = 1; i < cells.length; i++) {
+                let cellContent = cells[i].textContent.trim();
+                // Clean up content
+                cellContent = cellContent.replace(/\s+/g, ' ').trim();
+                printContent += `<td>${cellContent}</td>`;
+            }
+            printContent += '</tr>';
+        });
+        
+        printContent += `
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+        
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.print();
+    });
+    
+    // Download selected records as CSV
+    downloadSelectedBtn.addEventListener('click', function() {
+        const selectedIds = Array.from(rowCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        if (selectedIds.length === 0) {
+            alert('Please select at least one record to download.');
+            return;
+        }
+        
+        const selectedRows = Array.from(rowCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.closest('tr'));
+        
+        let csvContent = 'Date,Day Type,Time In,Time Out,Status,Remarks,Created At,Created By\n';
+        
+        selectedRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowData = [];
+            // Skip checkbox column (index 0)
+            for (let i = 1; i < cells.length; i++) {
+                let cellContent = cells[i].textContent.trim();
+                // Clean up content
+                cellContent = cellContent.replace(/\s+/g, ' ').trim();
+                // Escape commas and quotes in CSV
+                if (cellContent.includes(',') || cellContent.includes('"')) {
+                    cellContent = '"' + cellContent.replace(/"/g, '""') + '"';
+                }
+                rowData.push(cellContent);
+            }
+            csvContent += rowData.join(',') + '\n';
+        });
+        
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `attendance_records_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    });
+    
+    // Initialize
+    updateSelectAll();
 });
 </script>
 </x-app-layout>

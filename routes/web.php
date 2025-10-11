@@ -58,6 +58,24 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/delete/{id}', [AttendanceController::class, 'deleteConfirm'])->name('attendance.delete');
     Route::get('/attendance/pdf', [AttendanceController::class, 'generatePDF'])->name('attendance.pdf');
     Route::get('/attendance/search', [AttendanceController::class, 'search'])->name('attendance.search');
+    
+    // HR/Manager create attendance for employee
+    Route::post('/hr/create-for-employee', [AttendanceController::class, 'createForEmployee'])
+        ->middleware(['auth', 'role:hr,manager'])
+        ->name('hr.createForEmployee');
+
+    // HR/Manager attendance management routes
+    Route::middleware(['role:hr,manager'])->group(function () {
+        Route::get('/hr/pending-approvals', [AttendanceController::class, 'pendingApprovals'])->name('hr.pending-approvals');
+        Route::post('/hr/approve/{id}', [AttendanceController::class, 'approve'])->name('hr.approve');
+        Route::post('/hr/reject/{id}', [AttendanceController::class, 'reject'])->name('hr.reject');
+        Route::get('/hr/management', [AttendanceController::class, 'managementDashboard'])->name('hr.management');
+        Route::post('/hr/mark', [AttendanceController::class, 'markAttendance'])->name('hr.mark');
+        Route::put('/hr/edit-employee/{id}', [AttendanceController::class, 'editEmployeeAttendance'])->name('hr.edit-employee');
+        Route::get('/hr/create-for-employee', [AttendanceController::class, 'showCreateForEmployeeForm'])->name('hr.create-for-employee.form');
+        Route::post('/hr/create-for-employee', [AttendanceController::class, 'createForEmployee'])->name('hr.createForEmployee');
+    });
+    
     //generate Schedule
     // Route to show the generate shift schedule form
 Route::get('/attendance/generateShiftSchedule', [AttendanceController::class, 'showGenerateShiftScheduleForm'])->name('attendance.showGenerateShiftSchedule');

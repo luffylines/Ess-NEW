@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use App\Models\User;
 use PDF;
 
-
 class AttendanceController extends Controller
 {
     // Show attendance records
@@ -146,6 +145,9 @@ class AttendanceController extends Controller
             return back()->with('error', 'Invalid action.');
         }
 
+        // Set who created/modified this attendance record
+        $attendance->created_by = $user->id;
+        
         // Reset approval if any edit
         $attendance->status = 'pending';
         $attendance->save();
@@ -216,6 +218,9 @@ public function update(Request $request, $id)
     }
 
     $attendance->remarks = $data['remarks'] ?? null;
+
+    // Track who modified this record (important for HR/Manager edits)
+    $attendance->created_by = Auth::user()->id;
 
     // Reset status to pending on edit
     $attendance->status = 'pending';
@@ -338,9 +343,378 @@ public function generateShiftSchedule(Request $request)
     return redirect()->route('attendance.my')->with('success', 'Shift schedule generated successfully!');
 }
 
+/**
+ * Show form to create attendance for employee (HR/Manager only)
+ */
+public function showCreateForEmployeeForm()
+{
+    $currentUser = Auth::user();
+    
+    if (!in_array($currentUser->role, ['hr', 'manager'])) {
+        abort(403, 'Only HR and Managers can create attendance for other employees.');
+    }
+
+    return view('hr.create-for-employee');
+}
+
+/**
+ * Create attendance record for employee (HR/Manager only)
+ */
+public function createForEmployee(Request $request)
+{
+    $currentUser = Auth::user();
+    
+    // Check if current user is HR or Manager
+    if (!in_array($currentUser->role, ['hr', 'manager'])) {
+        abort(403, 'Only HR and Managers can create attendance for other employees.');
+    }
+
+    $request->validate([
+        'employee_id' => 'required|exists:users,id',
+        'date' => 'required|date',
+        'time_in' => 'nullable|date_format:H:i',
+        'time_out' => 'nullable|date_format:H:i|after_or_equal:time_in',
+        'day_type' => 'required|in:regular,holiday,rest_day,overtime',
+        'remarks' => 'required|string|max:255',
+    ]);
+
+    $employee = User::findOrFail($request->employee_id);
+    $date = $request->date;
+
+    // Check if attendance already exists for this date
+    $existingAttendance = Attendance::where('user_id', $employee->id)
+        ->where('date', $date)
+        ->first();
+
+    if ($existingAttendance) {
+        return back()->with('error', "Attendance record already exists for {$employee->name} on {$date}.");
+    }
+
+    // Create attendance record
+    $attendance = new Attendance();
+    $attendance->user_id = $employee->id;
+    $attendance->date = $date;
+    $attendance->day_type = $request->day_type;
+    $attendance->remarks = $request->remarks;
+    $attendance->created_by = $currentUser->id; // Track who created this record
+    $attendance->status = 'pending'; // Will need approval
+
+    if ($request->time_in) {
+        $attendance->time_in = Carbon::parse($date . ' ' . $request->time_in);
+    }
+
+    if ($request->time_out) {
+        $attendance->time_out = Carbon::parse($date . ' ' . $request->time_out);
+    }
+
+    $attendance->save();
+
+    // Log the activity
+    $currentUser->logActivity(
+        'attendance_created_for_employee',
+        "Created attendance record for {$employee->name} on {$date}",
+        [
+            'attendance_id' => $attendance->id,
+            'employee_id' => $employee->id,
+            'employee_name' => $employee->name,
+            'date' => $date
+        ]
+    );
+
+    return back()->with('success', "Attendance record created successfully for {$employee->name} on {$date}.");
+}
+
 public function showGenerateShiftScheduleForm()
 {
     return view('attendance.generateShiftSchedule');
 }
+
+    /**
+     * Show pending attendance records for HR/Manager approval
+     */
+    public function pendingApprovals(Request $request)
+    {
+        $currentUser = Auth::user();
+        
+        // Check if current user is HR or Manager
+        if (!in_array($currentUser->role, ['hr', 'manager'])) {
+            abort(403, 'Only HR and Managers can approve attendance.');
+        }
+
+        // Query for pending attendance records
+        $query = Attendance::with(['user', 'createdByUser'])
+            ->where('status', 'pending');
+
+        // Apply filters
+        if ($request->filled('employee_name')) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->employee_name . '%');
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->where('date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->where('date', '<=', $request->date_to);
+        }
+
+        $pendingAttendances = $query->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('hr.pending-approvals', compact('pendingAttendances'));
+    }
+
+    /**
+     * Approve attendance record
+     */
+    public function approve($id)
+    {
+        $currentUser = Auth::user();
+        
+        if (!in_array($currentUser->role, ['hr', 'manager'])) {
+            abort(403, 'Only HR and Managers can approve attendance.');
+        }
+
+        $attendance = Attendance::with('user')->findOrFail($id);
+
+        if ($attendance->status !== 'pending') {
+            return back()->with('error', 'Only pending attendance can be approved.');
+        }
+
+        $attendance->status = 'approved';
+        $attendance->approved_by = $currentUser->id;
+        $attendance->approved_at = now();
+        $attendance->save();
+
+        // Log the activity if method exists
+        if (method_exists($currentUser, 'logActivity')) {
+            $currentUser->logActivity(
+                'attendance_approved',
+                "Approved attendance for {$attendance->user->name} on {$attendance->date}",
+                [
+                    'attendance_id' => $attendance->id,
+                    'employee_id' => $attendance->user_id,
+                    'employee_name' => $attendance->user->name,
+                    'date' => $attendance->date
+                ]
+            );
+        }
+
+        return back()->with('success', "Attendance approved for {$attendance->user->name} on {$attendance->date}.");
+    }
+
+    /**
+     * Reject attendance record
+     */
+    public function reject(Request $request, $id)
+    {
+        $currentUser = Auth::user();
+        
+        if (!in_array($currentUser->role, ['hr', 'manager'])) {
+            abort(403, 'Only HR and Managers can reject attendance.');
+        }
+
+        $request->validate([
+            'rejection_reason' => 'required|string|max:255'
+        ]);
+
+        $attendance = Attendance::with('user')->findOrFail($id);
+
+        if ($attendance->status !== 'pending') {
+            return back()->with('error', 'Only pending attendance can be rejected.');
+        }
+
+        $attendance->status = 'rejected';
+        $attendance->approved_by = $currentUser->id;
+        $attendance->approved_at = now();
+        $attendance->rejection_reason = $request->rejection_reason;
+        $attendance->save();
+
+        // Log the activity if method exists
+        if (method_exists($currentUser, 'logActivity')) {
+            $currentUser->logActivity(
+                'attendance_rejected',
+                "Rejected attendance for {$attendance->user->name} on {$attendance->date}. Reason: {$request->rejection_reason}",
+                [
+                    'attendance_id' => $attendance->id,
+                    'employee_id' => $attendance->user_id,
+                    'employee_name' => $attendance->user->name,
+                    'date' => $attendance->date,
+                    'rejection_reason' => $request->rejection_reason
+                ]
+            );
+        }
+
+        return back()->with('success', "Attendance rejected for {$attendance->user->name} on {$attendance->date}.");
+    }
+
+    /**
+     * HR/Manager dashboard for attendance management
+     */
+    public function managementDashboard(Request $request)
+    {
+        $currentUser = Auth::user();
+        
+        if (!in_array($currentUser->role, ['hr', 'manager'])) {
+            abort(403, 'Only HR and Managers can access attendance management.');
+        }
+
+        $today = Carbon::today();
+        
+        // Get all employees
+        $employees = User::where('role', 'employee')->orderBy('name')->get();
+
+        // Get today's attendance records
+        $todayAttendances = Attendance::with('user')
+            ->where('date', $today)
+            ->get()
+            ->keyBy('user_id');
+
+        // Find employees who missed attendance today
+        $missedAttendanceEmployees = $employees->filter(function($employee) use ($todayAttendances) {
+            return !isset($todayAttendances[$employee->id]);
+        });
+
+        // Get recent attendance statistics
+        $stats = [
+            'total_employees' => $employees->count(),
+            'present_today' => $todayAttendances->count(),
+            'missed_today' => $missedAttendanceEmployees->count(),
+            'pending_approvals' => Attendance::where('status', 'pending')->count(),
+        ];
+
+        return view('hr.management-dashboard', compact(
+            'employees', 
+            'todayAttendances', 
+            'missedAttendanceEmployees', 
+            'stats',
+            'today'
+        ));
+    }
+
+    /**
+     * Mark employee as present/absent
+     */
+    public function markAttendance(Request $request)
+    {
+        $currentUser = Auth::user();
+        
+        if (!in_array($currentUser->role, ['hr', 'manager'])) {
+            abort(403, 'Only HR and Managers can mark attendance for employees.');
+        }
+
+        $request->validate([
+            'employee_id' => 'required|exists:users,id',
+            'date' => 'required|date',
+            'status' => 'required|in:present,absent',
+            'time_in' => 'nullable|date_format:H:i',
+            'time_out' => 'nullable|date_format:H:i|after_or_equal:time_in',
+            'remarks' => 'nullable|string|max:255',
+        ]);
+
+        $employee = User::findOrFail($request->employee_id);
+        $date = $request->date;
+
+        // Check if attendance already exists
+        $attendance = Attendance::where('user_id', $employee->id)
+            ->where('date', $date)
+            ->first();
+
+        if ($attendance) {
+            return back()->with('error', "Attendance already exists for {$employee->name} on {$date}.");
+        }
+
+        // Create new attendance record
+        $attendance = new Attendance();
+        $attendance->user_id = $employee->id;
+        $attendance->date = $date;
+        $attendance->created_by = $currentUser->id;
+        $attendance->status = 'approved'; // Auto-approve HR/Manager created records
+        $attendance->approved_by = $currentUser->id;
+        $attendance->approved_at = now();
+        $attendance->remarks = $request->remarks;
+
+        if ($request->status === 'present') {
+            $attendance->time_in = $request->time_in ? 
+                Carbon::parse($date . ' ' . $request->time_in) : 
+                Carbon::parse($date . ' 08:00:00'); // Default 8 AM
+                
+            $attendance->time_out = $request->time_out ? 
+                Carbon::parse($date . ' ' . $request->time_out) : 
+                Carbon::parse($date . ' 17:00:00'); // Default 5 PM
+        }
+        // For absent, leave time_in and time_out as null
+
+        $attendance->save();
+
+        // Log the activity if method exists
+        if (method_exists($currentUser, 'logActivity')) {
+            $currentUser->logActivity(
+                'attendance_marked_by_admin',
+                "Marked {$employee->name} as {$request->status} on {$date}",
+                [
+                    'attendance_id' => $attendance->id,
+                    'employee_id' => $employee->id,
+                    'employee_name' => $employee->name,
+                    'date' => $date,
+                    'status' => $request->status
+                ]
+            );
+        }
+
+        return back()->with('success', "Successfully marked {$employee->name} as {$request->status} on {$date}.");
+    }
+
+    /**
+     * Edit attendance times for employee
+     */
+    public function editEmployeeAttendance(Request $request, $id)
+    {
+        $currentUser = Auth::user();
+        
+        if (!in_array($currentUser->role, ['hr', 'manager'])) {
+            abort(403, 'Only HR and Managers can edit employee attendance.');
+        }
+
+        $request->validate([
+            'time_in' => 'nullable|date_format:H:i',
+            'time_out' => 'nullable|date_format:H:i',
+            'remarks' => 'nullable|string|max:255',
+        ]);
+
+        $attendance = Attendance::with('user')->findOrFail($id);
+
+        // Update times
+        if ($request->filled('time_in')) {
+            $attendance->time_in = Carbon::parse($attendance->date . ' ' . $request->time_in);
+        }
+
+        if ($request->filled('time_out')) {
+            $attendance->time_out = Carbon::parse($attendance->date . ' ' . $request->time_out);
+        }
+
+        $attendance->remarks = $request->remarks;
+        $attendance->created_by = $currentUser->id; // Update who modified it
+        $attendance->save();
+
+        // Log the activity if method exists
+        if (method_exists($currentUser, 'logActivity')) {
+            $currentUser->logActivity(
+                'attendance_edited_by_admin',
+                "Edited attendance times for {$attendance->user->name} on {$attendance->date}",
+                [
+                    'attendance_id' => $attendance->id,
+                    'employee_id' => $attendance->user_id,
+                    'employee_name' => $attendance->user->name,
+                    'date' => $attendance->date
+                ]
+            );
+        }
+
+        return back()->with('success', "Attendance updated for {$attendance->user->name}.");
+    }
 
 }

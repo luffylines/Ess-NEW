@@ -6,7 +6,7 @@
                     @if(Auth::user()->role === 'admin')
                         @include('admin.dashboard')
                     @elseif(Auth::user()->role === 'hr' || Auth::user()->role === 'manager')
-                        @include('hr.dashboard')
+                        @include('hr.management-dashboard')
                     @else
                         {{-- Employee Dashboard --}}
                         <div class="container-fluid">

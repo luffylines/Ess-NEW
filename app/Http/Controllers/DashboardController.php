@@ -22,8 +22,8 @@ class DashboardController extends Controller
             return view('admin.dashboard', $data);
         } elseif ($user->role === 'hr' || $user->role === 'manager') {
             // Get data for HR dashboard (both HR and Manager use same dashboard)
-            $data = $this->getHrDashboardData();
-            return view('hr.dashboard', $data);
+            $data = $this->managementDashboard();
+            return view('hr.management-dashboard', $data);
         } else {
             // Redirect to EmployeeDashboardController for employees
             $employeeDashboard = new \App\Http\Controllers\EmployeeDashboardController();
@@ -62,19 +62,44 @@ class DashboardController extends Controller
         );
     }
 
-    private function getHrDashboardData()
+     public function managementDashboard()
     {
-        // HR specific data
-        $totalEmployees = User::where('role', 'employee')->count();
-        $pendingLeaves = DB::table('leave_requests')->where('status', 'pending')->count();
-        $pendingOvertimes = DB::table('overtime_requests')->where('status', 'pending')->count();
-        $todayAttendances = Attendance::whereDate('created_at', Carbon::today())->count();
+        $currentUser = Auth::user();
+        
+        if (!in_array($currentUser->role, ['hr', 'manager'])) {
+            abort(403, 'Only HR and Managers can access attendance management.');
+        }
+
+        $today = Carbon::today();
+        
+        // Get all employees
+        $employees = User::where('role', 'employee')->orderBy('name')->get();
+
+        // Get today's attendance records
+        $todayAttendances = Attendance::with('user')
+            ->where('date', $today)
+            ->get()
+            ->keyBy('user_id');
+
+        // Find employees who missed attendance today
+        $missedAttendanceEmployees = $employees->filter(function($employee) use ($todayAttendances) {
+            return !isset($todayAttendances[$employee->id]);
+        });
+
+        // Get recent attendance statistics
+        $stats = [
+            'total_employees' => $employees->count(),
+            'present_today' => $todayAttendances->count(),
+            'missed_today' => $missedAttendanceEmployees->count(),
+            'pending_approvals' => Attendance::where('status', 'pending')->count(),
+        ];
 
         return compact(
-            'totalEmployees',
-            'pendingLeaves',
-            'pendingOvertimes', 
-            'todayAttendances'
+            'employees', 
+            'todayAttendances', 
+            'missedAttendanceEmployees', 
+            'stats',
+            'today'
         );
     }
 
