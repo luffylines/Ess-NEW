@@ -185,7 +185,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0" id="attendanceTable">
+                    <table class="table table-hover mb-0" id="attendanceTable">
                         <thead class="table-dark">
                             <tr>
                                 <th class="text-center" style="width: 50px;">
@@ -212,12 +212,12 @@
                                     data-remarks="{{ $attendance['remarks'] }}"
                                     data-created-at="{{ $attendance['created_at'] }}"
                                     data-created-by="{{ $attendance['created_by'] }}">
-                                    <td class="text-center">
+                                    <td class="empty text-center">
                                         <input type="checkbox" class="row-checkbox form-check-input" value="{{ $attendance['id'] }}">
                                     </td>
                                     <td>
-                                        <span class="fw-medium">{{ \Carbon\Carbon::parse($attendance['date'])->format('M d, Y') }}</span>
-                                        <br><small class="text-muted">{{ \Carbon\Carbon::parse($attendance['date'])->format('D') }}</small>
+                                        <span class="empty fw-medium">{{ \Carbon\Carbon::parse($attendance['date'])->format('M d, Y') }}</span>
+                                        <br><small class="empty">{{ \Carbon\Carbon::parse($attendance['date'])->format('D') }}</small>
                                     </td>
                                     <td>
                                         @php
@@ -275,7 +275,7 @@
                                             @elseif($status === 'Absent')
                                                 <span class="badge bg-danger">
                                                     <i class="fas fa-times me-1"></i>{{ $status }}
-                                                </span>
+                                                </span> 
                                             @else
                                                 <span class="badge bg-secondary">{{ $status }}</span>
                                             @endif
@@ -299,13 +299,13 @@
                                     </td>
                                     <td>
                                         @if($attendance['remarks'])
-                                            <span class="text-dark">{{ $attendance['remarks'] }}</span>
+                                            <span class="empty">{{ $attendance['remarks'] }}</span>
                                         @else
-                                            <span class="text-muted fst-italic">No remarks</span>
+                                            <span class="fst-italic">No remarks</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <small class="text-muted">
+                                        <small class="empty">
                                             {{ \Carbon\Carbon::parse($attendance['created_at'])->format('M d, Y') }}
                                             <br>{{ \Carbon\Carbon::parse($attendance['created_at'])->format('h:i A') }}
                                         </small>
@@ -316,7 +316,7 @@
                                         @endphp
                                         
                                         <div>
-                                            <span class="fw-medium">{{ $attendance['created_by'] }}</span>
+                                            <span class="fw-medium empty">{{ $attendance['created_by'] }}</span>
                                             <br>
                                             @if($createdByCurrentUser)
                                                 <small class="text-success">
@@ -334,14 +334,17 @@
                                 <tr>
                                     <td colspan="9" class="text-center py-5">
                                         @if(request()->hasAny(['search_created_by', 'date_from', 'date_to']))
-                                            <div class="py-4">
-                                                <img src="{{ asset('img/no-results.png') }}" alt="No Results" style="width: 64px; height: 64px;" class="mb-3">
-                                                <h5 class="fw-medium text-muted">No search results found</h5>
-                                                <p class="small text-muted">Try adjusting your search criteria</p>
-                                                <a href="{{ route('attendance.my') }}" class="btn btn-outline-primary btn-sm mt-2">
-                                                    <i class="fas fa-times me-1"></i>Clear Search
-                                                </a>
-                                            </div>
+                                        <div class="py-4 text-center">
+                                            <!-- Bootstrap Icon instead of image -->
+                                            <i class="bi bi-search empty" style="font-size: 3rem;"></i>
+                                            <h5 class="fw-medium empty mt-3">No records match your search criteria</h5>
+                                            <p class="small empty">Try adjusting your search criteria</p>
+                                            
+                                            <a href="{{ route('attendance.my') }}" class="btn btn-outline-primary btn-sm mt-2">
+                                                <i class="bi bi-x-circle me-1"></i> Clear Search
+                                            </a>
+                                        </div>
+
                                         @else
                                             <div class="py-4">
                                                 <img src="{{ asset('img/no-data.png') }}" alt="No Data" style="width: 64px; height: 64px;" class="mb-3">
@@ -367,6 +370,15 @@
     </div>
 
 <style>
+    body.light .empty {
+    color: #050505; /* secondary color */
+    }
+
+    body.dark .empty {
+        color: #ffffff; /* white for dark mode */
+    }
+
+    
     .btn-purple {
         background-color: #6f42c1;
         border-color: #6f42c1;
@@ -395,6 +407,19 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         border: 1px solid rgba(0, 0, 0, 0.125);
     }
+     /* MOBILE STYLES */
+        @media (max-width: 576px) {
+            #attendanceTable th, #attendanceTable td {
+                font-size: 12px;
+            }
+            .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            .table-hover tbody tr:hover {
+                background-color: inherit;
+            }
+        }
 </style>
 
 <script>

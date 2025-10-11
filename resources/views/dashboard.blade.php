@@ -16,12 +16,12 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h1 class="h3 fw-bold text-primary mb-1">Welcome, {{ $user->name }}!</h1>
-                                            <p class="text-muted mb-0">
+                                            <p class="mb-0">
                                                 Employee ID: {{ $user->employee_id }} | Role: {{ ucfirst($user->role) }}
                                             </p>
                                         </div>
                                         <div class="text-end">
-                                            <small class="text-muted">{{ \Carbon\Carbon::now()->format('l, F j, Y') }}</small>
+                                            <small class="">{{ \Carbon\Carbon::now()->format('l, F j, Y') }}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -30,7 +30,7 @@
                             {{-- Key Metrics Cards --}}
                             <div class="row mb-4">
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card bg-primary text-white shadow-sm h-100">
+                                    <div class="card bg-primary text-white shadow-sm h-100 stats-card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Attendance This Month</h5>
@@ -43,7 +43,7 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card bg-success text-white shadow-sm h-100">
+                                    <div class="card bg-success text-white shadow-sm h-100 stats-card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Overtime Hours</h5>
@@ -56,7 +56,7 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card bg-warning text-white shadow-sm h-100">
+                                    <div class="card bg-warning text-white shadow-sm h-100 stats-card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Leave Taken</h5>
@@ -69,7 +69,7 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card bg-info text-white shadow-sm h-100">
+                                    <div class="card bg-info text-white shadow-sm h-100 stats-card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Leave Balance</h5>
@@ -85,7 +85,7 @@
                             {{-- Holiday & Working Days Information --}}
                             <div class="row mb-4">
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card bg-secondary text-white shadow-sm h-100">
+                                    <div class="card bg-secondary text-white shadow-sm h-100 stats-card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Remaining Work Days</h5>
@@ -98,7 +98,7 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card {{ $isTodayHoliday ? 'bg-danger' : 'bg-dark' }} text-white shadow-sm h-100">
+                                    <div class="card {{ $isTodayHoliday ? 'bg-danger' : 'bg-dark' }} text-white shadow-sm h-100 stats-card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Today's Status</h5>
@@ -113,10 +113,10 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card bg-purple text-white shadow-sm h-100" style="background: linear-gradient(45deg, #6f42c1, #8e44ad);">
+                                    <div class="card bg-purple text-white shadow-sm h-100 stats-card" style="background: linear-gradient(45deg, #6f42c1, #8e44ad);">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
-                                                <h5 class="card-title mb-1">Holidays This Month</h5>
+                                                <h5 class="card-title mb-1" data-bs-toggle="tooltip">Holidays This Month</h5>
                                                 <h2 class="mb-0">{{ $holidayCount }}</h2>
                                                 <small class="opacity-75">{{ \Carbon\Carbon::now()->format('F') }}</small>
                                             </div>
@@ -126,7 +126,7 @@
                                 </div>
 
                                 <div class="col-xl-3 col-md-6 mb-3">
-                                    <div class="card bg-gradient-primary text-white shadow-sm h-100" style="background: linear-gradient(45deg, #007bff, #0056b3);">
+                                    <div class="card bg-gradient-primary text-white shadow-sm h-100 stats-card" style="background: linear-gradient(45deg, #007bff, #0056b3);">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Upcoming Holidays</h5>
@@ -142,7 +142,7 @@
                             {{-- Status Cards --}}
                             <div class="row mb-4">
                                 <div class="col-md-4 mb-3">
-                                    <div class="card shadow-sm text-center">
+                                    <div class="card shadow-sm text-center stats-card">
                                         <div class="card-body">
                                             <i class="fas fa-hourglass-half text-warning fa-2x mb-2"></i>
                                             <h5 class="card-title">Pending Requests</h5>
@@ -153,7 +153,7 @@
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <div class="card shadow-sm text-center">
+                                    <div class="card shadow-sm text-center stats-card">
                                         <div class="card-body">
                                             <i class="fas fa-calendar-day text-success fa-2x mb-2"></i>
                                             <h5 class="card-title">Upcoming Leave</h5>
@@ -168,7 +168,7 @@
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <div class="card shadow-sm text-center">
+                                    <div class="card shadow-sm text-center stats-card">
                                         <div class="card-body">
                                             <i class="fas fa-user-check text-primary fa-2x mb-2"></i>
                                             <h5 class="card-title">This Month</h5>
@@ -218,7 +218,7 @@
                                                     </div>
                                                 </div>
                                                 @endforeach
-                                            </div>
+                                           </div>
                                         </div>
                                     </div>
                                 </div>
@@ -245,7 +245,7 @@
                             <div class="row mb-4">
                                 <div class="col-lg-4 mb-3">
                                     <div class="card shadow-sm">
-                                        <div class="card-header bg-light">
+                                        <div class="card-header">
                                             <h5 class="card-title mb-0">Recent Attendance</h5>
                                         </div>
                                         <div class="card-body">
@@ -274,10 +274,10 @@
                                 {{-- Monthly Stats --}}
                                 <div class="col-lg-8 mb-3">
                                     <div class="card shadow-sm">
-                                        <div class="card-header bg-light">
+                                        <div class="card-header">
                                             <h5 class="card-title mb-0">
                                                 Monthly Attendance Statistics ({{ \Carbon\Carbon::now()->year }})
-                                                <small class="text-muted">- Excludes holidays & weekends</small>
+                                                <small class="">- Excludes holidays & weekends</small>
                                             </h5>
                                         </div>
                                         <div class="card-body">
@@ -306,7 +306,7 @@
                                                                 <td>
                                                                     @if($stat['percentage'] >= 90)
                                                                         <span class="text-success">Excellent</span>
-                                                                    @elseif($stat['percentage'] >= 75)
+                                                                    @elseif($stat['percentage'] >= 50)
                                                                         <span class="text-warning">Good</span>
                                                                     @else
                                                                         <span class="text-danger">Needs Improvement</span>
@@ -374,6 +374,23 @@
         </div>
     </div>
 
+    {{-- Custom CSS for Hover Effect --}}
+    <style>
+        .stats-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -434,5 +451,7 @@
                 plugins: { legend: { display: true, position: 'top' } }
             }
         });
+
     </script>
+
 </x-app-layout>
