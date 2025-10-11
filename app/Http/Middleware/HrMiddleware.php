@@ -22,11 +22,12 @@ class HrMiddleware
             return redirect()->route('login');
         }
 
-        // Assuming you have a role field or relationship
-        // Adjust this logic based on your user role implementation
+        // Check if user has HR or Manager role (both can access HR functionalities)
         $user = Auth::user();
-        if ($user->role !== 'hr' && $user->role !== 'HR') {
-            abort(403, 'Unauthorized access.');
+        $allowedRoles = ['hr', 'HR', 'manager', 'Manager'];
+        
+        if (!in_array($user->role, $allowedRoles)) {
+            abort(403, 'Unauthorized access. HR or Manager role required.');
         }
 
         return $next($request);

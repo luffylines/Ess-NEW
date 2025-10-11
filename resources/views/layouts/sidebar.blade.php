@@ -51,8 +51,8 @@
                     </li>
                 @endif
 
-                {{-- HR ONLY --}}
-                @if(auth()->user()->role === 'hr')
+                {{-- HR AND MANAGER --}}
+                @if(auth()->user()->role === 'hr' || auth()->user()->role === 'manager')
                     <li class="nav-item"><a href="{{ route('hr.approve') }}" class="nav-link"><i class="fas fa-user-check me-2"></i>Approve Attendance</a></li>
                     <li class="nav-item"><a href="{{ route('hr.attendance') }}" class="nav-link"><i class="fas fa-calendar-check me-2"></i>Monitor Attendance</a></li>
                     <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i>Approve Leave</a></li>

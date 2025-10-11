@@ -8,4 +8,8 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: {
+        host: true, // or 'localhost'
+        port: 5173,
+    }
 });

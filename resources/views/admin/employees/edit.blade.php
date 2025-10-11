@@ -26,6 +26,7 @@
                     <select name="role" class="form-select" required>
                         <option value="employee" {{ $employee->role == 'employee' ? 'selected' : '' }}>Employee</option>
                         <option value="hr" {{ $employee->role == 'hr' ? 'selected' : '' }}>HR</option>
+                        <option value="manager" {{ $employee->role == 'manager' ? 'selected' : '' }}>Manager</option>
                         <option value="admin" {{ $employee->role == 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                 </div>

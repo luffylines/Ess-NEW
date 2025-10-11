@@ -125,7 +125,7 @@
                                     </ul>
                                 </li>
 
-                            @elseif(auth()->user()->role === 'hr')
+                            @elseif(auth()->user()->role === 'hr' || auth()->user()->role === 'manager')
                                 <li class="nav-item"><a class="nav-link" href="{{ route('hr.approve') }}">Approve Attendance</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('hr.attendance') }}">Monitor Attendance</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('hr.approveleave.show') }}">Approve Leave</a></li>

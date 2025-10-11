@@ -20,8 +20,8 @@ class DashboardController extends Controller
             // Get data for admin dashboard
             $data = $this->getAdminDashboardData();
             return view('admin.dashboard', $data);
-        } elseif ($user->role === 'hr') {
-            // Get data for HR dashboard  
+        } elseif ($user->role === 'hr' || $user->role === 'manager') {
+            // Get data for HR dashboard (both HR and Manager use same dashboard)
             $data = $this->getHrDashboardData();
             return view('hr.dashboard', $data);
         } else {

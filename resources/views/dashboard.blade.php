@@ -5,7 +5,7 @@
                 <div class="card-body">
                     @if(Auth::user()->role === 'admin')
                         @include('admin.dashboard')
-                    @elseif(Auth::user()->role === 'hr')
+                    @elseif(Auth::user()->role === 'hr' || Auth::user()->role === 'manager')
                         @include('hr.dashboard')
                     @else
                         {{-- Default Employee Dashboard Content --}}
