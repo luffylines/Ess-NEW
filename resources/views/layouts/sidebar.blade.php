@@ -1,10 +1,6 @@
 <aside class="main-sidebar" id="sidebar">
     <!-- Brand Logo and Toggle Button -->
     <div class="brand-container d-flex justify-content-between align-items-center px-3">
-        <a href="{{ url('/') }}" class="brand-link text-decoration-none d-flex align-items-center">
-            <img src="{{ asset('img/logo.png') }}" alt="ESS Logo" class="brand-logo me-2">
-            <span class="brand-text fw-bold">ESS</span>
-        </a>
         <button id="sidebarToggle" type="button" title="Toggle Sidebar">
             <img src="{{ asset('img/menu.png') }}" alt="Toggle Sidebar" width="24" height="24" />
         </button>

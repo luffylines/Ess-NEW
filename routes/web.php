@@ -32,6 +32,7 @@ Route::patch('/profile/update-password', [ProfileController::class, 'updatePassw
     ->middleware(['auth'])
     ->name('profile.updatePassword');
 
+    
 Route::middleware('guest')->group(function () {
     Route::get('/about', [GuestPageController::class, 'about'])->name('about');
     Route::get('/contact', [GuestPageController::class, 'contact'])->name('contact');
