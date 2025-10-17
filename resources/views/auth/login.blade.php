@@ -80,7 +80,7 @@
             </div>
 
             <!-- Google reCAPTCHA -->
-            <div class="mb-3 text-center">
+            <div class="mb-1 text-center">
                 <!-- Using Google's test site key that works on any domain -->
                 <div class="g-recaptcha d-inline-block" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="recaptchaCallback" data-error-callback="recaptchaError"></div>
                 @error('g-recaptcha-response')
@@ -156,6 +156,12 @@
 </script>
 
 <style>
+    @media screen and (max-width: 400px) {
+    .g-recaptcha {
+      transform: scale(0.75);
+      transform-origin: 0 0;
+    }
+  }
     .role-box {
         cursor: pointer;
         transition: all 0.25s ease;

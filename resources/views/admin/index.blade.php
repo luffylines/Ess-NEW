@@ -4,7 +4,7 @@
 <div class="container-fluid py-4">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark mb-0">Employees Management</h2>
+        <h2 class="fw-bold mb-0">Employees Management</h2>
         <a href="{{ route('admin.employees.create') }}" class="btn btn-success fw-semibold d-flex align-items-center gap-2">
             <i class="bi bi-person-plus-fill"></i> Add Employee
         </a>
@@ -44,7 +44,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if($employee->profile_photo)
-                                            <img src="{{ asset('storage/profile_photos/' . $employee->profile_photo) }}" 
+                                            <img src="{{ asset('storage/' . $employee->profile_photo) }}" 
                                                  alt="Profile" class="rounded-circle me-2" width="40" height="40">
                                         @else
                                             <img src="{{ asset('img/default-avatar.png') }}" 

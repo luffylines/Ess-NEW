@@ -176,10 +176,16 @@
                                         @endphp
                                         <tr class="align-middle">
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar-circle me-3">
-                                                        <span class="avatar-initials">{{ substr($employee->name, 0, 1) }}</span>
-                                                    </div>
+                                                       <div class="d-flex align-items-center">
+                                                    @if($employee->profile_photo && file_exists(public_path('storage/' . $employee->profile_photo)))
+                                                        <img src="{{ asset('storage/' . $employee->profile_photo) }}" 
+                                                             alt="Profile" class="rounded-circle me-3" width="45" height="45"
+                                                             style="object-fit: cover; border: 3px solid #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                                                    @else
+                                                        <div class="avatar-circle me-3">
+                                                            <span class="avatar-initials">{{ substr($employee->name, 0, 1) }}</span>
+                                                        </div>
+                                                    @endif
                                                     <div>
                                                         <h6 class="mb-0 fw-bold">{{ $employee->name }}</h6>
                                                         <small class="text-muted">ID: {{ $employee->employee_id ?? 'N/A' }}</small>
@@ -449,9 +455,15 @@
                                 @foreach($missedAttendanceEmployees->take(4) as $employee)
                                     <div class="missed-item">
                                         <div class="missed-info">
-                                            <div class="missed-avatar">
-                                                <span>{{ substr($employee->name, 0, 1) }}</span>
-                                            </div>
+                                            @if($employee->profile_photo && file_exists(public_path('storage/' . $employee->profile_photo)))
+                                                <img src="{{ asset('storage/' . $employee->profile_photo) }}" 
+                                                     alt="Profile" class="rounded-circle me-2" width="30" height="30"
+                                                     style="object-fit: cover; border: 2px solid #ff9a9e;">
+                                            @else
+                                                <div class="missed-avatar">
+                                                    <span>{{ substr($employee->name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
                                             <div class="missed-details">
                                                 <span class="missed-name">{{ $employee->name }}</span>
                                                 <small class="missed-id">ID: {{ $employee->employee_id ?? 'N/A' }}</small>
@@ -489,7 +501,10 @@
         </div>
     </div>
 </div>
+<script>
 
+
+</script>
 <style>
 /* Background Gradients */
 .bg-gradient-primary {
@@ -859,7 +874,7 @@
 }
 
 .modal-header {
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 2px solid #ee9ecef;
     border-radius: 15px 15px 0 0;
 }
 

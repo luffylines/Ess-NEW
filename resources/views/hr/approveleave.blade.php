@@ -1,4 +1,6 @@
-<x-app-layout>
+@extends('layouts.app')
+
+@section('content')
     <div class="mx-auto px-4 py-4">
         <h1 class="h2 fw-bold mb-4">Approve Leave Requests</h1>
 
@@ -20,8 +22,8 @@
             
             @if(count($leaveRequests) > 0)
                 <div class="overflow-x-auto">
-                    <table class="bg-white border">
-                        <thead class="bg-light">
+                    <table class=" border">
+                        <thead>
                             <tr>
                                 <th class="border px-4 py-2 text-start">Employee</th>
                                 <th class="border px-4 py-2 text-start">Leave Type</th>
@@ -42,24 +44,34 @@
                                     <td class="border px-4 py-2">{{ $request->total_days }}</td>
                                     <td class="border px-4 py-2">{{ $request->reason }}</td>
                                     <td class="border px-4 py-2">
-                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="d-inline">
-                                            @csrf
-                                            <input type="hidden" name="request_id" value="{{ $request->id }}">
-                                            <input type="hidden" name="action" value="approve">
-                                            <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 small mb-1 w-100">
-                                            <button type="submit" class="text-white px-3 py-1 rounded small w-100 mb-1">
-                                                Approve
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="{{ route('hr.approveleave') }}" class="d-inline">
-                                            @csrf
-                                            <input type="hidden" name="request_id" value="{{ $request->id }}">
-                                            <input type="hidden" name="action" value="reject">
-                                            <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 small mb-1 w-100">
-                                            <button type="submit" class="text-white px-3 py-1 rounded small w-100">
-                                                Reject
-                                            </button>
-                                        </form>
+<!-- Approve Form -->
+<form method="POST" action="{{ route('hr.approveleave') }}" class="mb-2">
+    @csrf
+    <input type="hidden" name="request_id" value="{{ $request->id }}">
+    <input type="hidden" name="action" value="approve">
+
+    <input type="text" name="manager_remarks" placeholder="Remarks (optional)"
+           class="form-control form-control-sm mb-2" />
+
+    <button type="submit" class="btn btn-success btn-sm w-100">
+        ✅ Approve
+    </button>
+</form>
+
+<!-- Reject Form -->
+<form method="POST" action="{{ route('hr.approveleave') }}">
+    @csrf
+    <input type="hidden" name="request_id" value="{{ $request->id }}">
+    <input type="hidden" name="action" value="reject">
+
+    <input type="text" name="manager_remarks" placeholder="Remarks (optional)"
+           class="form-control form-control-sm mb-2" />
+
+    <button type="submit" class="btn btn-danger btn-sm w-100">
+        ❌ Reject
+    </button>
+</form>
+
                                     </td>
                                 </tr>
                             @endforeach
@@ -80,4 +92,4 @@
             <p class="text-blue-700">Pending Approval</p>
         </div>
     </div>
-</x-app-layout>
+@endsection

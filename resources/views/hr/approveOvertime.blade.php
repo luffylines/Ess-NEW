@@ -1,4 +1,6 @@
-<x-app-layout>
+@extends('layouts.app')
+
+@section('content')
     <div class="mx-auto px-4 py-4">
         <h1 class="h2 fw-bold mb-4">Approve Overtime Requests</h1>
 
@@ -80,4 +82,4 @@
             <p class="text-orange-700">Pending Approval</p>
         </div>
     </div>
-</x-app-layout>
+@endsection

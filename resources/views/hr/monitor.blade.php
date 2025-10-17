@@ -1,4 +1,5 @@
-<x-app-layout>
+@extends('layouts.app')
+@section('content')
     <div class="mx-auto px-4 py-4">
         <h1 class="h2 fw-bold mb-3">Attendance Monitoring</h1>
 
@@ -46,4 +47,4 @@
             {{ $attendances->withQueryString()->links() }}
         </div>
     </div>
-</x-app-layout>
+@endsection

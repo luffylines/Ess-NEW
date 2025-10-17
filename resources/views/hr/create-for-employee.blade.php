@@ -13,7 +13,7 @@
                         <i class="fas fa-user-plus text-primary me-2"></i>
                         Create Employee Attendance
                     </h2>
-                    <p class="text-muted mb-0">Create attendance records for employees (HR/Manager Only)</p>
+                    <p class="mb-0">Create attendance records for employees (HR/Manager Only)</p>
                 </div>
                 <div>
                     <a href="{{ route('hr.management') }}" class="btn btn-outline-primary">
@@ -288,38 +288,38 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-eye me-2"></i>Preview Attendance Record
+                <h5 class="modal-title text-muted">
+                    <i class="fas fa-eye me-2 text-muted"></i>Preview Attendance Record
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-6 text-muted">
                         <strong>Employee:</strong>
                         <p id="preview-employee" class="text-muted"></p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 text-muted">
                         <strong>Date:</strong>
                         <p id="preview-date" class="text-muted"></p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 text-muted">
                         <strong>Time In:</strong>
                         <p id="preview-time-in" class="text-muted"></p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 text-muted">
                         <strong>Time Out:</strong>
                         <p id="preview-time-out" class="text-muted"></p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 text-muted">
                         <strong>Day Type:</strong>
                         <p id="preview-day-type" class="text-muted"></p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 text-muted">
                         <strong>Status:</strong>
                         <p id="preview-status" class="text-muted"></p>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 text-muted">
                         <strong>Remarks:</strong>
                         <p id="preview-remarks" class="text-muted"></p>
                     </div>
@@ -345,6 +345,11 @@
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
+.btn-secondary {
+    background-color: #ff0000;
+    color: white;
+}
+
 
 .form-control-lg, .form-select-lg {
     border-radius: 10px;

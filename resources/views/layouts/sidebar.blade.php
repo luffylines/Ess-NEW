@@ -19,7 +19,7 @@
         @endif
         <div class="info mt-2">
             <span class="fw-semibold d-block">{{ auth()->user()->name }}</span>
-            <small class="text-muted">Employee ID: {{ auth()->user()->employee_id }}</small>
+            <small class="">Employee ID: {{ auth()->user()->employee_id }}</small>
         </div>
     </div>
 
@@ -140,7 +140,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #f8f9fa;
+    background-color: #ffffff;
     color: #212529;
     border-right: 1px solid #dee2e6;
     transition: width 0.3s ease, all 0.3s ease;

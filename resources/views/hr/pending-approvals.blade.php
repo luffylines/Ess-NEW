@@ -13,7 +13,7 @@
                         <i class="fas fa-clock text-warning me-2"></i>
                         Pending Attendance Approvals
                     </h2>
-                    <p class="text-muted mb-0">Review and approve/reject employee attendance records</p>
+                    <p class=" mb-0">Review and approve/reject employee attendance records</p>
                 </div>
                 <div>
                     <a href="{{ route('hr.management') }}" class="btn btn-outline-primary me-2">

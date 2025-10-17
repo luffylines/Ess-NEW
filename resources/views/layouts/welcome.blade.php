@@ -53,7 +53,7 @@
         }
 
         .navbar-dark .nav-link {
-            color: #fff !important;
+            color: #ffffff !important;
         }
 
         .navbar-dark .navbar-brand,
@@ -66,7 +66,7 @@
         }
 
         body.dark .dropdown-item:hover {
-            background-color: #444;
+            background-color: #f108ac;
         }
 
         body {

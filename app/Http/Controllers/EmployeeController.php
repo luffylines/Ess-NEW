@@ -66,7 +66,7 @@ public function store(Request $request)
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email',
-        'role' => 'required|in:employee,hr,manager',
+        'role' => 'required|in:employee,hr,manager,admin',
     ]);
 
     $token = Str::random(60); // Unique token to send via email
@@ -126,9 +126,9 @@ public function completeStore(Request $request, $token)
 
     $request->validate([
         'password' => 'required|confirmed|min:8',
-        'phone' => 'nullable|string|max:20',
-        'gender' => 'nullable|in:male,female,other',
-        'address' => 'nullable|string|max:500',
+        'phone' => ['required', 'regex:/^9[0-9]{9}$/'], // only 10 digits starting with 9
+        'gender' => 'required|in:male,female,other',
+        'address' => 'required|string|max:255',
     ]);
 
     // Format phone number to include +63 prefix
@@ -171,7 +171,6 @@ public function completeStore(Request $request, $token)
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
-            'remember_token' => null, // Invalidate token
             'role' => 'required|string',
             'phone' => 'nullable|string|max:20',
         ]);
