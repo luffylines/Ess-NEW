@@ -39,7 +39,7 @@ class LeaveController extends Controller
         ]);
 
         // Calculate total days
-        $totalDays = LeaveRequest::calculateTotalDays($request->start_date, $request->end_date);
+        $totalDays = LeaveRequest::calculateDaysBetween($request->start_date, $request->end_date);
 
         // Handle file upload
         $documentPath = null;
@@ -103,7 +103,7 @@ class LeaveController extends Controller
         ]);
 
         // Calculate total days
-        $totalDays = LeaveRequest::calculateTotalDays($request->start_date, $request->end_date);
+        $totalDays = LeaveRequest::calculateDaysBetween($request->start_date, $request->end_date);
 
         // Handle file upload
         $documentPath = $leave->supporting_document;

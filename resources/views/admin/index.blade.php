@@ -81,10 +81,11 @@
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
 
+
                                         <!-- Resend Invitation -->
                                         @if($employee->remember_token)
-                                            <button type="button" class="btn btn-outline-secondary btn-sm" 
-                                                    onclick="resendInvitation({{ $employee->id }})">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                    onclick="resendInvitation({{ $employee->id }}, '{{ $employee->name }}')">
                                                 <i class="bi bi-envelope-fill"></i> Resend
                                             </button>
                                         @endif
@@ -133,12 +134,37 @@
 </div>
 
 <!-- JS -->
+
+<!-- CSRF Meta -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<!-- JS: Resend Invitation -->
 <script>
-    function resendInvitation(employeeId) {
-        alert('Resend invitation for Employee ID: ' + employeeId);
+    function resendInvitation(employeeId, employeeName) {
+        if (!confirm(`Resend invitation to ${employeeName}?`)) return;
+
+        fetch(`/admin/employees/${employeeId}/resend`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else if (data.error) {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Resend failed:', error);
+            alert('Something went wrong while resending the invitation.');
+        });
     }
 </script>
-
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 @endsection

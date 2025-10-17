@@ -12,6 +12,42 @@ use App\Mail\InviteEmployee;
 
 class EmployeeController extends Controller
 {
+    /**
+     * Format phone number to ensure it has +63 prefix
+     */
+    private function formatPhoneNumber($phone)
+    {
+        if (empty($phone)) {
+            return null;
+        }
+
+        // Remove all non-digit characters except +
+        $phone = preg_replace('/[^\d+]/', '', $phone);
+
+        // If it starts with +63, keep it as is
+        if (str_starts_with($phone, '+63')) {
+            return $phone;
+        }
+
+        // If it starts with 63, add +
+        if (str_starts_with($phone, '63')) {
+            return '+' . $phone;
+        }
+
+        // If it starts with 09, replace with +639
+        if (str_starts_with($phone, '09')) {
+            return '+63' . substr($phone, 1);
+        }
+
+        // If it starts with 9 and is 10 digits, add +63
+        if (str_starts_with($phone, '9') && strlen($phone) == 10) {
+            return '+63' . $phone;
+        }
+
+        // Otherwise, assume it's a local number and add +639
+        return '+639' . ltrim($phone, '0');
+    }
+
     public function index()
     {
         // Fetch users from DB, for example:
@@ -95,10 +131,13 @@ public function completeStore(Request $request, $token)
         'address' => 'nullable|string|max:500',
     ]);
 
+    // Format phone number to include +63 prefix
+    $phone = $this->formatPhoneNumber($request->phone);
+
     $user->update([
         'password' => Hash::make($request->password),
         'remember_token' => null, // Invalidate token
-        'phone' => $request->phone,
+        'phone' => $phone,
         'gender' => $request->gender,
         'address' => $request->address,
     ]);
@@ -132,12 +171,50 @@ public function completeStore(Request $request, $token)
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
+            'remember_token' => null, // Invalidate token
             'role' => 'required|string',
             'phone' => 'nullable|string|max:20',
         ]);
 
-        $employee->update($request->all());
+        // Format phone number to include +63 prefix
+        $data = $request->all();
+        if (!empty($data['phone'])) {
+            $data['phone'] = $this->formatPhoneNumber($data['phone']);
+        }
+
+        $employee->update($data);
 
         return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully!');
     }
+
+    public function resendInvitation($id)
+{
+    $user = User::findOrFail($id);
+
+    if (!$user->remember_token) {
+        return response()->json(['error' => 'User already active. No invitation needed.'], 400);
+    }
+
+    try {
+        Mail::to($user->email)->send(new InviteEmployee($user));
+        return response()->json(['message' => 'Invitation resent successfully.']);
+    } catch (\Exception $e) {
+        Log::error("Failed to resend invitation: " . $e->getMessage());
+        return response()->json(['error' => 'Failed to resend invitation.'], 500);
+    }
+}
+    public function destroy($id)
+{
+    $employee = User::findOrFail($id);
+
+    // Optional: Prevent deleting self or admin?
+    // if (auth()->id() === $employee->id) {
+    //     return back()->with('error', 'You cannot delete your own account.');
+    // }
+
+    $employee->delete();
+
+    return redirect()->route('admin.employees.index')->with('success', 'Employee deleted successfully.');
+}
+
 }

@@ -168,13 +168,13 @@
     }
 
     .btn-gradient-primary {
-        background: linear-gradient(90deg, #0066ff 0%, #3399ff 100%);
+        background: linear-gradient(90deg, #ff00d4 0%, #ff33ee 100%);
         border: none;
         color: white;
     }
 
     .btn-gradient-primary:hover {
-        background: linear-gradient(90deg, #004ecc 0%, #2672ff 100%);
+        background: linear-gradient(90deg, #cc0077 0%, #ff26ed 100%);
     }
 
     .password-toggle {

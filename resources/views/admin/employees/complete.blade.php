@@ -55,7 +55,12 @@
             <div class="mb-3">
                 <label for="phone" class="form-label fw-semibold">Phone Number</label>
                 <input id="phone" name="phone" type="tel" class="form-control @error('phone') is-invalid @enderror" 
-                       value="{{ old('phone') }}">
+                       value="{{ old('phone') }}" 
+                       placeholder="+639XXXXXXXXX"
+                       pattern="^\+63[0-9]{10}$">
+                <div class="form-text">
+                    Format: +63 followed by 10 digits (e.g., +639171234567)
+                </div>
                 @error('phone')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -107,4 +112,48 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone');
+    
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Remove all non-digit characters except +
+            value = value.replace(/[^\d+]/g, '');
+            
+            // Auto-format based on input
+            if (value.length > 0 && !value.startsWith('+63')) {
+                if (value.startsWith('63')) {
+                    value = '+' + value;
+                } else if (value.startsWith('09')) {
+                    value = '+63' + value.substring(1);
+                } else if (value.startsWith('9') && value.length <= 10) {
+                    value = '+63' + value;
+                } else if (!value.startsWith('+')) {
+                    value = '+639' + value.replace(/^0+/, '');
+                }
+            }
+            
+            // Limit to +63 + 10 digits
+            if (value.startsWith('+63') && value.length > 13) {
+                value = value.substring(0, 13);
+            }
+            
+            e.target.value = value;
+        });
+        
+        phoneInput.addEventListener('blur', function(e) {
+            let value = e.target.value;
+            if (value && !value.match(/^\+63[0-9]{10}$/)) {
+                e.target.classList.add('is-invalid');
+            } else {
+                e.target.classList.remove('is-invalid');
+            }
+        });
+    }
+});
+</script>
 @endsection

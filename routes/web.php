@@ -108,6 +108,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/employees/{id}/edit', [EmployeeController::class, 'edit'])->name('admin.employees.edit');
     Route::put('/admin/employees/{id}', [EmployeeController::class, 'update'])->name('admin.employees.update');
     Route::delete('/admin/employees/{id}', [EmployeeController::class, 'destroy'])->name('admin.employees.destroy');
+    Route::post('/admin/employees/{id}/resend', [EmployeeController::class, 'resendInvitation'])
+     ->name('admin.employees.resend');
+
 
     Route::view('/admin/loans/sss', 'loans.sss')->name('admin.loans.sss');
     Route::view('/admin/loans/pagibig', 'loans.pagibig')->name('admin.loans.pagibig');

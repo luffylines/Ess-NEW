@@ -15,6 +15,42 @@ use Illuminate\Validation\Rules\Password;
 class ProfileController extends Controller
 {
     /**
+     * Format phone number to ensure it has +63 prefix
+     */
+    private function formatPhoneNumber($phone)
+    {
+        if (empty($phone)) {
+            return null;
+        }
+
+        // Remove all non-digit characters except +
+        $phone = preg_replace('/[^\d+]/', '', $phone);
+
+        // If it starts with +63, keep it as is
+        if (str_starts_with($phone, '+63')) {
+            return $phone;
+        }
+
+        // If it starts with 63, add +
+        if (str_starts_with($phone, '63')) {
+            return '+' . $phone;
+        }
+
+        // If it starts with 09, replace with +639
+        if (str_starts_with($phone, '09')) {
+            return '+63' . substr($phone, 1);
+        }
+
+        // If it starts with 9 and is 10 digits, add +63
+        if (str_starts_with($phone, '9') && strlen($phone) == 10) {
+            return '+63' . $phone;
+        }
+
+        // Otherwise, assume it's a local number and add +639
+        return '+639' . ltrim($phone, '0');
+    }
+
+    /**
      * Display the user's profile form.
      */
     public function edit(Request $request): View
@@ -30,10 +66,10 @@ class ProfileController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'gender' => ['nullable', 'in:male,female,other'],
+           'name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', 'in:male,female,other'],
+            'phone' => ['required', 'regex:/^\+63[0-9]{10}$/'],
+            'address' => ['required', 'string', 'max:500'],
             'profile_photo' => ['nullable', 'file', 'image', 'max:2048'],
         ]);
 
@@ -56,10 +92,13 @@ class ProfileController extends Controller
             $validated['profile_photo'] = $path;
         }
 
+        // Format phone number to include +63 prefix
+        $formattedPhone = $this->formatPhoneNumber($validated['phone'] ?? null);
+
         // Update user info
         $user->fill([
             'name' => $validated['name'],
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $formattedPhone,
             'address' => $validated['address'] ?? null,
             'gender' => $validated['gender'] ?? null,
             'profile_photo' => $validated['profile_photo'] ?? $user->profile_photo,

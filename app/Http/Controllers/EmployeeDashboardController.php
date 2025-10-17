@@ -52,24 +52,17 @@ class EmployeeDashboardController extends Controller
             ->where('status', 'approved')
             ->whereBetween('created_at', [$thirtyDaysAgo, $today])
             ->sum('total_hours');
-
-        // Total leave taken in last 30 days
+        // Total leave taken in current year
         $totalLeaveTaken = LeaveRequest::where('user_id', $user->id)
             ->where('status', 'approved')
-            ->where(function($query) use ($thirtyDaysAgo, $today) {
-                $query->whereBetween('start_date', [$thirtyDaysAgo, $today])
-                      ->orWhereBetween('end_date', [$thirtyDaysAgo, $today])
-                      ->orWhere(function($q) use ($thirtyDaysAgo, $today) {
-                          $q->where('start_date', '<', $thirtyDaysAgo)
-                            ->where('end_date', '>', $today);
-                      });
-            })
+            ->whereYear('start_date', $currentYear)
             ->get()
-            ->sum(function($leave) use ($thirtyDaysAgo, $today) {
-                $leaveStart = Carbon::parse($leave->start_date)->max($thirtyDaysAgo);
-                $leaveEnd = Carbon::parse($leave->end_date)->min($today);
-                return $leaveStart->diffInDays($leaveEnd) + 1;
+            ->sum(function($leave) {
+                return Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
             });
+
+
+            
 
         // Calculate leave balance (assuming 21 days annual leave)
         $annualLeaveEntitlement = 21;

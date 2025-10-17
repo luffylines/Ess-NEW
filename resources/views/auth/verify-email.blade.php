@@ -6,7 +6,7 @@
 
         <!-- Logo / Title -->
         <div class="mb-4 text-center">
-            <span class="h2 fw-bold text-primary">YourCompany</span>
+            <span class="h2 fw-bold text-primary">SALON</span>
         </div>
 
         <h4 class="fw-semibold mb-3 text-secondary text-center">Verify Your Email</h4>

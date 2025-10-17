@@ -54,7 +54,7 @@
                     {{-- Gender --}}
                     <div class="mb-3">
                         <label for="gender" class="form-label fw-semibold">Gender</label>
-                        <select id="gender" name="gender" class="form-control">
+                        <select id="gender" name="gender" class="form-control" required>
                             <option value="" {{ old('gender', $user->gender) == '' ? 'selected' : '' }}>Select Gender</option>
                             <option value="male" {{ old('gender', $user->gender) == 'male' ? 'selected' : '' }}>Male</option>
                             <option value="female" {{ old('gender', $user->gender) == 'female' ? 'selected' : '' }}>Female</option>
@@ -68,7 +68,13 @@
                     {{-- Phone --}}
                     <div class="mb-3">
                         <label for="phone" class="form-label fw-semibold">Phone Number</label>
-                        <input id="phone" name="phone" type="tel" class="form-control" value="{{ old('phone', $user->phone) }}">
+                        <input id="phone" name="phone" type="tel" class="form-control" 
+                               value="{{ old('phone', $user->phone) }}" 
+                               placeholder="+639XXXXXXXXX"
+                               pattern="^\+63[0-9]{10}$" required>
+                        <div class="form-text">
+                            Format: +63 followed by 10 digits (e.g., +639171234567)
+                        </div>
                         @error('phone')
                             <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
@@ -77,7 +83,7 @@
                     {{-- Address --}}
                     <div class="mb-4">
                         <label for="address" class="form-label fw-semibold">Address</label>
-                        <textarea id="address" name="address" rows="3" class="form-control" placeholder="Enter your complete address">{{ old('address', $user->address) }}</textarea>
+                        <textarea id="address" name="address" rows="3" class="form-control" placeholder="Enter your complete address" required>{{ old('address', $user->address) }}</textarea>
                         @error('address')
                             <div class="small mt-1">{{ $message }}</div>
                         @enderror
@@ -292,3 +298,47 @@ body.dark {
     padding: 0.75rem 1rem;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone');
+    
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Remove all non-digit characters except +
+            value = value.replace(/[^\d+]/g, '');
+            
+            // Auto-format based on input
+            if (value.length > 0 && !value.startsWith('+63')) {
+                if (value.startsWith('63')) {
+                    value = '+' + value;
+                } else if (value.startsWith('09')) {
+                    value = '+63' + value.substring(1);
+                } else if (value.startsWith('9') && value.length <= 10) {
+                    value = '+63' + value;
+                } else if (!value.startsWith('+')) {
+                    value = '+639' + value.replace(/^0+/, '');
+                }
+            }
+            
+            // Limit to +63 + 10 digits
+            if (value.startsWith('+63') && value.length > 13) {
+                value = value.substring(0, 13);
+            }
+            
+            e.target.value = value;
+        });
+        
+        phoneInput.addEventListener('blur', function(e) {
+            let value = e.target.value;
+            if (value && !value.match(/^\+63[0-9]{10}$/)) {
+                e.target.classList.add('is-invalid');
+            } else {
+                e.target.classList.remove('is-invalid');
+            }
+        });
+    }
+});
+</script>

@@ -1,7 +1,9 @@
 <x-app-layout>
     <div class="px-4">
         <h1 class="mb-3">My Attendance</h1>
-
+            <div class="text-end">
+               <small class="">{{ \Carbon\Carbon::now()->format('l, F j, Y') }}</small>
+            </div>
         {{-- Flash Messages --}}
         @if(session('success'))
             <div class="mb-3">{{ session('success') }}</div>
@@ -13,6 +15,7 @@
         {{-- === MARK ATTENDANCE === --}}
         <div class="p-3 rounded mx-auto mb-4" style="max-width: 400px;">
             <h2 class="mb-3">Mark Attendance</h2>
+
             @if($todayAttendance)
                 @if(!$todayAttendance->time_in)
                     <form method="POST" action="{{ route('attendance.submit') }}">

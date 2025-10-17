@@ -1,4 +1,6 @@
-<x-app-layout>
+@extends('layouts.app')
+
+@section('content')
     <div class="py-3">
         <div class="px-4">
             <div class="card shadow-sm">
@@ -60,7 +62,7 @@
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-1">Leave Taken</h5>
-                                                <h2 class="mb-0">{{ $totalLeaveTaken }}</h2>
+                                                <h2 class="mb-0">{{ number_format($totalLeaveTaken, ) }}</h2>
                                                 <small class="opacity-75">Last 30 Days</small>
                                             </div>
                                             <div class="fs-1 opacity-75"><i class="fas fa-plane-departure"></i></div>
@@ -387,8 +389,6 @@
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
         }
     </style>
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
     {{-- Chart.js --}}
@@ -454,4 +454,4 @@
 
     </script>
 
-</x-app-layout>
+@endsection

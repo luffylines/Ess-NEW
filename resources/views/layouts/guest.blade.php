@@ -21,26 +21,53 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <style>
+        /* Custom responsive styles */
+        @media (max-width: 576px) {
+            .mobile-padding { padding: 1rem !important; }   
+            .mobile-text-sm { font-size: 0.875rem !important; }
+            .mobile-h-auto { height: auto !important; }
+        }
+        
+        @media (max-width: 768px) {
+            .tablet-padding { padding: 1.5rem !important; }
+            .image-mobile { height: 200px !important; }
+        }
+        
+        @media (min-width: 992px) {
+            .desktop-max-width { max-width: 480px !important; }
+        }
+    </style>
 </head>
 <body class="bg-light">
 
-    <div class="container-fluid vh-100">
-        <div class="row h-100 flex-column flex-md-row">
+    <div class="container-fluid min-vh-100">
+        <div class="row min-vh-100 g-0">
 
-            <!-- Left Side: Image -->
-            <div class="col-12 col-md-6 px-0 order-1 order-md-1">
-                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img3.webp"
-                     alt="Login Image"
-                     class="w-100 h-100"
-                     style="object-fit: cover; object-position: center;">
+            <!-- Left Side: Image - Hidden on mobile, visible on tablet+ -->
+            <div class="col-lg-6 col-xl-7 d-none d-md-block position-relative">
+                <div class="position-absolute top-0 start-0 w-100 h-100" 
+                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="d-flex align-items-center justify-content-center h-100 text-white text-center p-4">
+                        <div>
+                            <h1 class="display-4 fw-bold mb-3">Welcome</h1>
+                            <p class="lead">Your Employee Management System</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Right Side: Content -->
-            <div class="col-12 col-md-6 d-flex align-items-start justify-content-center py-5 order-2 order-md-2">
-                <div class="w-100 px-3 px-md-0" style="max-width: 420px;">
-                    @yield('content')
+            <!-- Right Side: Centered Content -->
+            <div class="col-12 col-md-12 col-lg-6 col-xl-5 d-flex align-items-center justify-content-center">
+                <div class="w-100 d-flex align-items-center justify-content-center p-3 p-sm-4 p-md-5">
+                    <div class="desktop-max-width w-100">
+                        <!-- Mobile Logo/Brand - Only visible on mobile -->
+
+                        @yield('content')
+                    </div>
                 </div>
-            </div>
 
         </div>
     </div>
