@@ -29,14 +29,14 @@
 
     <!-- Flash Messages -->
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show auto-hide-alert" role="alert">
             <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show auto-hide-alert" role="alert">
             <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -235,149 +235,26 @@
                                             </td>
                                             <td class="text-center">
                                                 @if(!$attendance)
-                                                    <!-- Mark Present/Absent Buttons -->
+                                                    <!-- Mark Present/Absent Links -->
                                                     <div class="action-buttons">
-                                                        <button type="button" class="btn btn-success btn-sm action-btn" 
-                                                                data-bs-toggle="modal" data-bs-target="#markPresentModal{{ $employee->id }}">
+                                                        <a href="{{ route('hr.mark-present.form', ['employee' => $employee->id, 'date' => $today->format('Y-m-d')]) }}" 
+                                                           class="btn btn-success btn-sm action-btn">
                                                             <i class="fas fa-user-check me-1"></i>Mark Present
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger btn-sm action-btn" 
-                                                                data-bs-toggle="modal" data-bs-target="#markAbsentModal{{ $employee->id }}">
+                                                        </a>
+                                                        <a href="{{ route('hr.mark-absent.form', ['employee' => $employee->id, 'date' => $today->format('Y-m-d')]) }}" 
+                                                           class="btn btn-danger btn-sm action-btn">
                                                             <i class="fas fa-user-times me-1"></i>Mark Absent
-                                                        </button>
+                                                        </a>
                                                     </div>
                                                 @else
-                                                    <!-- Edit Times Button -->
-                                                    <button type="button" class="btn btn-primary btn-sm action-btn" 
-                                                            data-bs-toggle="modal" data-bs-target="#editTimesModal{{ $attendance->id }}">
+                                                    <!-- Edit Times Link -->
+                                                    <a href="{{ route('hr.edit-times.form', ['attendance' => $attendance->id]) }}" 
+                                                       class="btn btn-primary btn-sm action-btn">
                                                         <i class="fas fa-edit me-1"></i>Edit Times
-                                                    </button>
+                                                    </a>
                                                 @endif
                                             </td>
                                         </tr>
-
-                                        @if(!$attendance)
-                                            <!-- Mark Present Modal -->
-                                            <div class="modal fade" id="markPresentModal{{ $employee->id }}" tabindex="-1">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <form action="{{ route('hr.mark') }}" method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="employee_id" value="{{ $employee->id }}">
-                                                            <input type="hidden" name="date" value="{{ $today->format('Y-m-d') }}">
-                                                            <input type="hidden" name="status" value="present">
-                                                            
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title">Mark {{ $employee->name }} as Present</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <div class="row">
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="time_in{{ $employee->id }}" class="form-label">Time In</label>
-                                                                        <input type="time" class="form-control" id="time_in{{ $employee->id }}" 
-                                                                               name="time_in" value="08:00">
-                                                                    </div>
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="time_out{{ $employee->id }}" class="form-label">Time Out</label>
-                                                                        <input type="time" class="form-control" id="time_out{{ $employee->id }}" 
-                                                                               name="time_out" value="17:00">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="remarks{{ $employee->id }}" class="form-label">Remarks</label>
-                                                                    <textarea class="form-control" id="remarks{{ $employee->id }}" 
-                                                                              name="remarks" rows="2" 
-                                                                              placeholder="Reason for marking attendance..."></textarea>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-success">
-                                                                    <i class="fas fa-user-check me-1"></i>Mark Present
-                                                                </button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Mark Absent Modal -->
-                                            <div class="modal fade" id="markAbsentModal{{ $employee->id }}" tabindex="-1">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <form action="{{ route('hr.mark') }}" method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="employee_id" value="{{ $employee->id }}">
-                                                            <input type="hidden" name="date" value="{{ $today->format('Y-m-d') }}">
-                                                            <input type="hidden" name="status" value="absent">
-                                                            
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title">Mark {{ $employee->name }} as Absent</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <p>Are you sure you want to mark <strong>{{ $employee->name }}</strong> as absent for today?</p>
-                                                                <div class="mb-3">
-                                                                    <label for="absent_remarks{{ $employee->id }}" class="form-label">Remarks</label>
-                                                                    <textarea class="form-control" id="absent_remarks{{ $employee->id }}" 
-                                                                              name="remarks" rows="2" 
-                                                                              placeholder="Reason for absence..."></textarea>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-danger">
-                                                                    <i class="fas fa-user-times me-1"></i>Mark Absent
-                                                                </button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @else
-                                            <!-- Edit Times Modal -->
-                                            <div class="modal fade" id="editTimesModal{{ $attendance->id }}" tabindex="-1">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <form action="{{ route('hr.edit-employee', $attendance->id) }}" method="POST">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title">Edit Times for {{ $employee->name }}</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <div class="row">
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="edit_time_in{{ $attendance->id }}" class="form-label">Time In</label>
-                                                                        <input type="time" class="form-control" id="edit_time_in{{ $attendance->id }}" 
-                                                                               name="time_in" value="{{ $attendance->time_in ? $attendance->time_in->format('H:i') : '' }}">
-                                                                    </div>
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="edit_time_out{{ $attendance->id }}" class="form-label">Time Out</label>
-                                                                        <input type="time" class="form-control" id="edit_time_out{{ $attendance->id }}" 
-                                                                               name="time_out" value="{{ $attendance->time_out ? $attendance->time_out->format('H:i') : '' }}">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="edit_remarks{{ $attendance->id }}" class="form-label">Remarks</label>
-                                                                    <textarea class="form-control" id="edit_remarks{{ $attendance->id }}" 
-                                                                              name="remarks" rows="2">{{ $attendance->remarks }}</textarea>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-primary">
-                                                                    <i class="fas fa-save me-1"></i>Update
-                                                                </button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
                                     @endforeach
                                 </tbody>
                             </table>
@@ -501,10 +378,6 @@
         </div>
     </div>
 </div>
-<script>
-
-
-</script>
 <style>
 /* Background Gradients */
 .bg-gradient-primary {
@@ -599,25 +472,42 @@
     color: #dc3545;
 }
 
-/* Action Buttons */
+/* Action Buttons - STABILIZED */
 .action-btn {
     border-radius: 10px;
     font-weight: 600;
     padding: 8px 16px;
     margin: 2px;
-    transition: all 0.3s ease;
+    position: relative;
+    transform: none !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
 }
 
 .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    /* Remove transform animations to prevent flickering */
+    transform: none !important;
+    opacity: 0.9;
+}
+
+.action-btn:focus {
+    transform: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.action-btn:active {
+    transform: none !important;
 }
 
 .action-buttons {
+    position: relative;
+    min-height: 40px;
     display: flex;
     gap: 5px;
     justify-content: center;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 /* Table Enhancements */
@@ -866,15 +756,81 @@
     animation: fadeInUp 0.6s ease-out;
 }
 
-/* Modal Enhancements */
+/* Modal Enhancements - COMPLETE STABILIZATION */
+.modal {
+    z-index: 1055 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    outline: 0 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+
+.modal-backdrop {
+    z-index: 1050 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
 .modal-content {
-    border-radius: 15px;
-    border: none;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    border-radius: 15px !important;
+    border: none !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2) !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    background-color: #fff !important;
+    background-clip: padding-box !important;
+    outline: 0 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+
+.modal-dialog {
+    position: relative !important;
+    width: auto !important;
+    margin: 0.5rem auto !important;
+    pointer-events: none !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+
+.modal.show .modal-dialog {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+.modal.fade .modal-dialog {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Remove ALL fade effects */
+.modal.fade {
+    opacity: 1 !important;
+}
+
+.modal.fade.show {
+    opacity: 1 !important;
 }
 
 .modal-header {
-    border-bottom: 2px solid #ee9ecef;
+    border-bottom: 2px solid #e9ecef;
     border-radius: 15px 15px 0 0;
 }
 
@@ -883,4 +839,17 @@
     border-radius: 0 0 15px 15px;
 }
 </style>
+
+<script>
+// Auto-hide alerts after 3 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.auto-hide-alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }, 3000);
+    });
+});
+</script>
 @endsection

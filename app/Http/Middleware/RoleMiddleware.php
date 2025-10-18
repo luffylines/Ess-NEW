@@ -21,7 +21,7 @@ class RoleMiddleware
         }
 
         if (!in_array(Auth::user()->role, $roles)) {
-            abort(403, 'Unauthorized');
+            abort(403, 'Forbidden: You do not have permission to access this resource');
         }
         
         return $next($request);

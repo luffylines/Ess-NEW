@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\User;
+use App\Services\IpAddressService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Auth;
@@ -183,6 +184,8 @@ class ActivityLogController extends Controller
         return Response::stream($callback, 200, $headers);
     }
 
+
+
     // Helper method to log activities
     public static function log($actionType, $description, $userId = null, $properties = [])
     {
@@ -190,7 +193,7 @@ class ActivityLogController extends Controller
             'user_id' => $userId ?? Auth::id(),
             'action_type' => $actionType,
             'description' => $description,
-            'ip_address' => request()->ip(),
+            'ip_address'  => IpAddressService::getRealIpAddress(),
             'user_agent' => request()->userAgent(),
             'properties' => $properties,
         ]);

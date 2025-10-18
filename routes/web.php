@@ -60,6 +60,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/pdf', [AttendanceController::class, 'generatePDF'])->name('attendance.pdf');
     Route::get('/attendance/search', [AttendanceController::class, 'search'])->name('attendance.search');
     
+
+    //overtime show
+    Route::resource('overtime', OvertimeController::class)->middleware('auth');
+    
+    
     // HR/Manager create attendance for employee
     Route::post('/hr/create-for-employee', [AttendanceController::class, 'createForEmployee'])
         ->middleware(['auth', 'role:hr,manager'])
@@ -75,6 +80,11 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/hr/edit-employee/{id}', [AttendanceController::class, 'editEmployeeAttendance'])->name('hr.edit-employee');
         Route::get('/hr/create-for-employee', [AttendanceController::class, 'showCreateForEmployeeForm'])->name('hr.create-for-employee.form');
         Route::post('/hr/create-for-employee', [AttendanceController::class, 'createForEmployee'])->name('hr.createForEmployee');
+        
+        // Form pages for mark attendance actions
+        Route::get('/hr/mark-present', [AttendanceController::class, 'showMarkPresentForm'])->name('hr.mark-present.form');
+        Route::get('/hr/mark-absent', [AttendanceController::class, 'showMarkAbsentForm'])->name('hr.mark-absent.form');
+        Route::get('/hr/edit-times/{attendance}', [AttendanceController::class, 'showEditTimesForm'])->name('hr.edit-times.form');
     });
     
     //generate Schedule
@@ -91,9 +101,6 @@ Route::post('/attendance/generateShiftSchedule', [AttendanceController::class, '
     // Payslip listing page
     Route::get('/payslips', [PayslipController::class, 'index'])->name('payslip.index');
 
-    // Overtime requests for employees
-    Route::resource('overtime', OvertimeController::class);
-    
     // Leave requests for employees
     Route::resource('leave', App\Http\Controllers\LeaveController::class);
 

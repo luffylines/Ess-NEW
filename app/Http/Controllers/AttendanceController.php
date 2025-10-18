@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\User;
 use PDF;
@@ -600,72 +601,81 @@ public function showGenerateShiftScheduleForm()
      */
     public function markAttendance(Request $request)
     {
-        $currentUser = Auth::user();
-        
-        if (!in_array($currentUser->role, ['hr', 'manager'])) {
-            abort(403, 'Only HR and Managers can mark attendance for employees.');
+        try {
+            $currentUser = Auth::user();
+            
+            if (!in_array($currentUser->role, ['hr', 'manager'])) {
+                abort(403, 'Only HR and Managers can mark attendance for employees.');
+            }
+
+            $request->validate([
+                'employee_id' => 'required|exists:users,id',
+                'date' => 'required|date',
+                'status' => 'required|in:present,absent',
+                'time_in' => 'nullable|date_format:H:i',
+                'time_out' => 'nullable|date_format:H:i|after_or_equal:time_in',
+                'remarks' => 'nullable|string|max:255',
+            ]);
+
+            $employee = User::findOrFail($request->employee_id);
+            $date = $request->date;
+
+            // Check if attendance already exists
+            $attendance = Attendance::where('user_id', $employee->id)
+                ->where('date', $date)
+                ->first();
+
+            if ($attendance) {
+                return back()->with('error', "Attendance already exists for {$employee->name} on this date!");
+            }
+
+            // Get the date part only
+            $dateOnly = Carbon::parse($date)->format('Y-m-d');
+
+            // Create new attendance record
+            $attendance = new Attendance();
+            $attendance->user_id = $employee->id;
+            $attendance->date = $date;
+            $attendance->created_by = $currentUser->id;
+            $attendance->status = 'approved'; // Auto-approve HR/Manager created records
+            $attendance->approved_by = $currentUser->id;
+            $attendance->approved_at = now();
+            $attendance->remarks = $request->remarks;
+
+            if ($request->status === 'present') {
+                $attendance->time_in = $request->time_in ? 
+                    Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $request->time_in) : 
+                    Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' 08:00'); // Default 8 AM
+                    
+                $attendance->time_out = $request->time_out ? 
+                    Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $request->time_out) : 
+                    null; // Don't set default time_out if not provided
+            }
+            // For absent, leave time_in and time_out as null
+
+            $attendance->save();
+
+            // Log the activity if method exists
+            if (method_exists($currentUser, 'logActivity')) {
+                $currentUser->logActivity(
+                    'attendance_marked_by_admin',
+                    "Marked {$employee->name} as {$request->status} on {$date}",
+                    [
+                        'attendance_id' => $attendance->id,
+                        'employee_id' => $employee->id,
+                        'employee_name' => $employee->name,
+                        'date' => $date,
+                        'status' => $request->status
+                    ]
+                );
+            }
+
+            return back()->with('success', "Successfully marked {$employee->name} as {$request->status}!");
+            
+        } catch (\Exception $e) {
+            Log::error('Error marking attendance: ' . $e->getMessage());
+            return back()->with('error', 'Failed to mark attendance. Please check the information and try again.');
         }
-
-        $request->validate([
-            'employee_id' => 'required|exists:users,id',
-            'date' => 'required|date',
-            'status' => 'required|in:present,absent',
-            'time_in' => 'nullable|date_format:H:i',
-            'time_out' => 'nullable|date_format:H:i|after_or_equal:time_in',
-            'remarks' => 'nullable|string|max:255',
-        ]);
-
-        $employee = User::findOrFail($request->employee_id);
-        $date = $request->date;
-
-        // Check if attendance already exists
-        $attendance = Attendance::where('user_id', $employee->id)
-            ->where('date', $date)
-            ->first();
-
-        if ($attendance) {
-            return back()->with('error', "Attendance already exists for {$employee->name} on {$date}.");
-        }
-
-        // Create new attendance record
-        $attendance = new Attendance();
-        $attendance->user_id = $employee->id;
-        $attendance->date = $date;
-        $attendance->created_by = $currentUser->id;
-        $attendance->status = 'approved'; // Auto-approve HR/Manager created records
-        $attendance->approved_by = $currentUser->id;
-        $attendance->approved_at = now();
-        $attendance->remarks = $request->remarks;
-
-        if ($request->status === 'present') {
-            $attendance->time_in = $request->time_in ? 
-                Carbon::parse($date . ' ' . $request->time_in) : 
-                Carbon::parse($date . ' 08:00:00'); // Default 8 AM
-                
-            $attendance->time_out = $request->time_out ? 
-                Carbon::parse($date . ' ' . $request->time_out) : 
-                Carbon::parse($date . ' 17:00:00'); // Default 5 PM
-        }
-        // For absent, leave time_in and time_out as null
-
-        $attendance->save();
-
-        // Log the activity if method exists
-        if (method_exists($currentUser, 'logActivity')) {
-            $currentUser->logActivity(
-                'attendance_marked_by_admin',
-                "Marked {$employee->name} as {$request->status} on {$date}",
-                [
-                    'attendance_id' => $attendance->id,
-                    'employee_id' => $employee->id,
-                    'employee_name' => $employee->name,
-                    'date' => $date,
-                    'status' => $request->status
-                ]
-            );
-        }
-
-        return back()->with('success', "Successfully marked {$employee->name} as {$request->status} on {$date}.");
     }
 
     /**
@@ -673,48 +683,95 @@ public function showGenerateShiftScheduleForm()
      */
     public function editEmployeeAttendance(Request $request, $id)
     {
-        $currentUser = Auth::user();
+        try {
+            $currentUser = Auth::user();
+            
+            if (!in_array($currentUser->role, ['hr', 'manager'])) {
+                abort(403, 'Only HR and Managers can edit employee attendance.');
+            }
+
+            $request->validate([
+                'time_in' => 'nullable|date_format:H:i',
+                'time_out' => 'nullable|date_format:H:i',
+                'remarks' => 'nullable|string|max:255',
+            ]);
+
+            $attendance = Attendance::with('user')->findOrFail($id);
+
+            // Get the date part only (remove any time component)
+            $dateOnly = Carbon::parse($attendance->date)->format('Y-m-d');
+
+            // Update times - properly format the datetime
+            if ($request->filled('time_in')) {
+                $attendance->time_in = Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $request->time_in);
+            } else {
+                $attendance->time_in = null;
+            }
+
+            if ($request->filled('time_out')) {
+                $attendance->time_out = Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $request->time_out);
+            } else {
+                $attendance->time_out = null;
+            }
+
+            $attendance->remarks = $request->remarks;
+            $attendance->created_by = $currentUser->id; // Update who modified it
+            $attendance->save();
+
+            // Log the activity if method exists
+            if (method_exists($currentUser, 'logActivity')) {
+                $currentUser->logActivity(
+                    'attendance_edited_by_admin',
+                    "Edited attendance times for {$attendance->user->name} on {$attendance->date}",
+                    [
+                        'attendance_id' => $attendance->id,
+                        'employee_id' => $attendance->user_id,
+                        'employee_name' => $attendance->user->name,
+                        'date' => $attendance->date
+                    ]
+                );
+            }
+
+            return back()->with('success', "Attendance successfully updated for {$attendance->user->name}!");
+            
+        } catch (\Exception $e) {
+            Log::error('Error updating attendance: ' . $e->getMessage());
+            return back()->with('error', 'Failed to update attendance. Please check the time format and try again.');
+        }
+    }
+
+    /**
+     * Show Mark Present Form
+     */
+    public function showMarkPresentForm(Request $request)
+    {
+        $employeeId = $request->query('employee');
+        $date = $request->query('date');
         
-        if (!in_array($currentUser->role, ['hr', 'manager'])) {
-            abort(403, 'Only HR and Managers can edit employee attendance.');
-        }
+        $employee = User::findOrFail($employeeId);
+        
+        return view('hr.mark-present-form', compact('employee', 'date'));
+    }
 
-        $request->validate([
-            'time_in' => 'nullable|date_format:H:i',
-            'time_out' => 'nullable|date_format:H:i',
-            'remarks' => 'nullable|string|max:255',
-        ]);
+    /**
+     * Show Mark Absent Form
+     */
+    public function showMarkAbsentForm(Request $request)
+    {
+        $employeeId = $request->query('employee');
+        $date = $request->query('date');
+        
+        $employee = User::findOrFail($employeeId);
+        
+        return view('hr.mark-absent-form', compact('employee', 'date'));
+    }
 
-        $attendance = Attendance::with('user')->findOrFail($id);
-
-        // Update times
-        if ($request->filled('time_in')) {
-            $attendance->time_in = Carbon::parse($attendance->date . ' ' . $request->time_in);
-        }
-
-        if ($request->filled('time_out')) {
-            $attendance->time_out = Carbon::parse($attendance->date . ' ' . $request->time_out);
-        }
-
-        $attendance->remarks = $request->remarks;
-        $attendance->created_by = $currentUser->id; // Update who modified it
-        $attendance->save();
-
-        // Log the activity if method exists
-        if (method_exists($currentUser, 'logActivity')) {
-            $currentUser->logActivity(
-                'attendance_edited_by_admin',
-                "Edited attendance times for {$attendance->user->name} on {$attendance->date}",
-                [
-                    'attendance_id' => $attendance->id,
-                    'employee_id' => $attendance->user_id,
-                    'employee_name' => $attendance->user->name,
-                    'date' => $attendance->date
-                ]
-            );
-        }
-
-        return back()->with('success', "Attendance updated for {$attendance->user->name}.");
+    /**
+     * Show Edit Times Form
+     */
+    public function showEditTimesForm(Attendance $attendance)
+    {
+        return view('hr.edit-times-form', compact('attendance'));
     }
 
 }

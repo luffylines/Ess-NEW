@@ -7,46 +7,116 @@
             </a>
         </div>
 
-        <div class="bg-white rounded shadow">
+        <div class="card shadow-sm border-0">
             <!-- Header with status -->
-            <div class="py-3 bg-light border">
+            <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h2 class="h4 fw-semibold">
-                            Overtime Request #{{ $overtimeRequest->id }}
+                        <h2 class="h4 fw-bold mb-1 text-white">
+                            <i class="fas fa-clock me-2"></i>Overtime Request #{{ $overtimeRequest->id }}
                         </h2>
-                        <p class="small">
-                            Submitted on {{ $overtimeRequest->created_at->format('M d, Y \a\t H:i') }}
+                        <p class="mb-0 opacity-75">
+                            <i class="fas fa-calendar me-1"></i>Submitted on 
+                            @if($overtimeRequest->created_at)
+                                {{ \Carbon\Carbon::parse($overtimeRequest->created_at)->format('M d, Y \a\t H:i') }}
+                            @else
+                                {{ \Carbon\Carbon::now()->format('M d, Y \a\t H:i') }}
+                            @endif
                         </p>
                     </div>
-                    <span class="px-3 py-1 small fw-semibold rounded-circle">
-                        {{ ucfirst($overtimeRequest->status) }}
+                    @php
+                        $statusClasses = [
+                            'pending' => 'bg-warning text-dark',
+                            'approved' => 'bg-success text-white',
+                            'rejected' => 'bg-danger text-white',
+                        ];
+                        $statusIcons = [
+                            'pending' => 'fas fa-clock',
+                            'approved' => 'fas fa-check-circle',
+                            'rejected' => 'fas fa-times-circle',
+                        ];
+                    @endphp
+                    <span class="badge {{ $statusClasses[$overtimeRequest->status] ?? 'bg-secondary' }} px-3 py-2 fs-6">
+                        <i class="{{ $statusIcons[$overtimeRequest->status] ?? 'fas fa-question' }} me-1"></i>{{ ucfirst($overtimeRequest->status) }}
                     </span>
                 </div>
             </div>
 
             <!-- Request Details -->
-            <div class="py-4">
-                <div class="row">
+            <div class="card-body">
+                <div class="row g-4">
                     <!-- Date and Time -->
-                    <div>
-                        <h3 class="small fw-medium text-secondary mb-2">Date & Time</h3>
-                        <div class="bg-light rounded p-3">
-                            <p class="small"><strong>Date:</strong> {{ $overtimeRequest->overtime_date->format('M d, Y') }}</p>
-                            <p class="small"><strong>Start Time:</strong> {{ $overtimeRequest->start_time->format('H:i') }}</p>
-                            <p class="small"><strong>End Time:</strong> {{ $overtimeRequest->end_time->format('H:i') }}</p>
-                            <p class="small"><strong>Total Hours:</strong> {{ $overtimeRequest->total_hours }} hours</p>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <h5 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-calendar-alt me-2"></i>Date & Time
+                            </h5>
+                            <div class="mb-2">
+                                <strong class="text-secondary">Date:</strong>
+                                <span class="ms-2">
+                                    @if($overtimeRequest->overtime_date)
+                                        {{ \Carbon\Carbon::parse($overtimeRequest->overtime_date)->format('M d, Y') }}
+                                    @else
+                                        Date not available
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <strong class="text-secondary">Start Time:</strong>
+                                <span class="ms-2 badge bg-info text-dark">
+                                    @if($overtimeRequest->start_time)
+                                        {{ date('h:i A', strtotime($overtimeRequest->start_time)) }}
+                                    @else
+                                        Time not available
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <strong class="text-secondary">End Time:</strong>
+                                <span class="ms-2 badge bg-info text-dark">
+                                    @if($overtimeRequest->end_time)
+                                        {{ date('h:i A', strtotime($overtimeRequest->end_time)) }}
+                                    @else
+                                        Time not available
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="mb-0">
+                                <strong class="text-secondary">Total Hours:</strong>
+                                <span class="ms-2 badge bg-primary text-white fs-6">{{ number_format($overtimeRequest->total_hours, 2) }} hours</span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Status Information -->
-                    <div>
-                        <h3 class="small fw-medium text-secondary mb-2">Status Information</h3>
-                        <div class="bg-light rounded p-3">
-                            <p class="small"><strong>Status:</strong> {{ ucfirst($overtimeRequest->status) }}</p>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <h5 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Status Information
+                            </h5>
+                            <div class="mb-2">
+                                <strong class="text-secondary">Current Status:</strong>
+                                <span class="ms-2 badge {{ $statusClasses[$overtimeRequest->status] ?? 'bg-secondary' }}">
+                                    <i class="{{ $statusIcons[$overtimeRequest->status] ?? 'fas fa-question' }} me-1"></i>
+                                    {{ ucfirst($overtimeRequest->status) }}
+                                </span>
+                            </div>
                             @if($overtimeRequest->approved_by)
-                                <p class="small"><strong>Reviewed by:</strong> {{ $overtimeRequest->approvedBy->name }}</p>
-                                <p class="small"><strong>Reviewed on:</strong> {{ $overtimeRequest->approved_at->format('M d, Y \a\t H:i') }}</p>
+                                <div class="mb-2">
+                                    <strong class="text-secondary">Reviewed by:</strong>
+                                    <span class="ms-2">{{ $overtimeRequest->approvedBy->name }}</span>
+                                </div>
+                                @if($overtimeRequest->approved_at)
+                                    <div class="mb-0">
+                                        <strong class="text-secondary">Reviewed on:</strong>
+                                        <span class="ms-2">{{ \Carbon\Carbon::parse($overtimeRequest->approved_at)->format('M d, Y \a\t H:i') }}</span>
+                                    </div>
+                                @endif
+                            @else
+                                <div class="text-muted">
+                                    <i class="fas fa-hourglass-half me-1"></i>
+                                    Waiting for manager approval
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -54,18 +124,26 @@
 
                 <!-- Reason -->
                 <div class="mt-4">
-                    <h3 class="small fw-medium text-secondary mb-2">Reason for Overtime</h3>
-                    <div class="bg-light rounded p-3">
-                        <p class="small">{{ $overtimeRequest->reason }}</p>
+                    <div class="border rounded p-3">
+                        <h5 class="text-primary fw-bold mb-3">
+                            <i class="fas fa-comment-alt me-2"></i>Reason for Overtime
+                        </h5>
+                        <div class="bg-light rounded p-3">
+                            <p class="mb-0">{{ $overtimeRequest->reason }}</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Manager Remarks -->
                 @if($overtimeRequest->manager_remarks)
                     <div class="mt-4">
-                        <h3 class="small fw-medium text-secondary mb-2">Manager's Remarks</h3>
-                        <div class="bg-light rounded p-3">
-                            <p class="small">{{ $overtimeRequest->manager_remarks }}</p>
+                        <div class="border rounded p-3 border-warning">
+                            <h5 class="text-warning fw-bold mb-3">
+                                <i class="fas fa-user-tie me-2"></i>Manager's Remarks
+                            </h5>
+                            <div class="bg-light rounded p-3">
+                                <p class="mb-0">{{ $overtimeRequest->manager_remarks }}</p>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -73,14 +151,17 @@
                 <!-- Supporting Document -->
                 @if($overtimeRequest->supporting_document)
                     <div class="mt-4">
-                        <h3 class="small fw-medium text-secondary mb-2">Supporting Document</h3>
-                        <div class="bg-light rounded p-3">
-                            <a href="{{ \Illuminate\Support\Facades\Storage::url($overtimeRequest->supporting_document) }}" 
-                               target="_blank"
-                               class="align-items-center text-primary">
-                                <i class="fas fa-file mr-2"></i>
-                                View Document
-                            </a>
+                        <div class="border rounded p-3">
+                            <h5 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-paperclip me-2"></i>Supporting Document
+                            </h5>
+                            <div class="bg-light rounded p-3">
+                                <a href="{{ \Illuminate\Support\Facades\Storage::url($overtimeRequest->supporting_document) }}" 
+                                   target="_blank"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download me-2"></i>Download Document
+                                </a>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -88,21 +169,27 @@
 
             <!-- Actions -->
             @if($overtimeRequest->status === 'pending')
-                <div class="py-3 bg-light border">
-                    <div class="d-flex justify-content-end">
-                        <a href="{{ route('overtime.edit', $overtimeRequest) }}" 
-                           class="px-4 py-2 text-white">
-                            Edit Request
-                        </a>
-                        <form method="POST" action="{{ route('overtime.destroy', $overtimeRequest) }}" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    class="px-4 py-2 text-white"
-                                    onclick="return confirm('Are you sure you want to delete this overtime request?')">
-                                Delete Request
-                            </button>
-                        </form>
+                <div class="card-footer bg-light border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            You can edit or delete this request while it's pending approval.
+                        </small>
+                        <div class="btn-group">
+                            <a href="{{ route('overtime.edit', $overtimeRequest) }}" 
+                               class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit Request
+                            </a>
+                            <form method="POST" action="{{ route('overtime.destroy', $overtimeRequest) }}" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" 
+                                        class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Are you sure you want to delete this overtime request?')">
+                                    <i class="fas fa-trash me-1"></i>Delete Request
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             @endif

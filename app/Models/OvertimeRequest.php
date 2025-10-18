@@ -26,6 +26,8 @@ class OvertimeRequest extends Model
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
         'total_hours' => 'decimal:2',
+        'created_at' => 'datetime:H:i',
+        'updated_at' => 'datetime:H:i',
         'approved_at' => 'datetime',
     ];
 

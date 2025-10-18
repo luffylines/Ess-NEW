@@ -108,6 +108,24 @@
             .main-sidebar {
                 overflow-y: auto;
             }
+
+            /* Responsive adjustments */
+            @media (max-width: 992px) {
+                main {
+                    margin-left: 0;
+                }
+            }
+
+    /* Placeholder fix for dark mode */
+    body.dark textarea::placeholder {
+      color: #eee !important;
+    }
+
+    body.dark textarea.form-control {
+      color: #fff;
+     
+    }
+
         </style>
 
         <!-- Initialize Theme Early -->

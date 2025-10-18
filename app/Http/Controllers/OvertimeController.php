@@ -9,24 +9,29 @@ use Carbon\Carbon;
 
 class OvertimeController extends Controller
 {
-    // Show employee's overtime requests
+    // Show overtime requests
     public function index()
     {
         $user = Auth::user();
-        $overtimeRequests = OvertimeRequest::where('user_id', $user->id)
-            ->orderBy('overtime_date', 'desc')
-            ->paginate(10);
+
+        if ($user->role === 'employee') {
+            $overtimeRequests = OvertimeRequest::orderBy('overtime_date', 'desc')->paginate(10);
+        } else {
+            $overtimeRequests = OvertimeRequest::where('user_id', $user->id)
+                ->orderBy('overtime_date', 'desc')
+                ->paginate(10);
+        }
 
         return view('overtime.index', compact('overtimeRequests'));
     }
 
-    // Show form to create new overtime request
+    // Show form to create a new overtime request
     public function create()
     {
         return view('overtime.create');
     }
 
-    // Store new overtime request
+    // Store a new overtime request
     public function store(Request $request)
     {
         $request->validate([
@@ -37,16 +42,17 @@ class OvertimeController extends Controller
             'supporting_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
         ]);
 
-        // Calculate total hours
         $startTime = Carbon::createFromFormat('H:i', $request->start_time);
         $endTime = Carbon::createFromFormat('H:i', $request->end_time);
-        $totalHours = $endTime->diffInHours($startTime, false);
-
-        // Handle file upload
-        $documentPath = null;
-        if ($request->hasFile('supporting_document')) {
-            $documentPath = $request->file('supporting_document')->store('overtime_documents', 'public');
+            if ($endTime->lessThanOrEqualTo($startTime)) {
+            return back()->withErrors(['end_time' => 'End time must be after start time.'])->withInput();
         }
+
+        $totalHours = $endTime->floatDiffInHours($startTime);
+                $documentPath = null;
+                if ($request->hasFile('supporting_document')) {
+                    $documentPath = $request->file('supporting_document')->store('overtime_documents', 'public');
+                }
 
         OvertimeRequest::create([
             'user_id' => Auth::id(),
@@ -56,40 +62,44 @@ class OvertimeController extends Controller
             'total_hours' => $totalHours,
             'reason' => $request->reason,
             'supporting_document' => $documentPath,
+            'status' => 'pending',
         ]);
 
         return redirect()->route('overtime.index')
             ->with('success', 'Overtime request submitted successfully! Your manager will review it shortly.');
     }
 
-    // Show specific overtime request
+    // Show a specific overtime request
     public function show(OvertimeRequest $overtimeRequest)
     {
-        // Make sure user can only view their own requests
-        if ($overtimeRequest->user_id !== Auth::id()) {
+        $user = Auth::user();
+
+        if ($user->role !== 'employee' && $overtimeRequest->user_id !== $user->id) {
             abort(403, 'Unauthorized access.');
         }
 
         return view('overtime.show', compact('overtimeRequest'));
     }
 
-    // Show form to edit overtime request (only if pending)
+    // Show form to edit an overtime request
     public function edit(OvertimeRequest $overtimeRequest)
     {
-        // Make sure user can only edit their own pending requests
-        if ($overtimeRequest->user_id !== Auth::id() || $overtimeRequest->status !== 'pending') {
-            abort(403, 'Cannot edit this overtime request.');
+        $user = Auth::user();
+
+        if ($user->role !== 'employee' && ($overtimeRequest->user_id !== $user->id || $overtimeRequest->status !== 'pending')) {
+            abort(403, 'Unauthorized access.');
         }
 
         return view('overtime.edit', compact('overtimeRequest'));
     }
 
-    // Update overtime request
+    // Update an overtime request
     public function update(Request $request, OvertimeRequest $overtimeRequest)
     {
-        // Make sure user can only update their own pending requests
-        if ($overtimeRequest->user_id !== Auth::id() || $overtimeRequest->status !== 'pending') {
-            abort(403, 'Cannot update this overtime request.');
+        $user = Auth::user();
+
+        if ($user->role !== 'employee' && ($overtimeRequest->user_id !== $user->id || $overtimeRequest->status !== 'pending')) {
+            abort(403, 'Unauthorized access.');
         }
 
         $request->validate([
@@ -100,12 +110,10 @@ class OvertimeController extends Controller
             'supporting_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
         ]);
 
-        // Calculate total hours
         $startTime = Carbon::createFromFormat('H:i', $request->start_time);
         $endTime = Carbon::createFromFormat('H:i', $request->end_time);
-        $totalHours = $endTime->diffInHours($startTime, false);
+        $totalHours = $endTime->floatDiffInHours($startTime);
 
-        // Handle file upload
         $documentPath = $overtimeRequest->supporting_document;
         if ($request->hasFile('supporting_document')) {
             $documentPath = $request->file('supporting_document')->store('overtime_documents', 'public');
@@ -124,12 +132,13 @@ class OvertimeController extends Controller
             ->with('success', 'Overtime request updated successfully!');
     }
 
-    // Delete overtime request (only if pending)
+    // Delete an overtime request
     public function destroy(OvertimeRequest $overtimeRequest)
     {
-        // Make sure user can only delete their own pending requests
-        if ($overtimeRequest->user_id !== Auth::id() || $overtimeRequest->status !== 'pending') {
-            abort(403, 'Cannot delete this overtime request.');
+        $user = Auth::user();
+
+        if ($user->role !== 'employee' && ($overtimeRequest->user_id !== $user->id || $overtimeRequest->status !== 'pending')) {
+            abort(403, 'Unauthorized access.');
         }
 
         $overtimeRequest->delete();

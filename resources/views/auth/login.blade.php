@@ -19,12 +19,13 @@
 
         <!-- Error Messages -->
         @if ($errors->any())
-            <div class="alert alert-danger rounded-3 shadow-sm">
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
@@ -58,19 +59,20 @@
             </div>
 
             <!-- Password -->
-            <div class="mb-3 position-relative">
+            <div class="mb-3">
                 <label for="password" class="form-label fw-semibold text-secondary">Password</label>
-                <input id="password" type="password" name="password"
-                       class="form-control form-control-lg rounded-3 pe-5 shadow-sm"
-                       required
-                       placeholder="Enter your password">
+                <div class="position-relative">
+                    <input id="password" type="password" name="password"
+                           class="form-control form-control-lg rounded-3 pe-5 shadow-sm"
+                           required
+                           placeholder="Enter your password">
+                    <span id="togglePassword" class="position-absolute top-50 end-0 translate-middle-y me-3 password-toggle" style="cursor: pointer;">
+                        <img src="{{ asset('img/eyeoff.png') }}" width="22" alt="Toggle Password">
+                    </span>
+                </div>
                 @error('password')
                     <div class="text-danger mt-1">{{ $message }}</div>
                 @enderror
-
-                <span id="togglePassword" class="position-absolute top-50 end-0 translate-middle-y me-3 password-toggle">
-                    <img src="{{ asset('img/eyeoff.png') }}" width="22" alt="Toggle Password">
-                </span>
             </div>
 
             <!-- Remember Me -->
@@ -153,6 +155,23 @@
         document.getElementById('recaptcha-error').innerHTML = 'reCAPTCHA failed to load. Please refresh the page.';
         document.getElementById('recaptcha-error').style.display = 'block';
     }
+
+    // Auto-hide error messages after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert-danger');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                if (alert.classList.contains('alert-dismissible')) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                } else {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.style.display = 'none', 500);
+                }
+            }, 5000);
+        });
+    });
 </script>
 
 <style>
@@ -185,6 +204,39 @@
 
     .password-toggle {
         cursor: pointer;
+        z-index: 10;
+        transition: opacity 0.2s ease;
+        top: 50% !important;
+        right: 12px !important;
+        transform: translateY(-50%) !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        border-radius: 4px;
+    }
+
+    .password-toggle:hover {
+        opacity: 0.7;
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Ensure password toggle is properly positioned inside the input */
+    .password-toggle img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Ensure input has enough padding for the toggle button */
+    .form-control.pe-5 {
+        padding-right: 3rem !important;
+    }
+
+    /* Auto-hide alert styling */
+    .alert-danger {
+        transition: opacity 0.5s ease;
     }
 </style>
 @endsection

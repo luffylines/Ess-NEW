@@ -66,7 +66,7 @@ class LeaveController extends Controller
     {
         // Make sure user can only view their own requests
         if ($leave->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized access.');
+            abort(403, 'Forbidden: You do not have permission to access this resource');
         }
 
         $leaveRequest = $leave; // Pass as leaveRequest for view consistency

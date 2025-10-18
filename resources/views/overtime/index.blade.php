@@ -1,66 +1,73 @@
 <x-app-layout>
-    <div class="mx-auto px-4 py-4">
+    <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="h2 fw-bold">My Overtime Requests</h1>
-            <a href="{{ route('overtime.create') }}" class="text-white px-4 py-2 rounded">
-                <i class="fas fa-plus mr-2"></i>New Overtime Request
+            <a href="{{ route('overtime.create') }}" class="btn btn-primary d-flex align-items-center">
+                <i class="fas fa-plus me-2"></i> New Overtime Request
             </a>
         </div>
 
         @if(session('success'))
-            <div class="border px-4 rounded mb-3">
-                {{ session('success') }}
+            <div id="alert-message" class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <div>{{ session('success') }}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
         @if(session('error'))
-            <div class="border px-4 rounded mb-3">
-                {{ session('error') }}
+            <div id="alert-message" class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <div>{{ session('error') }}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
-        <div class="bg-white rounded shadow">
+        <div class="card shadow-sm rounded-3">
             @if($overtimeRequests->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="divide-y divide-gray-200">
-                        <thead class="bg-light">
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead class="text-uppercase text-secondary small">
                             <tr>
-                                <th class="text-start small fw-medium text-muted">Date</th>
-                                <th class="text-start small fw-medium text-muted">Time</th>
-                                <th class="text-start small fw-medium text-muted">Hours</th>
-                                <th class="text-start small fw-medium text-muted">Reason</th>
-                                <th class="text-start small fw-medium text-muted">Status</th>
-                                <th class="text-start small fw-medium text-muted">Actions</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Hours</th>
+                                <th scope="col">Reason</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white">
+                        <tbody>
                             @foreach($overtimeRequests as $request)
-                                <tr>
-                                    <td class="py-3 small">
-                                        {{ $request->overtime_date->format('M d, Y') }}
+                                <tr class="align-middle">
+                                    <td class="text-nowrap">{{ $request->overtime_date ? $request->overtime_date->format('M d, Y') : 'N/A' }}</td>
+                                    <td class="text-nowrap font-monospace">
+                                        {{ ($request->start_time ? date('h:i A', strtotime($request->start_time)) : 'N/A') }} - {{ ($request->end_time ? date('h:i A', strtotime($request->end_time)) : 'N/A') }}
                                     </td>
-                                    <td class="py-3 small">
-                                        {{ $request->start_time->format('H:i') }} - {{ $request->end_time->format('H:i') }}
-                                    </td>
-                                    <td class="py-3 small">
-                                        {{ $request->total_hours }} hrs
-                                    </td>
-                                    <td class="py-3 small">
+                                    <td class="fw-semibold text-primary">{{ number_format($request->total_hours, 2) }} hr</td>
+                                    <td class="text-truncate" style="max-width: 200px;" title="{{ $request->reason }}">
                                         {{ \Illuminate\Support\Str::limit($request->reason, 50) }}
                                     </td>
-                                    <td class="py-3">
-                                        <span class="px-2 py-1 small fw-semibold rounded-circle">
+                                    <td>
+                                        @php
+                                            $statusClasses = [
+                                                'pending' => 'bg-warning text-dark',
+                                                'approved' => 'bg-success text-white',
+                                                'rejected' => 'bg-danger text-white',
+                                            ];
+                                        @endphp
+                                        <span class="badge rounded-pill {{ $statusClasses[$request->status] ?? 'bg-secondary' }}">
                                             {{ ucfirst($request->status) }}
                                         </span>
                                     </td>
-                                    <td class="py-3 small fw-medium">
-                                        <a href="{{ route('overtime.show', $request) }}" class="text-primary mr-3">View</a>
+                                    <td>
+                                        <a href="{{ route('overtime.show', $request) }}" class="text-primary text-decoration-none me-3">View</a>
                                         @if($request->status === 'pending')
-                                            <a href="{{ route('overtime.edit', $request) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                            <form method="POST" action="{{ route('overtime.destroy', $request) }}" class="d-inline">
+                                            <a href="{{ route('overtime.edit', $request) }}" class="text-warning text-decoration-none me-3">Edit</a>
+                                            <form method="POST" action="{{ route('overtime.destroy', $request) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this request?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                                                <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger text-decoration-none">Delete</button>
                                             </form>
                                         @endif
                                     </td>
@@ -71,19 +78,32 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="border">
+                <div class="card-footer border-0 d-flex justify-content-center">
                     {{ $overtimeRequests->links() }}
                 </div>
             @else
-                <div class="text-center">
-                    <i class="text-muted mb-3"></i>
-                    <h3 class="h4 fw-medium mb-2">No overtime requests yet</h3>
-                    <p class="text-muted mb-3">You haven't submitted any overtime requests.</p>
-                    <a href="{{ route('overtime.create') }}" class="text-white px-4 py-2 rounded">
+                <div class="text-center py-5 px-3">
+                    <i class="fas fa-clock fa-5x text-secondary mb-4"></i>
+                    <h3 class="fw-semibold text-secondary mb-2">No overtime requests yet</h3>
+                    <p class="text-muted mb-4">You haven't submitted any overtime requests.</p>
+                    <a href="{{ route('overtime.create') }}" class="btn btn-primary btn-lg">
                         Submit Your First Request
                     </a>
                 </div>
             @endif
         </div>
     </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const alert = document.getElementById('alert-message');
+        if (alert) {
+            // Automatically dismiss after 3 seconds (3000ms)
+            setTimeout(() => {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }, 3000);
+        }
+    });
+</script>
 </x-app-layout>

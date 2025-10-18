@@ -22,8 +22,8 @@
             
             @if(count($overtimeRequests) > 0)
                 <div class="overflow-x-auto">
-                    <table class="bg-white border">
-                        <thead class="bg-light">
+                    <table class="border">
+                        <thead>
                             <tr>
                                 <th class="border px-4 py-2 text-start">Employee</th>
                                 <th class="border px-4 py-2 text-start">Date</th>
@@ -39,8 +39,8 @@
                                 <tr>
                                     <td class="border px-4 py-2">{{ $request->user->name }}</td>
                                     <td class="border px-4 py-2">{{ $request->overtime_date->format('Y-m-d') }}</td>
-                                    <td class="border px-4 py-2">{{ $request->start_time->format('H:i') }}</td>
-                                    <td class="border px-4 py-2">{{ $request->end_time->format('H:i') }}</td>
+                                    <td class="border px-4 py-2">{{ $request->start_time->format('h:i A') }}</td>
+                                    <td class="border px-4 py-2">{{ $request->end_time->format('h:i A') }}</td>
                                     <td class="border px-4 py-2">{{ $request->total_hours }}</td>
                                     <td class="border px-4 py-2">{{ $request->reason }}</td>
                                     <td class="border px-4 py-2">
@@ -49,7 +49,7 @@
                                             <input type="hidden" name="request_id" value="{{ $request->id }}">
                                             <input type="hidden" name="action" value="approve">
                                             <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 small mb-1 w-100">
-                                            <button type="submit" class="text-white px-3 py-1 rounded small w-100 mb-1">
+                                            <button type="submit" class=" px-3 py-1 rounded small w-100 mb-1">
                                                 Approve
                                             </button>
                                         </form>
@@ -58,7 +58,7 @@
                                             <input type="hidden" name="request_id" value="{{ $request->id }}">
                                             <input type="hidden" name="action" value="reject">
                                             <input type="text" name="manager_remarks" placeholder="Remarks (optional)" class="border rounded px-2 py-1 small mb-1 w-100">
-                                            <button type="submit" class="text-white px-3 py-1 rounded small w-100">
+                                            <button type="submit" class=" px-3 py-1 rounded small w-100">
                                                 Reject
                                             </button>
                                         </form>

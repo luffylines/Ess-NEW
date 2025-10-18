@@ -3,10 +3,12 @@
 namespace App\Traits;
 
 use App\Models\ActivityLog;
+use App\Services\IpAddressService;
 use Illuminate\Support\Facades\Auth;
 
 trait LogsActivity
 {
+
     /**
      * Log an activity
      */
@@ -16,7 +18,7 @@ trait LogsActivity
             'user_id' => Auth::id(),
             'action_type' => $actionType,
             'description' => $description,
-            'ip_address' => request()->ip(),
+            'ip_address' => IpAddressService::getRealIpAddress(),
             'user_agent' => request()->userAgent(),
             'properties' => $properties,
         ]);
