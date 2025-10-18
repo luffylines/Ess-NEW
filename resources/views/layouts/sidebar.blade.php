@@ -74,7 +74,7 @@
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('hr.create-for-employee.form') }}" class="nav-link">
-                                    <i class="far fa-circle me-2"></i>Create for Employee
+                                    <i class="far fa-circle me-2"></i>Create Employee Attendance
                                 </a>
                             </li>
                             <li class="nav-item">
