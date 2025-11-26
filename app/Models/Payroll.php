@@ -128,7 +128,7 @@ class Payroll extends Model
 
     public function getEmployeeDepartmentAttribute(): string
     {
-        return $this->user->department ?? 'General';
+        return $this->user->department ?? 'Salon';
     }
 
     public function getStatusBadge(): string
@@ -277,5 +277,60 @@ class Payroll extends Model
             'approved_by' => $approvedBy,
             'approved_at' => now()
         ]);
+    }
+    
+    // Accessors for overtime rates
+    public function getRegularOvertimeRateAttribute()
+    {
+        $hourlyRate = $this->daily_rate / 8; // 8 hours per day
+        return $hourlyRate * 1.25; // 125% for regular overtime
+    }
+    
+    public function getHolidayOvertimeRateAttribute()
+    {
+        $hourlyRate = $this->daily_rate / 8; // 8 hours per day
+        return $hourlyRate * 2.5; // 250% for holiday overtime
+    }
+    
+    public function getHourlyRateAttribute()
+    {
+        return $this->daily_rate / 8;
+    }
+    
+    // Recalculated overtime pay (in case stored values are incorrect)
+    public function getCalculatedRegularOvertimePayAttribute()
+    {
+        return $this->regular_overtime_hours * $this->regular_overtime_rate;
+    }
+    
+    public function getCalculatedHolidayOvertimePayAttribute()
+    {
+        return $this->holiday_overtime_hours * $this->holiday_overtime_rate;
+    }
+    
+    public function getCalculatedTotalOvertimePayAttribute()
+    {
+        return $this->calculated_regular_overtime_pay + $this->calculated_holiday_overtime_pay;
+    }
+    
+    public function getCalculatedGrossPayAttribute()
+    {
+        return $this->basic_pay + $this->calculated_total_overtime_pay;
+    }
+    
+    public function getCalculatedNetPayAttribute()
+    {
+        return $this->calculated_gross_pay - $this->total_deductions;
+    }
+    
+    // Method to recalculate and update stored overtime values
+    public function recalculateOvertimePay()
+    {
+        $this->regular_overtime_pay = $this->calculated_regular_overtime_pay;
+        $this->holiday_overtime_pay = $this->calculated_holiday_overtime_pay;
+        $this->total_overtime_pay = $this->calculated_total_overtime_pay;
+        $this->gross_pay = $this->calculated_gross_pay;
+        $this->net_pay = $this->calculated_net_pay;
+        return $this->save();
     }
 }

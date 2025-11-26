@@ -13,13 +13,26 @@
                     <i class="fas fa-arrow-left me-1"></i>Back to Payroll
                 </a>
                 @if($payroll->status === 'pending_approval')
-                    <button class="btn btn-warning me-2" onclick="editPayroll({{ $payroll->id }})">
+                    <a href="{{ route('hr.payroll.edit', $payroll) }}" class="btn btn-warning me-2">
                         <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                    <button class="btn btn-info me-2" onclick="recalculatePayroll({{ $payroll->id }})">
+                        <i class="fas fa-calculator me-1"></i>Recalculate
                     </button>
                     <button class="btn btn-success" onclick="approvePayroll({{ $payroll->id }})">
                         <i class="fas fa-check me-1"></i>Approve
                     </button>
+                @elseif($payroll->status === 'draft')
+                    <a href="{{ route('hr.payroll.edit', $payroll) }}" class="btn btn-warning me-2">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                    <button class="btn btn-info me-2" onclick="recalculatePayroll({{ $payroll->id }})">
+                        <i class="fas fa-calculator me-1"></i>Recalculate
+                    </button>
                 @else
+                    <button class="btn btn-outline-info me-2" onclick="recalculatePayroll({{ $payroll->id }})">
+                        <i class="fas fa-calculator me-1"></i>Recalculate Values
+                    </button>
                     <span class="badge bg-success fs-6 px-3 py-2">
                         <i class="fas fa-check me-1"></i>Approved
                     </span>
@@ -109,13 +122,13 @@
                                             @if($payroll->regular_overtime_hours > 0)
                                                 <tr>
                                                     <td class="fw-medium">Regular OT ({{ $payroll->regular_overtime_hours }}h):</td>
-                                                    <td class="text-end">₱{{ number_format($payroll->regular_overtime_pay, 2) }}</td>
+                                                    <td class="text-end">₱{{ number_format($payroll->calculated_regular_overtime_pay, 2) }}</td>
                                                 </tr>
                                             @endif
                                             @if($payroll->holiday_overtime_hours > 0)
                                                 <tr>
                                                     <td class="fw-medium">Holiday OT ({{ $payroll->holiday_overtime_hours }}h):</td>
-                                                    <td class="text-end">₱{{ number_format($payroll->holiday_overtime_pay, 2) }}</td>
+                                                    <td class="text-end">₱{{ number_format($payroll->calculated_holiday_overtime_pay, 2) }}</td>
                                                 </tr>
                                             @endif
                                             @if($payroll->holiday_pay > 0)
@@ -126,7 +139,7 @@
                                             @endif
                                             <tr class="border-top">
                                                 <td class="fw-bold text-success">Gross Pay:</td>
-                                                <td class="text-end fw-bold text-success fs-5">₱{{ number_format($payroll->gross_pay, 2) }}</td>
+                                                <td class="text-end fw-bold text-success fs-5">₱{{ number_format($payroll->calculated_gross_pay, 2) }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -202,7 +215,7 @@
                             <h4 class="fw-bold text-primary mb-2">
                                 <i class="fas fa-hand-holding-usd me-2"></i>Net Pay
                             </h4>
-                            <h2 class="fw-bold text-success mb-0">₱{{ number_format($payroll->net_pay, 2) }}</h2>
+                            <h2 class="fw-bold text-success mb-0">₱{{ number_format($payroll->calculated_net_pay, 2) }}</h2>
                         </div>
                     </div>
                 </div>
@@ -304,7 +317,7 @@
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Regular OT Pay:</span>
-                                    <span class="fw-bold">₱{{ number_format($payroll->regular_overtime_pay, 2) }}</span>
+                                    <span class="fw-bold">₱{{ number_format($payroll->calculated_regular_overtime_pay, 2) }}</span>
                                 </div>
                             @endif
                             @if($payroll->holiday_overtime_hours > 0)
@@ -314,7 +327,7 @@
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span>Holiday OT Pay:</span>
-                                    <span class="fw-bold">₱{{ number_format($payroll->holiday_overtime_pay, 2) }}</span>
+                                    <span class="fw-bold">₱{{ number_format($payroll->calculated_holiday_overtime_pay, 2) }}</span>
                                 </div>
                             @endif
                         </div>
@@ -354,6 +367,23 @@
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/hr/payroll/${payrollId}/approve`;
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                form.appendChild(csrfToken);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function recalculatePayroll(payrollId) {
+            if (confirm('Are you sure you want to recalculate this payroll? This will update overtime pay based on current rates.')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/hr/payroll/${payrollId}/recalculate`;
                 
                 const csrfToken = document.createElement('input');
                 csrfToken.type = 'hidden';

@@ -68,6 +68,11 @@ Route::middleware(['auth'])->group(function () {
     //overtime show
     Route::resource('overtime', OvertimeController::class)->middleware('auth');
     
+    // Fix negative overtime hours (admin only)
+    Route::post('/overtime/fix-negative-hours', [OvertimeController::class, 'fixNegativeHours'])
+        ->middleware(['auth', 'role:hr,manager'])
+        ->name('overtime.fixNegativeHours');
+    
     
     // HR/Manager create attendance for employee
     Route::post('/hr/create-for-employee', [AttendanceController::class, 'createForEmployee'])
@@ -119,8 +124,11 @@ Route::middleware(['auth', 'role:hr,manager,admin'])->group(function () {
     Route::post('/hr/payroll/generate', [PayslipController::class, 'generatePayroll'])->name('hr.payroll.generate');
     Route::post('/hr/payroll/generate-all', [PayslipController::class, 'generateAllPayrolls'])->name('hr.payroll.generate-all');
     Route::post('/hr/payroll/{payroll}/approve', [PayslipController::class, 'approvePayroll'])->name('hr.payroll.approve');
+    Route::post('/hr/payroll/{payroll}/recalculate', [PayslipController::class, 'recalculatePayroll'])->name('hr.payroll.recalculate');
     Route::post('/hr/payroll/bulk-approve', [PayslipController::class, 'bulkApprove'])->name('hr.payroll.bulk-approve');
     Route::get('/hr/payroll/{payroll}', [PayslipController::class, 'showPayroll'])->name('hr.payroll.show');
+    Route::get('/hr/payroll/{payroll}/edit', [PayslipController::class, 'editPayroll'])->name('hr.payroll.edit');
+    Route::put('/hr/payroll/{payroll}', [PayslipController::class, 'updatePayroll'])->name('hr.payroll.update');
     Route::delete('/hr/payroll/{payroll}', [PayslipController::class, 'deletePayroll'])->name('hr.payroll.delete');
     Route::get('/hr/payslips', [PayslipController::class, 'payslipManagement'])->name('hr.payslips.index');
 });

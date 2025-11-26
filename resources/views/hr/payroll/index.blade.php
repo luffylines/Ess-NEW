@@ -400,7 +400,7 @@
 
         // Edit Payroll Function
         function editPayroll(payrollId) {
-            window.location.href = `/hr/payroll/${payrollId}/edit`;
+            window.location.href = `{{ url('hr/payroll') }}/${payrollId}/edit`;
         }
     </script>
 

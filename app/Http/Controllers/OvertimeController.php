@@ -37,18 +37,25 @@ class OvertimeController extends Controller
         $request->validate([
             'overtime_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'end_time' => 'required|date_format:H:i',
             'reason' => 'required|string|max:500',
             'supporting_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
         ]);
 
         $startTime = Carbon::createFromFormat('H:i', $request->start_time);
         $endTime = Carbon::createFromFormat('H:i', $request->end_time);
-            if ($endTime->lessThanOrEqualTo($startTime)) {
-            return back()->withErrors(['end_time' => 'End time must be after start time.'])->withInput();
+        
+        // Handle overnight shifts (when end time is on next day)
+        if ($endTime->lessThanOrEqualTo($startTime)) {
+            $endTime->addDay();
         }
 
-        $totalHours = $endTime->floatDiffInHours($startTime);
+        $totalHours = $endTime->diffInHours($startTime, false);
+        
+        // Use more precise calculation for minutes
+        $totalMinutes = $startTime->diffInMinutes($endTime, false);
+        $totalHours = round($totalMinutes / 60, 2);
+        
                 $documentPath = null;
                 if ($request->hasFile('supporting_document')) {
                     $documentPath = $request->file('supporting_document')->store('overtime_documents', 'public');
@@ -105,14 +112,24 @@ class OvertimeController extends Controller
         $request->validate([
             'overtime_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'end_time' => 'required|date_format:H:i',
             'reason' => 'required|string|max:500',
             'supporting_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
         ]);
 
         $startTime = Carbon::createFromFormat('H:i', $request->start_time);
         $endTime = Carbon::createFromFormat('H:i', $request->end_time);
-        $totalHours = $endTime->floatDiffInHours($startTime);
+        
+        // Handle overnight shifts (when end time is on next day)
+        if ($endTime->lessThanOrEqualTo($startTime)) {
+            $endTime->addDay();
+        }
+
+        $totalHours = $endTime->diffInHours($startTime, false);
+        
+        // Use more precise calculation for minutes
+        $totalMinutes = $startTime->diffInMinutes($endTime, false);
+        $totalHours = round($totalMinutes / 60, 2);
 
         $documentPath = $overtimeRequest->supporting_document;
         if ($request->hasFile('supporting_document')) {
@@ -145,5 +162,38 @@ class OvertimeController extends Controller
 
         return redirect()->route('overtime.index')
             ->with('success', 'Overtime request deleted successfully!');
+    }
+
+    // Fix negative overtime hours for existing records
+    public function fixNegativeHours()
+    {
+        // Check if user is admin/hr
+        if (!in_array(Auth::user()->role, ['admin', 'hr', 'manager'])) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $negativeOvertimes = OvertimeRequest::where('total_hours', '<', 0)->get();
+        $fixed = 0;
+
+        foreach ($negativeOvertimes as $overtime) {
+            $startTime = Carbon::createFromFormat('H:i', $overtime->start_time);
+            $endTime = Carbon::createFromFormat('H:i', $overtime->end_time);
+            
+            // Handle overnight shifts
+            if ($endTime->lessThanOrEqualTo($startTime)) {
+                $endTime->addDay();
+            }
+            
+            // Recalculate with proper method
+            $totalMinutes = $endTime->diffInMinutes($startTime, false);
+            $totalHours = round($totalMinutes / 60, 2);
+            
+            if ($totalHours > 0) {
+                $overtime->update(['total_hours' => $totalHours]);
+                $fixed++;
+            }
+        }
+
+        return redirect()->back()->with('success', "Fixed {$fixed} overtime records with negative hours.");
     }
 }

@@ -304,6 +304,34 @@ class PayslipController extends Controller
         return back()->with('success', 'Payroll approved and payslip generated!');
     }
 
+    // HR/Manager: Recalculate payroll overtime
+    public function recalculatePayroll(Payroll $payroll)
+    {
+        // Check HR/Manager access
+        if (!in_array(Auth::user()->role, ['hr', 'manager', 'admin'])) {
+            abort(403, 'Only HR/Managers can recalculate payrolls');
+        }
+        
+        try {
+            $payroll->recalculateOvertimePay();
+            
+            // Update related payslip if it exists
+            $payslip = $payroll->payslips()->first();
+            if ($payslip) {
+                $payslip->basic_pay = $payroll->basic_pay;
+                $payslip->total_overtime_pay = $payroll->total_overtime_pay;
+                $payslip->gross_pay = $payroll->gross_pay;
+                $payslip->net_pay = $payroll->net_pay;
+                $payslip->save();
+            }
+            
+            return back()->with('success', 'Payroll recalculated successfully! Overtime pay updated.');
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to recalculate payroll: ' . $e->getMessage());
+        }
+    }
+
     // HR/Manager: Bulk approve payrolls
     public function bulkApprove(Request $request)
     {
@@ -342,6 +370,93 @@ class PayslipController extends Controller
         $payroll->load(['user', 'approvedBy', 'payslips']);
         
         return view('hr.payroll.show', compact('payroll'));
+    }
+
+    // HR/Manager: Show edit form for payroll
+    public function editPayroll(Payroll $payroll)
+    {
+        // Check HR/Manager access
+        if (!in_array(Auth::user()->role, ['hr', 'manager', 'admin'])) {
+            abort(403, 'Only HR/Managers can edit payrolls');
+        }
+        
+        // Only allow editing of draft or pending payrolls
+        if (!in_array($payroll->status, ['draft', 'pending_approval'])) {
+            return redirect()->back()->with('error', 'Cannot edit approved payrolls');
+        }
+        
+        $payroll->load('user');
+        
+        return view('hr.payroll.edit', compact('payroll'));
+    }
+
+    // HR/Manager: Update payroll
+    public function updatePayroll(Request $request, Payroll $payroll)
+    {
+        // Check HR/Manager access
+        if (!in_array(Auth::user()->role, ['hr', 'manager', 'admin'])) {
+            abort(403, 'Only HR/Managers can update payrolls');
+        }
+        
+        // Only allow editing of draft or pending payrolls
+        if (!in_array($payroll->status, ['draft', 'pending_approval'])) {
+            return redirect()->back()->with('error', 'Cannot edit approved payrolls');
+        }
+        
+        $request->validate([
+            'basic_pay' => 'required|numeric|min:0',
+            'regular_overtime_hours' => 'nullable|numeric|min:0',
+            'holiday_overtime_hours' => 'nullable|numeric|min:0',
+            'late_deductions' => 'nullable|numeric|min:0',
+            'undertime_deductions' => 'nullable|numeric|min:0',
+            'absent_deductions' => 'nullable|numeric|min:0',
+            'other_deductions' => 'nullable|numeric|min:0',
+        ]);
+        
+        try {
+            // Update payroll fields
+            $payroll->basic_pay = $request->basic_pay;
+            $payroll->regular_overtime_hours = $request->regular_overtime_hours ?? 0;
+            $payroll->holiday_overtime_hours = $request->holiday_overtime_hours ?? 0;
+            $payroll->late_deductions = $request->late_deductions ?? 0;
+            $payroll->undertime_deductions = $request->undertime_deductions ?? 0;
+            $payroll->absent_deductions = $request->absent_deductions ?? 0;
+            $payroll->other_deductions = $request->other_deductions ?? 0;
+            
+            // Recalculate derived fields
+            $payroll->total_overtime_pay = ($payroll->regular_overtime_hours * $payroll->regular_overtime_rate) + 
+                                         ($payroll->holiday_overtime_hours * $payroll->holiday_overtime_rate);
+            
+            $payroll->gross_pay = $payroll->basic_pay + $payroll->total_overtime_pay;
+            
+            $payroll->total_deductions = $payroll->sss_contribution + $payroll->philhealth_contribution + 
+                                       $payroll->pagibig_contribution + $payroll->withholding_tax + 
+                                       $payroll->late_deductions + $payroll->undertime_deductions + 
+                                       $payroll->absent_deductions + $payroll->other_deductions;
+            
+            $payroll->net_pay = $payroll->gross_pay - $payroll->total_deductions;
+            
+            $payroll->save();
+            
+            // Update related payslip if it exists
+            $payslip = $payroll->payslips()->first();
+            if ($payslip) {
+                $payslip->basic_pay = $payroll->basic_pay;
+                $payslip->total_overtime_pay = $payroll->total_overtime_pay;
+                $payslip->gross_pay = $payroll->gross_pay;
+                $payslip->total_deductions = $payroll->total_deductions;
+                $payslip->net_pay = $payroll->net_pay;
+                $payslip->save();
+            }
+            
+            return redirect()->route('hr.payroll.show', $payroll)
+                           ->with('success', 'Payroll updated successfully!');
+                           
+        } catch (\Exception $e) {
+            return redirect()->back()
+                           ->with('error', 'Failed to update payroll: ' . $e->getMessage())
+                           ->withInput();
+        }
     }
 
     // HR/Manager: Delete payroll (only drafts)

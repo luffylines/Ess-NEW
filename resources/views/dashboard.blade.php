@@ -185,22 +185,22 @@
                             @if($upcomingHolidays->count() > 0)
                             <div class="row mb-4">
                                 <div class="col-12">
-                                    <div class="card shadow-sm">
-                                        <div class="card-header bg-gradient-primary text-white">
+                                    <div class="card-1 card shadow-sm rounded-4 p-3">
+                                        <div class="card-1 card shadow-sm rounded-4 p-3">
                                             <h5 class="mb-0">
                                                 <i class="fas fa-star me-2"></i>
                                                 Upcoming Holidays (Next 30 Days)
                                             </h5>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-1 card shadow-sm rounded-4 p-3 mt-3">
                                             <div class="row">
                                                 @foreach($upcomingHolidays as $holiday)
                                                 <div class="col-md-6 col-lg-4 mb-3">
                                                     <div class="border rounded p-3 h-100 {{ $holiday->type === 'regular' ? 'border-danger' : 'border-warning' }}">
                                                         <div class="d-flex justify-content-between align-items-start">
                                                             <div>
-                                                                <h6 class="fw-bold text-dark mb-1">{{ $holiday->name }}</h6>
-                                                                <p class="text-muted mb-1">
+                                                                <h6 class="fw-bold mb-1">{{ $holiday->name }}</h6>
+                                                                <p class=" mb-1">
                                                                     {{ \Carbon\Carbon::parse($holiday->date)->format('l, F j, Y') }}
                                                                 </p>
                                                                 <small class="badge {{ $holiday->type === 'regular' ? 'bg-danger' : 'bg-warning' }}">
@@ -212,7 +212,7 @@
                                                             </div>
                                                         </div>
                                                         @if($holiday->type === 'regular')
-                                                        <small class="text-muted d-block mt-2">
+                                                        <small class="d-block mt-2">
                                                             <i class="fas fa-info-circle me-1"></i>
                                                             Double pay applies
                                                         </small>
