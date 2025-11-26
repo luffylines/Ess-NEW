@@ -3,8 +3,8 @@
 @section('content')
     <div class="py-3">
         <div class="px-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
+            <div class="shadow-sm">
+                
                     @if(Auth::user()->role === 'admin')
                         @include('admin.dashboard')
                     @elseif(Auth::user()->role === 'hr' || Auth::user()->role === 'manager')
@@ -103,7 +103,7 @@
                                     <div class="card {{ $isTodayHoliday ? 'bg-danger' : 'bg-dark' }} text-white shadow-sm h-100 stats-card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
-                                                <h5 class="card-title mb-1">Today's Status</h5>
+                                                <h5 class="mb-1">Today's Status</h5>
                                                 <h2 class="mb-0">{{ $isTodayHoliday ? 'Holiday' : 'Work Day' }}</h2>
                                                 <small class="opacity-75">{{ \Carbon\Carbon::now()->format('M j, Y') }}</small>
                                             </div>
@@ -144,7 +144,7 @@
                             {{-- Status Cards --}}
                             <div class="row mb-4">
                                 <div class="col-md-4 mb-3">
-                                    <div class="card shadow-sm text-center stats-card">
+                                    <div class="card-1 card shadow-sm text-center stats-card">
                                         <div class="card-body">
                                             <i class="fas fa-hourglass-half text-warning fa-2x mb-2"></i>
                                             <h5 class="card-title">Pending Requests</h5>
@@ -155,7 +155,7 @@
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <div class="card shadow-sm text-center stats-card">
+                                    <div class="card-1 card shadow-sm text-center stats-card">
                                         <div class="card-body">
                                             <i class="fas fa-calendar-day text-success fa-2x mb-2"></i>
                                             <h5 class="card-title">Upcoming Leave</h5>
@@ -170,7 +170,7 @@
                                 </div>
 
                                 <div class="col-md-4 mb-3">
-                                    <div class="card shadow-sm text-center stats-card">
+                                    <div class="card-1 card shadow-sm text-center stats-card">
                                         <div class="card-body">
                                             <i class="fas fa-user-check text-primary fa-2x mb-2"></i>
                                             <h5 class="card-title">This Month</h5>
@@ -230,13 +230,13 @@
                             {{-- Charts Section (Side by Side) --}}
                             <div class="row mb-4">
                                 <div class="col-lg-6 mb-3">
-                                    <div class="card shadow-sm rounded-4 p-3">
+                                    <div class="card-1 card shadow-sm rounded-4 p-3">
                                         <h5>Attendance Overview (Last 30 Days) - Line Chart</h5>
                                         <canvas id="lineAttendanceChart" height="150"></canvas>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 mb-3">
-                                    <div class="card shadow-sm rounded-4 p-3">
+                                    <div class="card-1 card shadow-sm rounded-4 p-3">
                                         <h5>Attendance Overview (Last 30 Days) - Bar Chart</h5>
                                         <canvas id="barAttendanceChart" height="150"></canvas>
                                     </div>
@@ -246,7 +246,7 @@
                             {{-- Recent Attendance --}}
                             <div class="row mb-4">
                                 <div class="col-lg-4 mb-3">
-                                    <div class="card shadow-sm">
+                                    <div class="card-1 card shadow-sm">
                                         <div class="card-header">
                                             <h5 class="card-title mb-0">Recent Attendance</h5>
                                         </div>
@@ -275,7 +275,7 @@
 
                                 {{-- Monthly Stats --}}
                                 <div class="col-lg-8 mb-3">
-                                    <div class="card shadow-sm">
+                                    <div class="card-1 card shadow-sm">
                                         <div class="card-header">
                                             <h5 class="card-title mb-0">
                                                 Monthly Attendance Statistics ({{ \Carbon\Carbon::now()->year }})
@@ -327,7 +327,7 @@
                             {{-- Leave Requests Section --}}
                             <div class="row mb-4">
                                 <div class="col-md-12">
-                                    <div class="card shadow-sm rounded-4 p-3">
+                                    <div class="card-1 card shadow-sm rounded-4 p-3">
                                         <h5>Leave Requests</h5>
                                         @forelse ($leaveRequests ?? [] as $leaveRequest)
                                             <div class="alert alert-info d-flex justify-content-between align-items-center">
@@ -354,7 +354,7 @@
                             {{-- Recent Activity Section --}}
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div class="card shadow-sm rounded-4 p-3">
+                                    <div class="card-1 card shadow-sm rounded-4 p-3">
                                         <h5>Recent Activity</h5>
                                         @forelse ($recentActivities ?? [] as $activity)
                                             <div class="alert alert-light">
@@ -388,6 +388,20 @@
             transform: translateY(-8px);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
         }
+        /* Dark Mode */
+.dark .card-1 {
+    background-color: #1e1e2f !important;
+    color: #ffffff !important;
+    border-color: #2c2c3b;
+}
+
+
+.dark .table td,
+.dark .table th {
+    background-color: #1e1e2f;
+    color: #ffffff;
+}
+
     </style>
 
 

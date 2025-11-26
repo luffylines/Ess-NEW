@@ -1,11 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    /* Table Row Hover Effect (Lift) */
+    .employee-row {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .employee-row:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
+    }
+
+    /* Button Styling */
+    .btn-outline-primary:hover { background-color: #0d6efd; color: #fff; }
+    .btn-outline-danger:hover { background-color: #dc3545; color: #fff; }
+    .btn-outline-secondary:hover { background-color: #6c757d; color: #fff; }
+
+    /* Status Badges */
+    .badge-success { background-color: #28a745 !important; }
+    .badge-warning { background-color: #ffc107 !important; color: #000 !important; }
+</style>
+
 <div class="container-fluid py-4">
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Employees Management</h2>
-        <a href="{{ route('admin.employees.create') }}" class="btn btn-success fw-semibold d-flex align-items-center gap-2">
+        <h2 class="fw-bold mb-0 text-primary">Employees Management</h2>
+        <a href="{{ route('admin.employees.create') }}" class="btn btn-success fw-semibold d-flex align-items-center gap-2 shadow-sm">
             <i class="bi bi-person-plus-fill"></i> Add Employee
         </a>
     </div>
@@ -17,10 +39,16 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-
+    <!-- Error Message -->
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
     <!-- Employees Table -->
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-header bg-primary text-white fw-semibold">
+        <div class="card-header bg-gradient bg-primary text-white fw-semibold">
             Employees List
         </div>
         <div class="card-body p-0">
@@ -28,27 +56,27 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light text-secondary">
                         <tr>
-                            <th scope="col">Employee ID</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Role</th>
-                            <th scope="col">Phone</th>
-                            <th scope="col">Status</th>
-                            <th scope="col" class="text-center">Actions</th>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($employees as $employee)
-                            <tr>
+                            <tr class="employee-row">
                                 <td class="fw-semibold">{{ $employee->employee_id ?? $employee->id }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if($employee->profile_photo)
-                                            <img src="{{ asset('storage/' . $employee->profile_photo) }}" 
-                                                 alt="Profile" class="rounded-circle me-2" width="40" height="40">
+                                            <img src="{{ asset('storage/' . $employee->profile_photo) }}"
+                                                 alt="Profile" class="rounded-circle me-2 shadow-sm" width="40" height="40">
                                         @else
-                                            <img src="{{ asset('img/default-avatar.png') }}" 
-                                                 alt="Default" class="rounded-circle me-2" width="40" height="40">
+                                            <img src="{{ asset('img/default-avatar.png') }}"
+                                                 alt="Default" class="rounded-circle me-2 shadow-sm" width="40" height="40">
                                         @endif
                                         <div>
                                             <span class="fw-semibold">{{ $employee->name }}</span><br>
@@ -61,28 +89,22 @@
                                 <td>{{ $employee->phone ?? '—' }}</td>
                                 <td>
                                     @if($employee->remember_token)
-                                        <span class="badge bg-warning text-dark">Pending Setup</span>
+                                        <span class="badge badge-warning">Pending Setup</span>
                                     @else
-                                        <span class="badge bg-success">Active</span>
+                                        <span class="badge badge-success">Active</span>
                                     @endif
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
-                                        <!-- Edit -->
-                                        <a href="{{ route('admin.employees.edit', $employee->id) }}" 
+                                        <a href="{{ route('admin.employees.edit', $employee->id) }}"
                                            class="btn btn-outline-primary btn-sm">
                                             <i class="bi bi-pencil-square"></i> Edit
                                         </a>
-
-                                        <!-- Delete -->
-                                        <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                data-bs-toggle="modal" 
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                data-bs-toggle="modal"
                                                 data-bs-target="#deleteModal{{ $employee->id }}">
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
-
-
-                                        <!-- Resend Invitation -->
                                         @if($employee->remember_token)
                                             <button type="button" class="btn btn-outline-secondary btn-sm"
                                                     onclick="resendInvitation({{ $employee->id }}, '{{ $employee->name }}')">
@@ -92,7 +114,6 @@
                                     </div>
                                 </td>
                             </tr>
-
                             <!-- Delete Confirmation Modal -->
                             <div class="modal fade" id="deleteModal{{ $employee->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
@@ -119,7 +140,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center text-muted py-4">
-                                    No employees found. 
+                                    No employees found.
                                     <a href="{{ route('admin.employees.create') }}" class="text-primary text-decoration-none">
                                         Add your first employee
                                     </a>
@@ -134,37 +155,38 @@
 </div>
 
 <!-- JS -->
-
-<!-- CSRF Meta -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<!-- JS: Resend Invitation -->
 <script>
-    function resendInvitation(employeeId, employeeName) {
-        if (!confirm(`Resend invitation to ${employeeName}?`)) return;
+function resendInvitation(employeeId, employeeName) {
+    if (!confirm(`Resend invitation to ${employeeName}?`)) return;
 
-        fetch(`/admin/employees/${employeeId}/resend`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(data.message);
-            } else if (data.error) {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Resend failed:', error);
-            alert('Something went wrong while resending the invitation.');
-        });
+    fetch(`/admin/employees/${employeeId}/resend`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || 'Error occurred.');
+    })
+    .catch(() => alert('Something went wrong while resending the invitation.'));
+}
+// Auto-dismiss alerts after 3 seconds
+document.addEventListener('DOMContentLoaded', () => {
+    const alert = document.querySelector('.alert-dismissible');
+    if (alert) {
+        // Automatically dismiss after 3 seconds (3000ms)
+        setTimeout(() => {
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+            bsAlert.close();
+        }, 3000);
     }
+});
 </script>
-<!-- Bootstrap Icons -->
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 @endsection

@@ -35,6 +35,10 @@ Route::patch('/profile/update-password', [ProfileController::class, 'updatePassw
     
 Route::middleware('guest')->group(function () {
     Route::get('/about', [GuestPageController::class, 'about'])->name('about');
+    Route::get('/guest/attendance', [GuestPageController::class, 'attendance'])->name('guest.attendance');
+    Route::get('/guest/reports', [GuestPageController::class, 'reports'])->name('guest.reports');
+    Route::get('/guest/tasks', [GuestPageController::class, 'tasks'])->name('guest.tasks');
+    //contact page and feedback submission
     Route::get('/contact', [GuestPageController::class, 'contact'])->name('contact');
     Route::post('/submit-feedback', [FeedbackController::class, 'submit'])->name('submitFeedback');
     Route::get('/terms', [GuestPageController::class, 'terms'])->name('terms');

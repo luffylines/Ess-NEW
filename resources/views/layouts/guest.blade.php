@@ -18,6 +18,7 @@
 
     <!-- Google reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -48,7 +49,7 @@
             <!-- Left Side: Image - Hidden on mobile, visible on tablet+ -->
             <div class="col-lg-6 col-xl-7 d-none d-md-block position-relative">
                 <div class="position-absolute top-0 start-0 w-100 h-100" 
-                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                     style="background: linear-gradient(135deg, #ea6692 0%, #e61ba2 100%);">
                     <div class="d-flex align-items-center justify-content-center h-100 text-white text-center p-4">
                         <div>
                             <h1 class="display-4 fw-bold mb-3">Welcome</h1>

@@ -20,9 +20,9 @@
     <!-- Custom Theme Styles -->
     <style>
         :root {
-            --bs-primary: #0d6efd;
+             --bs-primary: #dd1f7e;
             --bs-dark-bg: #1a1a1a;
-            --bs-light-bg: #ffffff;
+            --bs-light-bg: hsla(324, 14%, 93%, 1.00);
         }
 
         body.light {
@@ -48,19 +48,6 @@
             border-color: #444;
         }
 
-        .navbar-light .nav-link {
-            color: #000 !important;
-        }
-
-        .navbar-dark .nav-link {
-            color: #ffffff !important;
-        }
-
-        .navbar-dark .navbar-brand,
-        .navbar-light .navbar-brand {
-            font-weight: 600;
-        }
-
         .dropdown-item:hover {
             background-color: #f0f0f0;
         }
@@ -80,10 +67,112 @@
         main {
             margin-top: 80px;
         }
+    /* Navbar */
+    .navbar {
+        background-color: #ff69b4 !important; /* Baby pink */
+        border-bottom: none; /* slightly deeper pink for definition */
+    }
+
+    .navbar .navbar-brand,
+    .navbar .nav-link {
+        color: #000 !important;
+        font-weight: 500;
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link:focus,
+    .navbar .nav-item.active .nav-link {
+        color: #fff !important;
+        background-color: #f4a8c4 !important;
+        border-radius: 6px;
+    }
+
+    .dropdown-menu {
+        background-color: #FADADD !important;
+        border: 1px solid #f8c8dc !important;
+    }
+
+    .dropdown-item {
+        color: #000 !important;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        background-color: #f4a8c4 !important;
+        color: #fff !important;
+    }
+
+    .navbar-toggler {
+        border-color: #f4a8c4 !important;
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='black' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+    }
+
+    .navbar,
+    .dropdown-menu,
+    .navbar .nav-link {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    /* Navbar Darkmode */
+    body.dark-mode .navbar {
+        background-color: #333 !important; /* Dark background */
+        border-bottom: 2px solid #555 !important; /* Darker border */
+    }
+
+    body.dark .navbar .navbar-brand,
+    body.dark .navbar .nav-link {
+        color: #fff !important;
+        font-weight: 500;
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+
+    body.dark-mode .navbar .nav-link:hover,
+    body.dark-mode .navbar .nav-link:focus,
+    body.dark-mode .navbar .nav-item.active .nav-link {
+        color: #fff !important;
+        background-color: #f4a8c4 !important;
+        border-radius: 6px;
+    }
+
+    body.dark-mode .dropdown-menu {
+        background-color: #FADADD !important;
+        border: 1px solid #f8c8dc !important;
+    }
+
+    body.dark-mode .dropdown-item {
+        color: #fff !important;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body.dark-mode .dropdown-item:hover,
+    .dropdown-item:focus {
+        background-color: #f4a8c4 !important;
+        color: #fff !important;
+    }
+
+    body.dark-mode .navbar-toggler {
+        border-color: #f4a8c4 !important;
+    }
+
+    body.dark-mode .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='black' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+    }
+
+    body.dark-mode .navbar,
+    body.dark-mode .dropdown-menu,
+    body.dark-mode .navbar .nav-link {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
     </style>
 
     <!-- Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @yield('styles')
 </head>
 
 <body class="{{ (Auth::check() && Auth::user()->display_mode === 'dark') ? 'dark' : 'light' }}">
@@ -108,22 +197,13 @@
                     <ul class="navbar-nav me-auto">
                         @auth
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a>
+                                <a class="nav-link" href="{{ route('dashboard') }}" class="nav-link">
+                                    <i class="fas fa-tachometer-alt nav-icon me-2"></i>Dashboard</a>
                             </li>
 
                             @if(auth()->user()->role === 'admin')
-                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.index') }}">Employees</a></li>
-
-                                <li class="nav-item dropdown">
-                                    <a id="deductionsDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                        Deductions & Contributions
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('admin.loans.sss') }}">SSS Loan</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.loans.pagibig') }}">Pag-Ibig Loan</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.loans.company') }}">Company Loan</a></li>
-                                    </ul>
-                                </li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.index') }}"><i class="fas fa-users nav-icon me-2"></i> Employees</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('admin.activity-logs.index') }}"><i class="fas fa-history nav-icon me-2"></i> Activity Logs</a></li>
 
                             @elseif(auth()->user()->role === 'hr' || auth()->user()->role === 'manager')
                                                     <li class="nav-item">
@@ -226,7 +306,7 @@
                 <div class="row text-center text-md-start">
                     <div class="col-md-3 mb-3">
                         <h5>About ESS</h5>
-                        <p>Employee Self-Service (ESS) system by Christian Baynado Aring. Streamline employee attendance, reports, and tasks efficiently.</p>
+                        <p>Employee Self-Service (ESS) Streamline employee attendance, reports, and tasks efficiently.</p>
                     </div>
                     <div class="col-md-3 mb-3">
                         <h5>Links</h5>
@@ -239,14 +319,14 @@
                     </div>
                     <div class="col-md-3 mb-3">
                         <h5>Developer</h5>
-                        <p>Christian Aring</p>
+                        <p>Christian Aring And Rovic Cabansag</p>
                         <p>Email: <a href="mailto:chba.aring.sjc@phinmaed.com">chba.aring.sjc@phinmaed.com</a></p>
                     </div>
                     <div class="col-md-3 mb-3">
                         <h5>Social</h5>
-                        <a href="#" class="me-2"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://www.facebook.com/christianaring6" class="me-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/crstn.aring6" class="me-2"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/in/christian-aring-57bab1344/"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
                 <div class="text-center mt-3">

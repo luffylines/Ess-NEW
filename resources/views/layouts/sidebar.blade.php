@@ -103,18 +103,6 @@
                     <li class="nav-item"><a href="{{ route('leave.index') }}" class="nav-link"><i class="fas fa-plane me-2"></i>My Leave Requests</a></li>
                     <li class="nav-item"><a href="{{ route('payslip.index') }}" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i>Payslips</a></li>
                     
-                    <!-- Deductions Dropdown -->
-                    <li class="nav-item">
-                        <a href="#" class="nav-link dropdown-toggle" id="deductionsToggle">
-                            <i class="fas fa-coins nav-icon me-2"></i> Deductions & Contributions
-                        </a>
-                        <ul class="nav flex-column ms-4" id="deductionsMenu" style="display: none;">
-                            <li class="nav-item"><a href="{{ route('admin.loans.sss') }}" class="nav-link"><i class="far fa-circle me-2"></i>SSS Loan</a></li>
-                            <li class="nav-item"><a href="{{ route('admin.loans.pagibig') }}" class="nav-link"><i class="far fa-circle me-2"></i>Pag-IBIG Loan</a></li>
-                            <li class="nav-item"><a href="{{ route('admin.loans.company') }}" class="nav-link"><i class="far fa-circle me-2"></i>Company Loan</a></li>
-                        </ul>
-                    </li>
-                    
                 @endif
 
             </ul>

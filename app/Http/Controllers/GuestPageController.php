@@ -25,4 +25,17 @@ class GuestPageController extends Controller
     {
         return view('guest.system-info');
     }
+
+    public function attendance()
+    {
+        return view('guest.attendance');
+    }
+    public function reports()
+    {
+        return view('guest.reports');
+    }
+    public function tasks()
+    {
+        return view('guest.tasks');
+    }
 }

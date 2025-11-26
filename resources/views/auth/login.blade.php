@@ -1,16 +1,16 @@
 @extends('layouts.guest')
 
 @section('content')
-<div class="card shadow-lg rounded-4 bg-white">
+<div class="card shadow-lg rounded-4 bgcolor">
     <div class="card-body p-10 p-md-4">
 
         <!-- Logo / Title -->
         <div class="mb-2 text-center">
-            <span class="h2 fw-bold text-primary">Salon</span>
+            <span class="text h2 fw-bold text">Place Of Beauty</span>
         </div>
 
-        <h3 class="fw-semibold mb-1 text-secondary text-center">Welcome Back</h3>
-        <p class="text-muted mb-4 text-center">Use your Employee ID or Gmail to log in</p>
+        <h3 class="text fw-semibold mb-1 text-center">Welcome Back</h3>
+        <p class="text mb-4 text-center">Use your Employee ID or Gmail to log in</p>
 
         <!-- Session Status -->
         @if (session('status'))
@@ -34,11 +34,11 @@
 
             <!-- Role Selection -->
             <div class="d-flex justify-content-center mb-4 gap-3">
-                <div id="employee" class="role-box p-2 rounded-3 border border-secondary text-center fw-semibold text-secondary"
+                <div id="employee" class="text role-box p-2 rounded-3 border border-secondary text-center fw-semibold"
                      onclick="selectRole('employee')" role="button" tabindex="0">
                     Employee
                 </div>
-                <div id="manager" class="role-box p-2 rounded-3 border border-secondary text-center fw-semibold text-secondary"
+                <div id="manager" class="text role-box p-2 rounded-3 border border-secondary text-center fw-semibold"
                      onclick="selectRole('manager')" role="button" tabindex="0">
                     Manager
                 </div>
@@ -47,7 +47,7 @@
 
             <!-- Employee ID or Gmail -->
             <div class="mb-3">
-                <label for="login" class="form-label fw-semibold text-secondary">Employee ID or Gmail</label>
+                <label for="login" class="text form-label fw-semibold">Employee ID or Gmail</label>
                 <input type="text" id="login" name="login"
                        value="{{ old('login') }}"
                        required autofocus
@@ -60,7 +60,7 @@
 
             <!-- Password -->
             <div class="mb-3">
-                <label for="password" class="form-label fw-semibold text-secondary">Password</label>
+                <label for="password" class="text form-label fw-semibold ">Password</label>
                 <div class="position-relative">
                     <input id="password" type="password" name="password"
                            class="form-control form-control-lg rounded-3 pe-5 shadow-sm"
@@ -78,13 +78,13 @@
             <!-- Remember Me -->
             <div class="form-check mb-3">
                 <input id="remember_me" type="checkbox" class="form-check-input" name="remember">
-                <label for="remember_me" class="form-check-label small text-muted">Remember me</label>
+                <label for="remember_me" class="form-check-label small text">Remember me</label>
             </div>
 
             <!-- Google reCAPTCHA -->
             <div class="mb-1 text-center">
                 <!-- Using Google's test site key that works on any domain -->
-                <div class="g-recaptcha d-inline-block" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-callback="recaptchaCallback" data-error-callback="recaptchaError"></div>
+                <div class="g-recaptcha d-inline-block" data-sitekey="6Lfv5fArAAAAAPvO-IYEtHxiwPmU4YRYmYifrw8j" data-callback="recaptchaCallback" data-error-callback="recaptchaError"></div>
                 @error('g-recaptcha-response')
                     <div class="text-danger mt-2">{{ $message }}</div>
                 @enderror
@@ -102,7 +102,7 @@
             <!-- Google Sign-In -->
             <div class="d-flex justify-content-center mb-3">
                 <a href="{{ route('google.redirect') }}"
-                   class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2 px-4 py-2 w-100 fw-semibold rounded-3 shadow-sm">
+                   class="text btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2 px-4 py-2 w-100 fw-semibold rounded-3 shadow-sm">
                     <img src="{{ asset('img/google.png') }}" width="20" alt="Google logo">
                     Sign in with Google
                 </a>
@@ -111,7 +111,7 @@
             <!-- Forgot Password -->
             @if (Route::has('password.request'))
                 <p class="small mb-2 text-center">
-                    <a class="text-muted text-decoration-none" href="{{ route('password.request') }}">Forgot password?</a>
+                    <a class="text text-decoration-none" href="{{ route('password.request') }}">Forgot password?</a>
                 </p>
             @endif
         </form>
@@ -155,6 +155,7 @@
         document.getElementById('recaptcha-error').innerHTML = 'reCAPTCHA failed to load. Please refresh the page.';
         document.getElementById('recaptcha-error').style.display = 'block';
     }
+    
 
     // Auto-hide error messages after 5 seconds
     document.addEventListener('DOMContentLoaded', function() {
@@ -175,6 +176,14 @@
 </script>
 
 <style>
+
+    .bgcolor {
+        background: linear-gradient(90deg, #ff79bc 0%, #dd1f7e 100%);
+    }
+
+    .text, .text-muted {
+        color: #0f090c;
+    }
     @media screen and (max-width: 400px) {
     .g-recaptcha {
       transform: scale(0.75);
@@ -193,13 +202,13 @@
     }
 
     .btn-gradient-primary {
-        background: linear-gradient(90deg, #ff00d4 0%, #ff33ee 100%);
+        background: linear-gradient(90deg, #0f090c 0%, #0f090c 100%);
         border: none;
         color: white;
     }
 
     .btn-gradient-primary:hover {
-        background: linear-gradient(90deg, #cc0077 0%, #ff26ed 100%);
+        background: linear-gradient(90deg, #9e165a 0%, #c90165 100%);
     }
 
     .password-toggle {

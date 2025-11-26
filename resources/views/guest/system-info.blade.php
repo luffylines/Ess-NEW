@@ -32,19 +32,6 @@
             color: #ffffff;
             border-color: #444;
         }
-
-        .navbar-light .nav-link {
-            color: #000 !important;
-        }
-
-        .navbar-dark .nav-link {
-            color: #fff !important;
-        }
-
-        .navbar-dark .navbar-brand, .navbar-light .navbar-brand {
-            font-weight: 600;
-        }
-
         .dropdown-item:hover {
             background-color: #f0f0f0;
         }
@@ -57,13 +44,73 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        .system-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #212529;
+            text-align: center;
+            margin-bottom: 30px;
+        }
         .card, .navbar, .form-control, .form-select {
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-
+        .card, .list-group-item {
+            background-color: #ff69b4;
+        
+            border-bottom: #000000 1px solid;
+        }
         main {
             margin-top: 80px;
         }
+            .navbar {
+        background-color: #ff69b4 !important; /* Baby pink */
+        border-bottom: 2px solid #ff69b4; /* slightly deeper pink for definition */
+    }
+
+    .navbar .navbar-brand,
+    .navbar .nav-link {
+        color: #000 !important;
+        font-weight: 500;
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link:focus,
+    .navbar .nav-item.active .nav-link {
+        color: #fff !important;
+        background-color: #f4a8c4 !important;
+        border-radius: 6px;
+    }
+
+    .dropdown-menu {
+        background-color: #FADADD !important;
+        border: 1px solid #f8c8dc !important;
+    }
+
+    .dropdown-item {
+        color: #000 !important;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        background-color: #f4a8c4 !important;
+        color: #fff !important;
+    }
+
+    .navbar-toggler {
+        border-color: #f4a8c4 !important;
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='black' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+    }
+
+    .navbar,
+    .dropdown-menu,
+    .navbar .nav-link {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
     </style>
 </head>
 <body class="{{ (Auth::check() && Auth::user()->display_mode === 'dark') ? 'dark' : 'light' }}">
@@ -120,7 +167,7 @@
 
         <!-- MAIN CONTENT -->
         <main class="container py-5" style="margin-top: 90px;">
-            <h1 class="mb-4">System Information</h1>
+            <h1 class="system-title">System Information</h1>
             <div class="card p-4 shadow-sm">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><strong>App Version:</strong> 1.0.0</li>
@@ -129,6 +176,7 @@
                     <li class="list-group-item"><strong>Laravel Version:</strong> {{ app()->version() }}</li>
                     <li class="list-group-item"><strong>Server Software:</strong> {{ $_SERVER['SERVER_SOFTWARE'] ?? 'N/A' }}</li>
                     <li class="list-group-item"><strong>Database Connection:</strong> {{ config('database.default') }}</li>
+                    <li class="list-group-item"><strong>Hosting:</strong> Ngrok</li>
                 </ul>
             </div>
         </main>

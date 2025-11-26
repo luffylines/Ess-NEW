@@ -300,16 +300,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     
 });
-</script>
 
-                            <script>
-                                 // Hide the error alert after 3 seconds (3000 ms)
-                                setTimeout(() => {
-                                    const alert = document.getElementById('alert-danger');
-                                    if (alert) {
-                                        // Bootstrap 5 requires triggering 'close' for fade out
-                                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-                                        bsAlert.close();
-                                    }
-                                }, 3000);
-                            </script>
+ // Hide the error alert after 3 seconds (3000 ms)
+      setTimeout(() => {
+            const alert = document.getElementById('alert-danger');
+            if (alert) {
+             // Bootstrap 5 requires triggering 'close' for fade out
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+            bsAlert.close();
+            }
+        }, 3000);
+</script>

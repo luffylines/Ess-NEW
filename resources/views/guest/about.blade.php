@@ -19,7 +19,7 @@
     <!-- Custom Theme Styles -->
     <style>
         :root {
-            --bs-primary: #0d6efd;
+            --bs-primary: #ff69b4;
             --bs-dark-bg: #1a1a1a;
             --bs-light-bg: #ffffff;
         }
@@ -44,10 +44,6 @@
             border-color: #444;
         }
 
-        .navbar-light .nav-link {
-            color: #000 !important;
-        }
-
         .navbar-dark .nav-link {
             color: #fff !important;
         }
@@ -55,7 +51,56 @@
         .navbar-dark .navbar-brand, .navbar-light .navbar-brand {
             font-weight: 600;
         }
+        /* Navbar PINK */
+            .navbar {
+        background-color: #ff69b4 !important; /* Baby pink */
+        border-bottom: 2px solid #ff69b4; /* slightly deeper pink for definition */
+    }
 
+    .navbar .navbar-brand,
+    .navbar .nav-link {
+        color: #000 !important;
+        font-weight: 500;
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link:focus,
+    .navbar .nav-item.active .nav-link {
+        color: #fff !important;
+        background-color: #f4a8c4 !important;
+        border-radius: 6px;
+    }
+
+    .dropdown-menu {
+        background-color: #FADADD !important;
+        border: 1px solid #f8c8dc !important;
+    }
+
+    .dropdown-item {
+        color: #000 !important;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        background-color: #f4a8c4 !important;
+        color: #fff !important;
+    }
+
+    .navbar-toggler {
+        border-color: #f4a8c4 !important;
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='black' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+    }
+
+    .navbar,
+    .dropdown-menu,
+    .navbar .nav-link {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
         .dropdown-item:hover {
             background-color: #f0f0f0;
         }
@@ -84,7 +129,7 @@
         .about-title {
             font-size: 2.5rem;
             font-weight: bold;
-            color: var(--bs-primary);
+            color: #212529;
         }
 
         .about-description {
@@ -100,17 +145,21 @@
 
         .feature-card .card-header {
             background-color: var(--bs-primary);
-            color: white;
+            color: black;
             font-weight: bold;
         }
-
+        .card, .card-footer {
+            background-color: #ff69b4;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
         .feature-card .card-body {
             font-size: 1rem;
             color: #555;
         }
 
         .feature-card .card-footer {
-            background-color: #f8f9fa;
+            background-color: #ff69b4;
             text-align: center;
         }
 
@@ -170,7 +219,7 @@
         <div class="container about-section">
             <h1 class="about-title">About the Employee Self-Service (ESS) System</h1>
             <p class="about-description">
-                Employee Self-Service (ESS) system by Christian Baynado Aring is designed to streamline employee attendance, reports, and tasks efficiently. ESS provides employees with a self-managed platform to track attendance, access performance metrics, and manage various administrative tasks. With an easy-to-use interface, it simplifies the daily work experience.
+                Employee Self-Service (ESS) is designed to streamline employee attendance, reports, and tasks efficiently. ESS provides employees with a self-managed platform to track attendance, access performance metrics, and manage various administrative tasks. With an easy-to-use interface, it simplifies the daily work experience.
             </p>
 
             <!-- Features Section -->
@@ -183,8 +232,8 @@
                         <div class="card-body">
                             ESS allows employees to log their attendance, view attendance history, and track work hours easily.
                         </div>
-                        <div class="card-footer">
-                            Learn More
+                        <div class="card text-center">
+                            <a href="{{ route('guest.attendance') }}" class="btn btn-primary">Learn More</a>
                         </div>
                     </div>
                 </div>
@@ -196,8 +245,8 @@
                         <div class="card-body">
                             Generate and review attendance, leave reports, and more with our dynamic reporting feature.
                         </div>
-                        <div class="card-footer">
-                            Learn More
+                        <div class="card text-center">
+                            <a href="{{ route('guest.reports') }}" class="btn btn-primary">Learn More</a>
                         </div>
                     </div>
                 </div>
@@ -209,8 +258,8 @@
                         <div class="card-body">
                             Organize and manage your tasks in one place. Set reminders and deadlines to stay on top of your responsibilities.
                         </div>
-                        <div class="card-footer">
-                            Learn More
+                        <div class="card text-center">
+                            <a href="{{ route('guest.tasks') }}" class="btn btn-primary">Learn More</a>
                         </div>
                     </div>
                 </div>

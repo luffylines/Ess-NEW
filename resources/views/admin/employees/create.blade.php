@@ -11,6 +11,20 @@
             </a>
             <h2 class="h4 fw-bold mb-0">Add New Employee</h2>
         </div>
+    <!-- Success Message -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    <!-- Error Message -->
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
 
         <div class="row g-4">
             <!-- Form Card -->
@@ -99,4 +113,16 @@
         </div>
     </div>
 </div>
+<script>
+    // Auto-dismiss alerts after 3 seconds
+    document.addEventListener('DOMContentLoaded', () => {
+        const alert = document.querySelector('.alert-dismissible');
+        if (alert) {
+            setTimeout(() => {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }, 3000);
+        }
+    });
+</script>
 @endsection

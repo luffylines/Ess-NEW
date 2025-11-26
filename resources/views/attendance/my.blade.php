@@ -219,8 +219,8 @@
                                         <input type="checkbox" class="row-checkbox form-check-input" value="{{ $attendance['id'] }}">
                                     </td>
                                     <td>
-                                        <span class="empty fw-medium">{{ \Carbon\Carbon::parse($attendance['date'])->format('M d, Y') }}</span>
-                                        <br><small class="empty">{{ \Carbon\Carbon::parse($attendance['date'])->format('D') }}</small>
+                                        <span class="fw-medium">{{ \Carbon\Carbon::parse($attendance['date'])->format('M d, Y') }}</span>
+                                        <br><small class="">{{ \Carbon\Carbon::parse($attendance['date'])->format('D') }}</small>
                                     </td>
                                     <td>
                                         @php
@@ -302,13 +302,13 @@
                                     </td>
                                     <td>
                                         @if($attendance['remarks'])
-                                            <span class="empty">{{ $attendance['remarks'] }}</span>
+                                            <span class="">{{ $attendance['remarks'] }}</span>
                                         @else
                                             <span class="fst-italic">No remarks</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <small class="empty">
+                                        <small class="">
                                             {{ \Carbon\Carbon::parse($attendance['created_at'])->format('M d, Y') }}
                                             <br>{{ \Carbon\Carbon::parse($attendance['created_at'])->format('h:i A') }}
                                         </small>
@@ -319,7 +319,7 @@
                                         @endphp
                                         
                                         <div>
-                                            <span class="fw-medium empty">{{ $attendance['created_by'] }}</span>
+                                            <span class="fw-medium">{{ $attendance['created_by'] }}</span>
                                             <br>
                                             @if($createdByCurrentUser)
                                                 <small class="text-success">
