@@ -104,10 +104,25 @@ Route::post('/attendance/generateShiftSchedule', [AttendanceController::class, '
     Route::post('/attendance/requests', [AttendanceController::class, 'submitRequest'])->name('attendance.requests.submit');
     // Payslip listing page
     Route::get('/payslips', [PayslipController::class, 'index'])->name('payslip.index');
+    Route::get('/payslips/{payslip}', [PayslipController::class, 'show'])->name('payslips.show');
+    Route::get('/payslips/{payslip}/download', [PayslipController::class, 'download'])->name('payslips.download');
+    Route::get('/payslips/debug/test-download', [PayslipController::class, 'testDownload'])->name('payslips.debug');
 
     // Leave requests for employees
     Route::resource('leave', App\Http\Controllers\LeaveController::class);
 
+});
+
+// HR/Manager Payroll Routes
+Route::middleware(['auth', 'role:hr,manager,admin'])->group(function () {
+    Route::get('/hr/payroll', [PayslipController::class, 'payrollIndex'])->name('hr.payroll.index');
+    Route::post('/hr/payroll/generate', [PayslipController::class, 'generatePayroll'])->name('hr.payroll.generate');
+    Route::post('/hr/payroll/generate-all', [PayslipController::class, 'generateAllPayrolls'])->name('hr.payroll.generate-all');
+    Route::post('/hr/payroll/{payroll}/approve', [PayslipController::class, 'approvePayroll'])->name('hr.payroll.approve');
+    Route::post('/hr/payroll/bulk-approve', [PayslipController::class, 'bulkApprove'])->name('hr.payroll.bulk-approve');
+    Route::get('/hr/payroll/{payroll}', [PayslipController::class, 'showPayroll'])->name('hr.payroll.show');
+    Route::delete('/hr/payroll/{payroll}', [PayslipController::class, 'deletePayroll'])->name('hr.payroll.delete');
+    Route::get('/hr/payslips', [PayslipController::class, 'payslipManagement'])->name('hr.payslips.index');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {

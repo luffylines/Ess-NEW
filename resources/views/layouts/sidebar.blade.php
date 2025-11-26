@@ -85,6 +85,13 @@
                         </ul>
                     </li>
                     
+                    <!-- Payroll Management -->
+                    <li class="nav-item">
+                        <a href="{{ route('hr.payroll.index') }}" class="nav-link">
+                            <i class="fas fa-calculator nav-icon me-2"></i> Payroll Management
+                        </a>
+                    </li>
+                    
                     <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i>Approve Leave</a></li>
                     <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="fas fa-clock me-2"></i>Approve Overtime</a></li>
                     <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="fas fa-file-alt me-2"></i>Generate Reports</a></li>

@@ -312,15 +312,15 @@
                             </div>
                         </a>
                         
-                        <div class="action-card export">
+                        <a href="{{ route('hr.payroll.index') }}" class="action-card payroll">
                             <div class="action-icon">
-                                <i class="fas fa-download"></i>
+                                <i class="fas fa-calculator"></i>
                             </div>
                             <div class="action-content">
-                                <h6>Export Data</h6>
-                                <span class="action-text">PDF/Excel</span>
+                                <h6>Payroll</h6>
+                                <span class="action-text">Manage Payroll</span>
                             </div>
-                        </div>
+                        </a>
                     </div>
 
                     <div class="missed-employees-section">
@@ -580,6 +580,10 @@
 
 .action-card.reports {
     background: linear-gradient(135deg, #d1ecf1 0%, #ffffff 100%);
+}
+
+.action-card.payroll {
+    background: linear-gradient(135deg, #e2e3ff 0%, #ffffff 100%);
 }
 
 .action-card.export {
