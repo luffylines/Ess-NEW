@@ -5,7 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Employee Self-Service') }} - Place Of Beauty</title>
+        
+        <!-- Favicon -->
+        <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+        <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('img/logo.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -59,6 +65,22 @@
             .navbar-brand {
                 font-weight: 600;
                 color: inherit !important;
+            }
+
+            .navbar-logo {
+                transition: transform 0.3s ease;
+            }
+
+            .navbar-brand:hover .navbar-logo {
+                transform: scale(1.1);
+            }
+
+            /* Responsive navbar logo */
+            @media (max-width: 768px) {
+                .navbar-logo {
+                    width: 28px !important;
+                    height: 28px !important;
+                }
             }
 
             /* Sidebar alignment fix */
@@ -146,8 +168,9 @@
             <!-- ✅ Navbar -->
             <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
                 <div class="container-fluid px-4">
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
+                    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url('/') }}">
+                        <img src="{{ asset('img/logo.png') }}" alt="Company Logo" class="navbar-logo" style="width: 32px; height: 32px; object-fit: contain;">
+                        <span class="fw-bold">Place Of Beauty</span>
                     </a>
 
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"

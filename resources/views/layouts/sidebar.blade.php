@@ -1,6 +1,10 @@
 <aside class="main-sidebar" id="sidebar">
     <!-- Brand Logo and Toggle Button -->
-    <div class="brand-container d-flex justify-content-between align-items-center px-3">
+    <div class="brand-container d-flex justify-content-between align-items-center px-3 py-2">
+        <div class="d-flex align-items-center gap-2">
+            <img src="{{ asset('img/logo.png') }}" alt="Company Logo" class="sidebar-logo" style="width: 28px; height: 28px; object-fit: contain;">
+            <span class="brand-text fw-bold text-truncate" style="font-size: 0.95rem;">Place Of Beauty</span>
+        </div>
         <button id="sidebarToggle" type="button" title="Toggle Sidebar">
             <img src="{{ asset('img/menu.png') }}" alt="Toggle Sidebar" width="24" height="24" />
         </button>
@@ -153,12 +157,14 @@
 /* Hide all details when collapsed */
 .main-sidebar:not(.expanded) #userPanel,
 .main-sidebar:not(.expanded) .menu-text,
+.main-sidebar:not(.expanded) .brand-text,
 .main-sidebar:not(.expanded) #logoutSection {
     display: none;
 }
 
-/* Keep icons visible when collapsed */
-.nav-link i {
+/* Keep icons and logos visible when collapsed */
+.nav-link i,
+.sidebar-logo {
     width: 40px;
     text-align: center;
 }
@@ -169,6 +175,19 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.sidebar-logo {
+    transition: transform 0.3s ease;
+}
+
+.sidebar-logo:hover {
+    transform: scale(1.1);
+}
+
+.brand-text {
+    transition: opacity 0.3s ease;
 }
 
 .brand-logo {

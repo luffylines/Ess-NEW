@@ -17,7 +17,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        // Get remembered login if exists
+        $rememberedLogin = request()->cookie('remembered_login');
+        
+        return view('auth.login', compact('rememberedLogin'));
     }
 
     /**
@@ -38,8 +41,18 @@ class AuthenticatedSessionController extends Controller
             Auth::id()
         );
 
-        // Redirect to intended page
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Handle remember me functionality
+        $response = redirect()->intended(route('dashboard', absolute: false));
+        
+        if ($request->has('remember') && !$request->has('clear_remembered')) {
+            // Store login for next time (expires in 30 days)
+            $response->withCookie(cookie('remembered_login', $request->login, 30 * 24 * 60));
+        } elseif (!$request->has('remember') || $request->has('clear_remembered')) {
+            // Clear any existing remembered login
+            $response->withCookie(cookie()->forget('remembered_login'));
+        }
+
+        return $response;
     }
 
     /**
@@ -65,6 +78,8 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // The remembered login cookie is preserved - it will only be cleared 
+        // when user unchecks "Remember Me" on next login
+        return redirect('/login');
     }
 }

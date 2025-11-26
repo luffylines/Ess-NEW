@@ -5,8 +5,9 @@
     <div class="card-body p-10 p-md-4">
 
         <!-- Logo / Title -->
-        <div class="mb-2 text-center">
-            <span class="text h2 fw-bold text">Place Of Beauty</span>
+        <div class="mb-2 text-center d-flex align-items-center justify-content-center gap-3">
+            <img src="{{ asset('img/logo.png') }}" alt="Company Logo" class="logo-img" style="width: 50px; height: 50px; object-fit: contain;">
+            <span class="text h2 fw-bold text mb-0">Place Of Beauty</span>
         </div>
 
         <h3 class="text fw-semibold mb-1 text-center">Welcome Back</h3>
@@ -36,7 +37,7 @@
             <div class="mb-3">
                 <label for="login" class="text form-label fw-semibold">Employee ID or Gmail</label>
                 <input type="text" id="login" name="login"
-                       value="{{ old('login') }}"
+                       value="{{ old('login', $rememberedLogin ?? '') }}"
                        required autofocus
                        class="form-control form-control-lg rounded-3 shadow-sm"
                        placeholder="Enter Employee ID or Gmail">
@@ -64,7 +65,8 @@
 
             <!-- Remember Me -->
             <div class="form-check mb-3">
-                <input id="remember_me" type="checkbox" class="form-check-input" name="remember">
+                <input id="remember_me" type="checkbox" class="form-check-input" name="remember" 
+                       {{ old('remember', !empty($rememberedLogin)) ? 'checked' : '' }}>
                 <label for="remember_me" class="form-check-label small text">Remember me</label>
             </div>
 
@@ -130,6 +132,38 @@
         document.getElementById('recaptcha-error').style.display = 'block';
     }
     
+    // Handle Remember Me functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const rememberCheckbox = document.getElementById('remember_me');
+        const loginInput = document.getElementById('login');
+        const loginForm = document.querySelector('form');
+        
+        // Clear login field when unchecking remember me
+        rememberCheckbox.addEventListener('change', function() {
+            if (!this.checked) {
+                // If unchecking and there's a remembered login, clear the field
+                const hasRememberedLogin = '{{ !empty($rememberedLogin) }}' === '1';
+                if (hasRememberedLogin) {
+                    loginInput.value = '';
+                    // Add a hidden field to signal that we want to clear the remembered login
+                    let clearField = document.querySelector('input[name="clear_remembered"]');
+                    if (!clearField) {
+                        clearField = document.createElement('input');
+                        clearField.type = 'hidden';
+                        clearField.name = 'clear_remembered';
+                        clearField.value = '1';
+                        loginForm.appendChild(clearField);
+                    }
+                }
+            } else {
+                // Remove the clear flag if re-checking
+                const clearField = document.querySelector('input[name="clear_remembered"]');
+                if (clearField) {
+                    clearField.remove();
+                }
+            }
+        });
+    });
 
     // Auto-hide error messages after 5 seconds
     document.addEventListener('DOMContentLoaded', function() {
@@ -158,6 +192,27 @@
     .text, .text-muted {
         color: #0f090c;
     }
+    
+    /* Logo styling */
+    .logo-img {
+        transition: transform 0.3s ease;
+    }
+    
+    .logo-img:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Responsive logo and title */
+    @media screen and (max-width: 576px) {
+        .logo-img {
+            width: 40px !important;
+            height: 40px !important;
+        }
+        .h2 {
+            font-size: 1.5rem !important;
+        }
+    }
+    
     @media screen and (max-width: 400px) {
     .g-recaptcha {
       transform: scale(0.75);

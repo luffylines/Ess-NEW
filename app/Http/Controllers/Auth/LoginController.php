@@ -16,7 +16,10 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login'); // Your Blade login page
+        // Get remembered login if exists
+        $rememberedLogin = request()->cookie('remembered_login');
+        
+        return view('auth.login', compact('rememberedLogin')); // Your Blade login page
     }
 
     public function login(Request $request)
@@ -65,10 +68,13 @@ class LoginController extends Controller
         // Send OTP email
         Mail::to($user->email)->send(new SendOtpMail($otp));
 
-        // Temporarily store user ID and credentials in session
+        // Temporarily store user ID, credentials and remember preference in session
         session([
             'temp_user_id' => $user->id,
             'temp_password' => $request->password,
+            'temp_login' => $request->login,
+            'temp_remember' => $request->has('remember'),
+            'temp_clear_remembered' => $request->has('clear_remembered'),
         ]);
 
         return redirect()->route('otp.verify')->with('email', $user->email);
@@ -87,6 +93,9 @@ class LoginController extends Controller
 
         $userId = session('temp_user_id');
         $password = session('temp_password');
+        $login = session('temp_login');
+        $remember = session('temp_remember', false);
+        $clearRemembered = session('temp_clear_remembered', false);
 
         if (!$userId) {
             return redirect()->route('login')->withErrors(['login' => 'Session expired. Please login again.']);
@@ -103,12 +112,36 @@ class LoginController extends Controller
 
         // OTP is valid → login the user
         $user = User::find($userId);
-        Auth::login($user);
+        Auth::login($user, $remember);
+
+        // Handle remember me functionality
+        $response = redirect()->intended('/dashboard');
+        
+        if ($remember && !$clearRemembered) {
+            // Store login for next time (expires in 30 days)
+            $response->withCookie(cookie('remembered_login', $login, 30 * 24 * 60));
+        } else {
+            // Clear any existing remembered login
+            $response->withCookie(cookie()->forget('remembered_login'));
+        }
 
         // Clear OTP and session
         $otp->delete();
-        session()->forget(['temp_user_id', 'temp_password']);
+        session()->forget(['temp_user_id', 'temp_password', 'temp_login', 'temp_remember', 'temp_clear_remembered']);
 
-        return redirect()->intended('/dashboard');
+        return $response;
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        // Only clear remembered login if the user wasn't using "remember me"
+        // We check if there's a remembered_login cookie, if the user wants to clear it, they should uncheck remember me on next login
+        
+        return redirect('/login');
     }
 }
