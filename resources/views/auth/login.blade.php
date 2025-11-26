@@ -32,19 +32,6 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            <!-- Role Selection -->
-            <div class="d-flex justify-content-center mb-4 gap-3">
-                <div id="employee" class="text role-box p-2 rounded-3 border border-secondary text-center fw-semibold"
-                     onclick="selectRole('employee')" role="button" tabindex="0">
-                    Employee
-                </div>
-                <div id="manager" class="text role-box p-2 rounded-3 border border-secondary text-center fw-semibold"
-                     onclick="selectRole('manager')" role="button" tabindex="0">
-                    Manager
-                </div>
-            </div>
-            <input type="hidden" id="role" name="role" value="">
-
             <!-- Employee ID or Gmail -->
             <div class="mb-3">
                 <label for="login" class="text form-label fw-semibold">Employee ID or Gmail</label>
@@ -131,19 +118,6 @@
             : `<img src="{{ asset('img/eyeon.png') }}" width="22" alt="Show">`;
     });
 
-    // Role selection
-    function selectRole(role) {
-        document.querySelectorAll('.role-box').forEach(box => {
-            box.classList.remove('border-primary', 'bg-primary', 'text-white', 'shadow');
-            box.classList.add('border-secondary', 'bg-white', 'text-secondary');
-        });
-
-        const selected = document.getElementById(role);
-        selected.classList.remove('border-secondary', 'bg-white', 'text-secondary');
-        selected.classList.add('border-primary', 'bg-primary', 'text-white', 'shadow');
-        document.getElementById('role').value = role;
-    }
-
     // reCAPTCHA callbacks
     function recaptchaCallback(response) {
         console.log('reCAPTCHA success:', response);
@@ -190,17 +164,6 @@
       transform-origin: 0 0;
     }
   }
-    .role-box {
-        cursor: pointer;
-        transition: all 0.25s ease;
-        user-select: none;
-    }
-
-    .role-box:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
     .btn-gradient-primary {
         background: linear-gradient(90deg, #0f090c 0%, #0f090c 100%);
         border: none;

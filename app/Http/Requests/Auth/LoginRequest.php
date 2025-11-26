@@ -29,7 +29,6 @@ class LoginRequest extends FormRequest
         return [
             'login' => ['required', 'string'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'in:employee,hr,manager,admin'],
             'g-recaptcha-response' => ['required'],
         ];
     }
@@ -60,13 +59,13 @@ class LoginRequest extends FormRequest
         // Determine if login is email or employee_id
         $loginField = filter_var($this->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'employee_id';
         
-        // First, attempt to authenticate without role check
-        $basicCredentials = [
+        // Attempt to authenticate
+        $credentials = [
             $loginField => $this->login,
             'password' => $this->password,
         ];
 
-        if (! Auth::attempt($basicCredentials, $this->boolean('remember'))) {
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -74,32 +73,9 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // Now check if the user has permission for the selected role
-        $user = Auth::user();
-        $selectedRole = $this->role;
-        $userRole = $user->role;
-
-        // Define role compatibility: HR and Manager can access each other's functionalities
-        $roleCompatibility = [
-            'employee' => ['employee'],
-            'hr' => ['hr', 'manager'], // HR can login as HR or Manager
-            'manager' => ['hr', 'manager'], // Manager can login as HR or Manager
-            'admin' => ['admin', 'hr', 'manager', 'employee'], // Admin can access everything
-        ];
-
-        // Check if the user's actual role allows them to access the selected role
-        if (!in_array($selectedRole, $roleCompatibility[$userRole] ?? [])) {
-            Auth::logout(); // Log them out since they don't have permission
-            
-            throw ValidationException::withMessages([
-                'role' => "You are not authorized to log in as " . ucfirst($selectedRole) . ". Your role is: " . ucfirst($userRole),
-            ]);
-        }
-
-        // Log successful login activity
-        $user = Auth::user();
-        $user->logLogin($loginField); // Log with the login method used (email or employee_id)
-
+        // Authentication successful - user role will be automatically detected
+        // and handled by the DashboardController after redirect
+        
         RateLimiter::clear($this->throttleKey());
     }
 
