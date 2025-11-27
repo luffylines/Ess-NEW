@@ -168,9 +168,12 @@ Route::middleware(['web', 'auth', 'hr'])->group(function () {
         return redirect()->route('hr.pending');
     });
 
-    Route::post('/hr/approve', [HrAttendanceController::class, 'approveAttendance'])->name('hr.approve');
+    Route::post('/hr/approve', [HrAttendanceController::class, 'approveAttendance'])->name('hr.approve.attendance');
     Route::get('/hr/attendance', [HrAttendanceController::class, 'monitorAttendance'])->name('hr.attendance');
     Route::get('/hr/monitor', [HrAttendanceController::class, 'monitorAttendance'])->name('hr.monitor');
+    Route::post('/hr/approve/{id}', [HrAttendanceController::class, 'approveRecord'])->name('hr.approve');
+    Route::post('/hr/reject/{id}', [HrAttendanceController::class, 'rejectRecord'])->name('hr.reject');
+    Route::delete('/hr/attendance/{id}', [HrAttendanceController::class, 'deleteRecord'])->name('hr.attendance.delete');
     Route::get('/hr/approveleave', [HrAttendanceController::class, 'showApproveLeave'])->name('hr.approveleave.show');
     Route::post('/hr/approveleave', [HrAttendanceController::class, 'approveleave'])->name('hr.approveleave');
     Route::get('/hr/approveOvertime', [HrAttendanceController::class, 'showApproveOvertime'])->name('hr.approveOvertime.show');

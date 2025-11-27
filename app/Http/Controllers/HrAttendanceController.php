@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\Attendance;
 
 class HrAttendanceController extends Controller
@@ -210,5 +211,52 @@ public function exportMonthlyReport(Request $request)
 
         $action = $request->action === 'approve' ? 'approved' : 'rejected';
         return back()->with('success', "Overtime request has been {$action} successfully.");
+    }
+
+    // Approve attendance record
+    public function approveRecord($id)
+    {
+        $attendance = Attendance::findOrFail($id);
+        
+        $attendance->update([
+            'status' => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Attendance record has been approved successfully.');
+    }
+
+    // Reject attendance record
+    public function rejectRecord($id)
+    {
+        $attendance = Attendance::findOrFail($id);
+        
+        $attendance->update([
+            'status' => 'rejected',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('success', 'Attendance record has been rejected successfully.');
+    }
+
+    // Delete attendance record
+    public function deleteRecord($id)
+    {
+        $attendance = Attendance::findOrFail($id);
+        
+        // Log the deletion for audit purposes
+        Log::info("Attendance record deleted", [
+            'attendance_id' => $attendance->id,
+            'user_id' => $attendance->user_id,
+            'date' => $attendance->date,
+            'deleted_by' => Auth::id(),
+            'deleted_at' => now()
+        ]);
+        
+        $attendance->delete();
+
+        return back()->with('success', 'Attendance record has been deleted successfully.');
     }
 }

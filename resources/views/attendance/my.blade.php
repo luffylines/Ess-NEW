@@ -4,44 +4,116 @@
             <div class="text-end">
                <small class="">{{ \Carbon\Carbon::now()->format('l, F j, Y') }}</small>
             </div>
-        {{-- Flash Messages --}}
+        <!-- Flash Messages -->
         @if(session('success'))
-            <div class="mb-3">{{ session('success') }}</div>
+            <div class="alert alert-success alert-dismissible fade show auto-hide-alert" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Success!</strong> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         @endif
+
         @if(session('error'))
-            <div class="mb-3">{{ session('error') }}</div>
+            <div class="alert alert-danger alert-dismissible fade show auto-hide-alert" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Error!</strong> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         @endif
 
+        @if($errors->any())
+            <div class="alert alert-warning alert-dismissible fade show auto-hide-alert" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Please fix the following errors:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         {{-- === MARK ATTENDANCE === --}}
-        <div class="p-3 rounded mx-auto mb-4" style="max-width: 400px;">
-            <h2 class="mb-3">Mark Attendance</h2>
-
-            @if($todayAttendance)
-                @if(!$todayAttendance->time_in)
-                    <form method="POST" action="{{ route('attendance.submit') }}">
-                        @csrf
-                        <button type="submit" name="action" value="time_in" class="btn btn-success w-100">
-                            Mark Time In
-                        </button>
-                    </form>
-                @elseif(!$todayAttendance->time_out)
-                    <form method="POST" action="{{ route('attendance.submit') }}">
-                        @csrf
-                        <button type="submit" name="action" value="time_out" class="btn btn-danger w-100">
-                            Mark Time Out
-                        </button>
-                    </form>
+        <div class="card shadow-sm mb-4 mx-auto" style="max-width: 600px;">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-clock me-2"></i>Mark Attendance</h4>
+            </div>
+            <div class="card-body">
+                @if($todayAttendance && $todayAttendance->time_in && $todayAttendance->time_out)
+                    <div class="text-center">
+                        <p class="text-success fw-semibold mb-3">
+                            <i class="fas fa-check-circle me-2"></i>You have completed attendance for today.
+                        </p>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h6 class="text-success">{{ $todayAttendance->total_hours ?? '0.00' }}</h6>
+                                    <small class="text-muted">Working Hours</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-success">₱{{ number_format($todayAttendance->earned_amount ?? 0, 2) }}</h6>
+                                <small class="text-muted">Earned Amount</small>
+                            </div>
+                        </div>
+                    </div>
                 @else
-                    <p class="text-success fw-semibold">You have completed attendance for today.</p>
+                    <form method="POST" action="{{ route('attendance.submit') }}" id="attendanceMarkForm">
+                        @csrf
+                        
+                        {{-- Time In --}}
+                        @if(!$todayAttendance || !$todayAttendance->time_in)
+                            <div class="text-center">
+                                <button type="submit" name="action" value="time_in" class="btn btn-success btn-lg w-100">
+                                    <i class="fas fa-play me-2"></i>Mark Time In
+                                </button>
+                            </div>
+                        
+                        {{-- Break Time In --}}
+                        @elseif($todayAttendance->time_in && !$todayAttendance->breaktime_in)
+                            <div class="text-center">
+                                <p class="text-success mb-3">
+                                    <i class="fas fa-check-circle me-2"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
+                                </p>
+                                <button type="submit" name="action" value="break_in" class="btn btn-warning btn-lg w-100">
+                                    <i class="fas fa-coffee me-2"></i>Mark Break Time In
+                                </button>
+                            </div>
+                        
+                        {{-- Break Time Out --}}
+                        @elseif($todayAttendance->breaktime_in && !$todayAttendance->breaktime_out)
+                            <div class="text-center">
+                                <p class="text-success mb-1">
+                                    <i class="fas fa-check-circle me-2"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
+                                </p>
+                                <p class="text-warning mb-3">
+                                    <i class="fas fa-check-circle me-2"></i>Break In: {{ $todayAttendance->breaktime_in->format('h:i A') }}
+                                </p>
+                                <button type="submit" name="action" value="break_out" class="btn btn-info btn-lg w-100">
+                                    <i class="fas fa-coffee me-2"></i>Mark Break Time Out
+                                </button>
+                            </div>
+                        
+                        {{-- Time Out --}}
+                        @elseif($todayAttendance->breaktime_out && !$todayAttendance->time_out)
+                            <div class="text-center">
+                                <p class="text-success mb-1">
+                                    <i class="fas fa-check-circle me-2"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
+                                </p>
+                                <p class="text-warning mb-1">
+                                    <i class="fas fa-check-circle me-2"></i>Break In: {{ $todayAttendance->breaktime_in->format('h:i A') }}
+                                </p>
+                                <p class="text-info mb-3">
+                                    <i class="fas fa-check-circle me-2"></i>Break Out: {{ $todayAttendance->breaktime_out->format('h:i A') }}
+                                </p>
+                                <button type="submit" name="action" value="time_out" class="btn btn-danger btn-lg w-100">
+                                    <i class="fas fa-stop me-2"></i>Mark Time Out
+                                </button>
+                            </div>
+                        @endif
+                    </form>
                 @endif
-            @else
-                <form method="POST" action="{{ route('attendance.submit') }}">
-                    @csrf
-                    <button type="submit" name="action" value="time_in" class="btn btn-success w-100">
-                        Mark Time In
-                    </button>
-                </form>
-            @endif
+            </div>
         </div>
 
         {{-- === TOOLBAR ABOVE TABLE === --}}
@@ -196,11 +268,13 @@
                                 </th>
                                 <th><i class="fas fa-calendar-day me-1"></i>Date</th>
                                 <th><i class="fas fa-tags me-1"></i>Day Type</th>
-                                <th><i class="fas fa-clock me-1"></i>Time In</th>
-                                <th><i class="fas fa-clock me-1"></i>Time Out</th>
+                                <th><i class="fas fa-sign-in-alt me-1"></i>Time In</th>
+                                <th><i class="fas fa-sign-out-alt me-1"></i>Time Out</th>
+                                <th><i class="fas fa-coffee me-1"></i>Break In</th>
+                                <th><i class=""></i>Break Out</th>
                                 <th><i class="fas fa-user-check me-1"></i>Status</th>
                                 <th><i class="fas fa-comment me-1"></i>Remarks</th>
-                                <th><i class="fas fa-calendar-plus me-1"></i>Created At</th>
+                                <th><i class=""></i>Created At</th>
                                 <th><i class="fas fa-user me-1"></i>Created By</th>
                             </tr>
                         </thead>
@@ -259,6 +333,25 @@
                                             <span class="text-muted">-</span>
                                         @endif
                                     </td>
+                                    <td>
+                                        @if(isset($attendance['breaktime_in']) && $attendance['breaktime_in'])
+                                            <span class="text-warning fw-medium">
+                                                <i class="fas fa-coffee me-1"></i>{{ \Carbon\Carbon::parse($attendance['breaktime_in'])->format('h:i A') }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if(isset($attendance['breaktime_out']) && $attendance['breaktime_out'])
+                                            <span class="text-info fw-medium">
+                                                <i class="fas fa-coffee me-1"></i>{{ \Carbon\Carbon::parse($attendance['breaktime_out'])->format('h:i A') }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+
                                     <td>
                                         @php
                                             $status = $attendance['status'];
@@ -410,6 +503,53 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         border: 1px solid rgba(0, 0, 0, 0.125);
     }
+
+    /* Enhanced Alert Message Styling */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+
+        .alert i {
+            font-size: 1.1em;
+        }
+
+        /* Animation for alert entrance */
+        .alert.fade.show {
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
      /* MOBILE STYLES */
         @media (max-width: 576px) {
             #attendanceTable th, #attendanceTable td {
@@ -427,6 +567,43 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.auto-hide-alert');
+    
+    alerts.forEach(function(alert) {
+        // Add a progress bar for visual feedback
+        const progressBar = document.createElement('div');
+        progressBar.style.cssText = `
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            animation: progressBar 5s linear forwards;
+        `;
+        alert.style.position = 'relative';
+        alert.appendChild(progressBar);
+
+        // Auto-hide after 5 seconds
+        setTimeout(function() {
+            if (alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    });
+
+    // CSS for progress bar animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    `;
+    document.head.appendChild(style);
+
     // Elements
     const enableFilteringBtn = document.getElementById('enableFilteringBtn');
     const advancedFiltering = document.getElementById('advancedFiltering');

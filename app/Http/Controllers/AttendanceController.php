@@ -52,6 +52,10 @@ class AttendanceController extends Controller
                                        Carbon::parse($attendance->time_in)->setTimezone($timezone)->format('h:i A') : '-',
                                    'time_out' => $attendance->time_out ? 
                                        Carbon::parse($attendance->time_out)->setTimezone($timezone)->format('h:i A') : '-',
+                                   'breaktime_in' => $attendance->breaktime_in ? 
+                                       Carbon::parse($attendance->breaktime_in)->setTimezone($timezone)->format('Y-m-d H:i:s') : null,
+                                   'breaktime_out' => $attendance->breaktime_out ? 
+                                       Carbon::parse($attendance->breaktime_out)->setTimezone($timezone)->format('Y-m-d H:i:s') : null,
                                    'status' => $status,
                                    'remarks' => $attendance->remarks ?? '-',
                                    'created_at' => $attendance->created_at ? 
@@ -132,7 +136,26 @@ class AttendanceController extends Controller
             }
             $attendance->time_in = Carbon::now($timezone);
             $attendance->day_type = 'regular'; // Default day type
+            $attendance->daily_rate = 600; // Set default daily rate
             $message = 'Time In marked successfully at ' . Carbon::now($timezone)->format('h:i A');
+        } elseif ($action === 'break_in') {
+            if (!$attendance->time_in) {
+                return back()->with('error', 'Please mark Time In first.');
+            }
+            if ($attendance->breaktime_in) {
+                return back()->with('error', 'You already marked Break Time In today.');
+            }
+            $attendance->breaktime_in = Carbon::now($timezone);
+            $message = 'Break Time In marked successfully at ' . Carbon::now($timezone)->format('h:i A');
+        } elseif ($action === 'break_out') {
+            if (!$attendance->breaktime_in) {
+                return back()->with('error', 'Please mark Break Time In first.');
+            }
+            if ($attendance->breaktime_out) {
+                return back()->with('error', 'You already marked Break Time Out today.');
+            }
+            $attendance->breaktime_out = Carbon::now($timezone);
+            $message = 'Break Time Out marked successfully at ' . Carbon::now($timezone)->format('h:i A');
         } elseif ($action === 'time_out') {
             if (!$attendance->time_in) {
                 return back()->with('error', 'Please mark Time In first.');
@@ -142,6 +165,32 @@ class AttendanceController extends Controller
             }
             $attendance->time_out = Carbon::now($timezone);
             $message = 'Time Out marked successfully at ' . Carbon::now($timezone)->format('h:i A');
+        } elseif ($action === 'update_breaktime') {
+            // Validate breaktime and daily rate inputs
+            $request->validate([
+                'breaktime_in' => 'nullable|date_format:H:i',
+                'breaktime_out' => 'nullable|date_format:H:i|after_or_equal:breaktime_in',
+                'daily_rate' => 'nullable|numeric|min:0',
+            ]);
+            
+            if (!$attendance->time_in) {
+                return back()->with('error', 'Please mark Time In first before updating breaktime.');
+            }
+            
+            // Update breaktime if provided
+            if ($request->breaktime_in) {
+                $attendance->breaktime_in = Carbon::createFromFormat('Y-m-d H:i', $today . ' ' . $request->breaktime_in);
+            }
+            if ($request->breaktime_out) {
+                $attendance->breaktime_out = Carbon::createFromFormat('Y-m-d H:i', $today . ' ' . $request->breaktime_out);
+            }
+            
+            // Update daily rate
+            if ($request->daily_rate) {
+                $attendance->daily_rate = $request->daily_rate;
+            }
+            
+            $message = 'Breaktime and daily rate updated successfully!';
         } else {
             return back()->with('error', 'Invalid action.');
         }
@@ -375,7 +424,10 @@ public function createForEmployee(Request $request)
         'date' => 'required|date',
         'time_in' => 'nullable|date_format:H:i',
         'time_out' => 'nullable|date_format:H:i|after_or_equal:time_in',
+        'breaktime_in' => 'nullable|date_format:H:i|after_or_equal:time_in',
+        'breaktime_out' => 'nullable|date_format:H:i|after_or_equal:breaktime_in|before_or_equal:time_out',
         'day_type' => 'required|in:regular,holiday,rest_day,overtime',
+        'daily_rate' => 'nullable|numeric|min:0',
         'remarks' => 'required|string|max:255',
     ]);
 
@@ -407,6 +459,17 @@ public function createForEmployee(Request $request)
     if ($request->time_out) {
         $attendance->time_out = Carbon::parse($date . ' ' . $request->time_out);
     }
+    
+    if ($request->breaktime_in) {
+        $attendance->breaktime_in = Carbon::parse($date . ' ' . $request->breaktime_in);
+    }
+    
+    if ($request->breaktime_out) {
+        $attendance->breaktime_out = Carbon::parse($date . ' ' . $request->breaktime_out);
+    }
+    
+    // Set daily rate
+    $attendance->daily_rate = $request->daily_rate ?? 600;
 
     $attendance->save();
 
@@ -614,6 +677,9 @@ public function showGenerateShiftScheduleForm()
                 'status' => 'required|in:present,absent',
                 'time_in' => 'nullable|date_format:H:i',
                 'time_out' => 'nullable|date_format:H:i|after_or_equal:time_in',
+                'breaktime_in' => 'nullable|date_format:H:i|after_or_equal:time_in',
+                'breaktime_out' => 'nullable|date_format:H:i|after_or_equal:breaktime_in|before_or_equal:time_out',
+                'daily_rate' => 'nullable|numeric|min:0',
                 'remarks' => 'nullable|string|max:255',
             ]);
 
@@ -649,7 +715,19 @@ public function showGenerateShiftScheduleForm()
                     
                 $attendance->time_out = $request->time_out ? 
                     Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $request->time_out) : 
-                    null; // Don't set default time_out if not provided
+                    Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' 17:00'); // Default 5 PM (9 hours with 1hr break)
+                    
+                // Handle breaktime
+                if ($request->breaktime_in) {
+                    $attendance->breaktime_in = Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $request->breaktime_in);
+                }
+                
+                if ($request->breaktime_out) {
+                    $attendance->breaktime_out = Carbon::createFromFormat('Y-m-d H:i', $dateOnly . ' ' . $request->breaktime_out);
+                }
+                
+                // Set daily rate
+                $attendance->daily_rate = $request->daily_rate ?? 600;
             }
             // For absent, leave time_in and time_out as null
 

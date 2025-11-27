@@ -97,7 +97,7 @@
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label for="time_in" class="form-label fw-bold">
-                                    <i class="fas fa-clock me-1"></i>Time In
+                                    <i class="fas fa-sign-in-alt me-1 text-success"></i>Time In
                                 </label>
                                 <input type="time" name="time_in" id="time_in" class="form-control form-control-lg" 
                                        value="{{ old('time_in', '08:00') }}">
@@ -106,11 +106,66 @@
                             
                             <div class="col-md-6">
                                 <label for="time_out" class="form-label fw-bold">
-                                    <i class="fas fa-clock me-1"></i>Time Out
+                                    <i class="fas fa-sign-out-alt me-1 text-danger"></i>Time Out
                                 </label>
                                 <input type="time" name="time_out" id="time_out" class="form-control form-control-lg" 
                                        value="{{ old('time_out', '17:00') }}">
                                 <div class="form-text">Leave empty if employee didn't time out</div>
+                            </div>
+                        </div>
+
+                        <!-- Breaktime Settings -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="breaktime_in" class="form-label fw-bold">
+                                    <i class="fas fa-coffee me-1 text-warning"></i>Break Time In
+                                </label>
+                                <input type="time" name="breaktime_in" id="breaktime_in" class="form-control form-control-lg" 
+                                       value="{{ old('breaktime_in', '12:00') }}">
+                                <div class="form-text">Lunch break start time (default: 12:00 PM)</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="breaktime_out" class="form-label fw-bold">
+                                    <i class="fas fa-coffee me-1 text-info"></i>Break Time Out
+                                </label>
+                                <input type="time" name="breaktime_out" id="breaktime_out" class="form-control form-control-lg" 
+                                       value="{{ old('breaktime_out', '13:00') }}">
+                                <div class="form-text">Lunch break end time (default: 1:00 PM)</div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Rate and Calculation Display -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="daily_rate" class="form-label fw-bold">
+                                    <i class="fas fa-money-bill me-1 text-success"></i>Daily Rate
+                                </label>
+                                <input type="number" name="daily_rate" id="daily_rate" class="form-control form-control-lg" 
+                                       value="{{ old('daily_rate', '600') }}" min="0" step="0.01">
+                                <div class="form-text">Standard daily rate: ₱600</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-calculator me-1"></i>Attendance Summary
+                                </label>
+                                <div class="card bg-light border-0">
+                                    <div class="card-body p-2">
+                                        <div class="row text-center small">
+                                            <div class="col-6">
+                                                <div class="border-end">
+                                                    <span class="fw-bold text-primary d-block" id="calcTotalHours">8.00</span>
+                                                    <small class="text-muted">Hours</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <span class="fw-bold text-success d-block" id="calcEarnedAmount">₱600.00</span>
+                                                <small class="text-muted">Earned</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -401,6 +456,79 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Real-time attendance calculation
+    function calculateAttendance() {
+        const timeIn = document.getElementById('time_in').value;
+        const timeOut = document.getElementById('time_out').value;
+        const breaktimeIn = document.getElementById('breaktime_in').value;
+        const breaktimeOut = document.getElementById('breaktime_out').value;
+        const dailyRate = parseFloat(document.getElementById('daily_rate').value) || 600;
+
+        if (timeIn && timeOut) {
+            // Calculate total hours
+            const startTime = new Date(`1970-01-01T${timeIn}:00`);
+            const endTime = new Date(`1970-01-01T${timeOut}:00`);
+            let totalMinutes = (endTime - startTime) / (1000 * 60);
+
+            // Subtract break time
+            if (breaktimeIn && breaktimeOut) {
+                const breakStart = new Date(`1970-01-01T${breaktimeIn}:00`);
+                const breakEnd = new Date(`1970-01-01T${breaktimeOut}:00`);
+                const breakMinutes = (breakEnd - breakStart) / (1000 * 60);
+                totalMinutes -= breakMinutes;
+            }
+
+            const totalHours = totalMinutes / 60;
+            const standardHours = 8;
+            const hourlyRate = dailyRate / standardHours;
+
+            // Calculate earned amount
+            let earnedAmount = dailyRate;
+            
+            if (totalHours < 7) {
+                earnedAmount = totalHours * hourlyRate;
+            } else if (totalHours < 8) {
+                earnedAmount = totalHours * hourlyRate;
+            } else {
+                earnedAmount = dailyRate;
+            }
+
+            // Update display
+            document.getElementById('calcTotalHours').textContent = totalHours.toFixed(2);
+            document.getElementById('calcEarnedAmount').textContent = `₱${earnedAmount.toFixed(2)}`;
+
+            // Change colors based on hours
+            const totalHoursEl = document.getElementById('calcTotalHours');
+            const earnedEl = document.getElementById('calcEarnedAmount');
+            
+            if (totalHours >= 8) {
+                totalHoursEl.className = 'fw-bold text-success d-block';
+                earnedEl.className = 'fw-bold text-success d-block';
+            } else if (totalHours >= 7) {
+                totalHoursEl.className = 'fw-bold text-warning d-block';
+                earnedEl.className = 'fw-bold text-warning d-block';
+            } else {
+                totalHoursEl.className = 'fw-bold text-danger d-block';
+                earnedEl.className = 'fw-bold text-danger d-block';
+            }
+        } else {
+            document.getElementById('calcTotalHours').textContent = '0.00';
+            document.getElementById('calcEarnedAmount').textContent = '₱0.00';
+        }
+    }
+
+    // Add calculation event listeners
+    ['time_in', 'time_out', 'breaktime_in', 'breaktime_out', 'daily_rate'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', calculateAttendance);
+            element.addEventListener('input', calculateAttendance);
+        }
+    });
+
+    // Initial calculation
+    calculateAttendance();
+
     // Quick reason buttons
     document.querySelectorAll('.quick-reason').forEach(button => {
         button.addEventListener('click', function() {
@@ -432,6 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('time_out').value = '';
             alert('Time Out must be after Time In');
         }
+        calculateAttendance();
     });
     
     document.getElementById('time_out').addEventListener('change', function() {
@@ -442,6 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.value = '';
             alert('Time Out must be after Time In');
         }
+        calculateAttendance();
     });
     
     // Attendance status auto-update
@@ -449,18 +579,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const status = this.value;
         const timeIn = document.getElementById('time_in');
         const timeOut = document.getElementById('time_out');
+        const breaktimeIn = document.getElementById('breaktime_in');
+        const breaktimeOut = document.getElementById('breaktime_out');
         
         if (status === 'absent') {
             timeIn.value = '';
             timeOut.value = '';
-            timeIn.disabled = true;
-            timeOut.disabled = true;
+            breaktimeIn.value = '';
+            breaktimeOut.value = '';
+            [timeIn, timeOut, breaktimeIn, breaktimeOut].forEach(el => el.disabled = true);
         } else {
-            timeIn.disabled = false;
-            timeOut.disabled = false;
+            [timeIn, timeOut, breaktimeIn, breaktimeOut].forEach(el => el.disabled = false);
             if (!timeIn.value) timeIn.value = '08:00';
             if (!timeOut.value && status === 'present') timeOut.value = '17:00';
+            if (!breaktimeIn.value) breaktimeIn.value = '12:00';
+            if (!breaktimeOut.value) breaktimeOut.value = '13:00';
         }
+        calculateAttendance();
     });
     
     // Preview functionality
