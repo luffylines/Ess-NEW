@@ -64,7 +64,17 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        /* Header Background */
+
+        .icon-box h5,
+        .icon-box p {
+            color: #333 !important; /* dark gray, always visible */
+        }
+
+        body.dark-mode .icon-box h5,
+        body.dark-mode .icon-box p {
+            color: #fff !important; /* OR white if your dark mode turns cards dark */
+        }
+                /* Header Background */
         .custom-header {
             background: linear-gradient(135deg, #ff69b4, #ff85c2) !important;
             color: white;

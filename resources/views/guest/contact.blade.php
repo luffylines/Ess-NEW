@@ -19,7 +19,7 @@
     <!-- Custom Theme Styles -->
     <style>
         :root {
-            --bs-primary: #212529;
+            --bs-primary: #ff69b4;
             --bs-dark-bg: #1a1a1a;
             --bs-light-bg: #ffffff;
         }
@@ -38,9 +38,9 @@
             background-color: #2d2d2d !important;
         }
 
-        body.dark .card, body.dark .dropdown-menu, body.dark .form-control, body.dark .form-select {
-            background-color: #2d2d2d;
-            color: #ffffff;
+        body.dark .card, body.dark .dropdown-menu, body.dark .form-control, body.dark .form-select, body.dark .mb-3 {
+            background-color: #ff69b4;
+            color: #000000;
             border-color: #444;
         }
         .card {
@@ -48,6 +48,68 @@
             border: 1px solid #ddd;
             border-radius: 8px;
         }
+
+        /* Navbar PINK */
+        .navbar {
+            background-color: #ff69b4 !important;
+            border-bottom: 2px solid #ff69b4;
+        }
+
+        .navbar .navbar-brand,
+        .navbar .nav-link {
+            color: #000 !important;
+            font-weight: 500;
+        }
+
+        .navbar .nav-link:hover {
+            background-color: #f4a8c4 !important;
+            border-radius: 6px;
+        }
+
+        /* Navbar Darkmode */
+        body.dark .navbar {
+            background-color: #333 !important;
+            border-bottom: 2px solid #555 !important;
+        }
+
+        body.dark .navbar .navbar-brand,
+        body.dark .navbar .nav-link {
+            color: #fff !important;
+        }
+
+        body.dark .navbar .nav-link:hover {
+            background-color: #f4a8c4 !important;
+        }
+
+        /* Dark mode text colors */
+        body.dark h1,
+        body.dark h2,
+        body.dark h3,
+        body.dark h4,
+        body.dark h5,
+        body.dark p {
+            color: #000000 !important;
+        }
+        body.dark .contact-title,
+        body.dark .contact-description {
+            color: #ffffff !important;
+        }
+
+        body.dark .card-body {
+            background-color: #2d2d2d !important;
+            color: #ffffff !important;
+        }
+
+        body.dark .form-control {
+            background-color: #444 !important;
+            color: #ffffff !important;
+            border-color: #555 !important;
+        }
+
+        body.dark .form-control::placeholder {
+            color: #aaa !important;
+        }
+
         .dropdown-item:hover {
             background-color: #f0f0f0;
         }
@@ -109,8 +171,8 @@
             display: inline-block;
             margin-top: 20px;
             padding: 10px 15px;
-            background-color: #0d6efd;
-            color: white;
+            background-color: #black;
+            color: black;
             font-weight: bold;
             border-radius: 5px;
             text-decoration: none;
@@ -259,7 +321,7 @@
         <div class="col-md-6 mt-4 mt-md-0">
             <div class="card shadow-sm p-4">
                 <h5 class="mb-3">Developer Location</h5>
-                <p><strong>Christian Aring</strong><br>Manila, Philippines</p>
+                <p><strong>Christian Aring</strong><br>Vasra, Manila, Philippines</p>
                 <iframe
                     width="100%"
                     height="300"
@@ -280,4 +342,5 @@
 </div>
 
 </body>
+
 </html>
