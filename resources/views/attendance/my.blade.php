@@ -4,42 +4,155 @@
             <div class="text-end">
                <small class="">{{ \Carbon\Carbon::now()->format('l, F j, Y') }}</small>
             </div>
-        <!-- Flash Messages -->
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show auto-hide-alert" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                <strong>Success!</strong> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show auto-hide-alert" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Error!</strong> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div class="alert alert-warning alert-dismissible fade show auto-hide-alert" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                <strong>Please fix the following errors:</strong>
-                <ul class="mb-0 mt-2">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        @include('partials.flash-messages')
+        
+        {{-- Mobile-Specific Styles --}}
+        <style>
+            /* Mobile-specific optimizations */
+            .mobile-device .btn-lg {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+                min-height: 60px;
+            }
+            
+            .mobile-device .card {
+                border-radius: 15px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            
+            .mobile-device .display-4 {
+                font-size: 2.5rem;
+            }
+            
+            /* Better touch targets for mobile */
+            .mobile-device button {
+                min-height: 48px;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* Prevent zoom on form focus for iOS */
+            @media screen and (-webkit-min-device-pixel-ratio: 0) {
+                .mobile-device input, .mobile-device select, .mobile-device textarea {
+                    font-size: 16px !important;
+                }
+            }
+            
+            /* Enhanced mobile form styling */
+            .mobile-device .form-control {
+                font-size: 16px;
+                padding: 0.75rem;
+            }
+            
+            /* Real-time clock styling */
+            #currentTime {
+                font-weight: bold;
+                color: #007bff;
+                font-family: 'Courier New', monospace;
+            }
+            
+            /* Loading state for buttons */
+            .btn-loading {
+                position: relative;
+            }
+            
+            .btn-loading .fa-spinner {
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            /* Mobile alert positioning */
+            @media (max-width: 768px) {
+                .alert {
+                    margin: 0.5rem;
+                    font-size: 0.9rem;
+                }
+                
+                .fixed-top-alert {
+                    position: fixed !important;
+                    top: 280px !important;  /* Much lower - below header, employee name, title, date, and card header */
+                    left: 10px !important;
+                    right: 10px !important;
+                    transform: none !important;
+                    z-index: 9999 !important;
+                    max-width: none !important;
+                    width: auto !important;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important; /* More prominent shadow */
+                }
+                
+                .fixed-top-alert .btn-sm {
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.8rem;
+                }
+            }
+            
+            /* Desktop alert positioning */
+            @media (min-width: 769px) {
+                .fixed-top-alert {
+                    position: fixed !important;
+                    top: 70px !important; /* Much lower - below navbar, employee name, title, date, and card header */
+                    right: 20% !important;
+                    transform: translateX(40%) !important;
+                    z-index: 9999 !important;
+                    max-width: 600px !important;
+                    width: 90% !important;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+                }
+            }
+            
+            /* Location status indicator */
+            #locationStatus {
+                min-height: 20px;
+                transition: all 0.3s ease;
+            }
+            
+            /* Enhanced button styles for help actions */
+            .btn-outline-primary:hover, .btn-outline-info:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        </style>
         {{-- === MARK ATTENDANCE === --}}
         <div class="card shadow-sm mb-4 mx-auto" style="max-width: 600px;">
             <div class="card-header bg-primary text-white">
                 <h4 class="mb-0"><i class="fas fa-clock me-2"></i>Mark Attendance</h4>
             </div>
             <div class="card-body">
-                @if($todayAttendance && $todayAttendance->time_in && $todayAttendance->time_out)
+                {{-- System Status Check --}}
+                @if(isset($systemStatus) && !$systemStatus['available'])
+                    <div class="text-center">
+                        <div class="mb-3">
+                            @if(str_contains($systemStatus['error'], 'not configured'))
+                                <i class="fas fa-cogs display-4 text-warning mb-3"></i>
+                                <h5 class="text-warning">System Not Configured</h5>
+                                <div class="alert alert-warning" role="alert">
+                                    <i class="fas fa-wrench me-2"></i>
+                                    <strong>{{ $systemStatus['error'] }}</strong><br>
+                                    <small>{{ $systemStatus['details'] }}</small>
+                                </div>
+                                <p class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    The attendance system needs to be set up by an administrator.
+                                </p>
+                            @else
+                                <i class="fas fa-ban display-4 text-danger mb-3"></i>
+                                <h5 class="text-danger">System Temporarily Disabled</h5>
+                                <div class="alert alert-danger" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>{{ $systemStatus['error'] }}</strong><br>
+                                    <small>{{ $systemStatus['details'] }}</small>
+                                </div>
+                                <p class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Please contact your administrator to reactivate the attendance system.
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                @elseif($todayAttendance && $todayAttendance->time_in && $todayAttendance->time_out)
                     <div class="text-center">
                         <p class="text-success fw-semibold mb-3">
                             <i class="fas fa-check-circle me-2"></i>You have completed attendance for today.
@@ -57,64 +170,580 @@
                             </div>
                         </div>
                     </div>
+                @elseif(!isset($systemStatus) || !$systemStatus['available'])
+                    {{-- System disabled - form already handled above --}}
                 @else
-                    <form method="POST" action="{{ route('attendance.submit') }}" id="attendanceMarkForm">
+                    
+                    <form method="POST" action="{{ route('attendance.submit') }}" id="attendanceMarkForm" novalidate>
                         @csrf
                         
                         {{-- Time In --}}
                         @if(!$todayAttendance || !$todayAttendance->time_in)
                             <div class="text-center">
-                                <button type="submit" name="action" value="time_in" class="btn btn-success btn-lg w-100">
+                                <div class="mb-3">
+                                    <i class="fas fa-clock display-4 text-primary mb-3"></i>
+                                    <h5>Ready to start your workday?</h5>
+                                    <p class="text-muted">Current time: <span id="currentTime"></span></p>
+                                    <div id="locationStatus" class="mb-2"></div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-info">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            <strong>Two ways to mark attendance:</strong><br>
+                                            📶 Connect to Store WiFi (instant) OR 📍 Use GPS within 50m radius
+                                        </small>
+                                    </div>
+                                </div>
+                                <button type="submit" name="action" value="time_in" class="btn btn-success btn-lg w-100" id="btnTimeIn">
                                     <i class="fas fa-play me-2"></i>Mark Time In
                                 </button>
+                                <small class="text-muted d-block mt-2">Standard work start time: 8:00 AM</small>
                             </div>
                         
                         {{-- Break Time In --}}
-                        @elseif($todayAttendance->time_in && !$todayAttendance->breaktime_in)
+                        @elseif($todayAttendance && $todayAttendance->time_in && !$todayAttendance->breaktime_in)
                             <div class="text-center">
-                                <p class="text-success mb-3">
-                                    <i class="fas fa-check-circle me-2"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
-                                </p>
-                                <button type="submit" name="action" value="break_in" class="btn btn-warning btn-lg w-100">
-                                    <i class="fas fa-coffee me-2"></i>Mark Break Time In
+                                <div class="mb-3">
+                                    <i class="fas fa-check-circle text-success display-4 mb-3"></i>
+                                    <h5>Work session started</h5>
+                                    <p class="text-success mb-1">
+                                        <i class="fas fa-clock me-1"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
+                                    </p>
+                                    <p class="text-muted">Current time: <span id="currentTime"></span></p>
+                                    <div id="locationStatus" class="mb-2"></div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-info">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            System is working properly - No errors detected
+                                        </small>
+                                    </div>
+                                </div>
+                                <button type="submit" name="action" value="break_in" class="btn btn-warning btn-lg w-100" id="btnBreakIn">
+                                    <i class="fas fa-coffee me-2"></i>Start Lunch Break
                                 </button>
+                                <small class="text-muted d-block mt-2">Lunch break start (default: 12:00 PM)</small>
                             </div>
                         
                         {{-- Break Time Out --}}
-                        @elseif($todayAttendance->breaktime_in && !$todayAttendance->breaktime_out)
+                        @elseif($todayAttendance && $todayAttendance->breaktime_in && !$todayAttendance->breaktime_out)
                             <div class="text-center">
-                                <p class="text-success mb-1">
-                                    <i class="fas fa-check-circle me-2"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
-                                </p>
-                                <p class="text-warning mb-3">
-                                    <i class="fas fa-check-circle me-2"></i>Break In: {{ $todayAttendance->breaktime_in->format('h:i A') }}
-                                </p>
-                                <button type="submit" name="action" value="break_out" class="btn btn-info btn-lg w-100">
-                                    <i class="fas fa-coffee me-2"></i>Mark Break Time Out
+                                <div class="mb-3">
+                                    <i class="fas fa-coffee text-warning display-4 mb-3"></i>
+                                    <h5>On lunch break</h5>
+                                    <p class="text-success mb-1">
+                                        <i class="fas fa-clock me-1"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
+                                    </p>
+                                    <p class="text-warning mb-1">
+                                        <i class="fas fa-coffee me-1"></i>Break In: {{ $todayAttendance && $todayAttendance->breaktime_in ? $todayAttendance->breaktime_in->format('h:i A') : 'Not recorded' }}
+                                    </p>
+                                    <p class="text-muted">Current time: <span id="currentTime"></span></p>
+                                    <div id="locationStatus" class="mb-2"></div>
+                                    <div class="text-center mt-2">
+                                        <small class="text-info">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            System is working properly - No errors detected
+                                        </small>
+                                    </div>
+                                </div>
+                                <button type="submit" name="action" value="break_out" class="btn btn-info btn-lg w-100" id="btnBreakOut">
+                                    <i class="fas fa-utensils me-2"></i>End Lunch Break
                                 </button>
+                                <small class="text-muted d-block mt-2">Lunch break end (default: 1:00 PM)</small>
                             </div>
                         
                         {{-- Time Out --}}
-                        @elseif($todayAttendance->breaktime_out && !$todayAttendance->time_out)
+                        @elseif($todayAttendance && $todayAttendance->breaktime_out && !$todayAttendance->time_out)
                             <div class="text-center">
-                                <p class="text-success mb-1">
-                                    <i class="fas fa-check-circle me-2"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
-                                </p>
-                                <p class="text-warning mb-1">
-                                    <i class="fas fa-check-circle me-2"></i>Break In: {{ $todayAttendance->breaktime_in->format('h:i A') }}
-                                </p>
-                                <p class="text-info mb-3">
-                                    <i class="fas fa-check-circle me-2"></i>Break Out: {{ $todayAttendance->breaktime_out->format('h:i A') }}
-                                </p>
-                                <button type="submit" name="action" value="time_out" class="btn btn-danger btn-lg w-100">
+                                <div class="mb-3">
+                                    <i class="fas fa-briefcase text-primary display-4 mb-3"></i>
+                                    <h5>Back to work</h5>
+                                    <p class="text-success mb-1">
+                                        <i class="fas fa-clock me-1"></i>Time In: {{ $todayAttendance->time_in->format('h:i A') }}
+                                    </p>
+                                    <p class="text-info mb-1">
+                                        <i class="fas fa-coffee me-1"></i>Break: {{ $todayAttendance->breaktime_in ? $todayAttendance->breaktime_in->format('h:i A') : '--' }} - {{ $todayAttendance->breaktime_out ? $todayAttendance->breaktime_out->format('h:i A') : '--' }}
+                                    </p>
+                                    <p class="text-muted">Current time: <span id="currentTime"></span></p>
+                                </div>
+                                <button type="submit" name="action" value="time_out" class="btn btn-danger btn-lg w-100" id="btnTimeOut">
                                     <i class="fas fa-stop me-2"></i>Mark Time Out
                                 </button>
-                            </div>
+                              </div>
                         @endif
                     </form>
                 @endif
             </div>
         </div>
+        {{-- Enhanced Mobile-Friendly Geofencing Script --}}
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('attendanceMarkForm');
+            
+            // Update current time every second
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+            }
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // Auto-detect location on page load for better user experience
+            detectLocationOnLoad();
+
+            if (!form) return;
+
+            let isSubmitting = false;
+
+            async function checkLocationAndSubmit(actionValue) {
+                // Prevent double submission
+                if (isSubmitting) {
+                    return false;
+                }
+                isSubmitting = true;
+
+                const btn = document.querySelector(`button[name=\"action\"][value=\"${actionValue}\"]`);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                }
+
+                try {
+                    // 1) Try network-based allowance first (no GPS required)
+                    const resNet = await fetch('/api/attendance/check-location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    });
+                    
+                    if (!resNet.ok) {
+                        throw new Error('Network check failed');
+                    }
+                    
+                    const dataNet = await resNet.json();
+                    if (dataNet.allowed) {
+                        // Create and submit form properly for mobile
+                        const hiddenAction = document.createElement('input');
+                        hiddenAction.type = 'hidden';
+                        hiddenAction.name = 'action';
+                        hiddenAction.value = actionValue;
+                        form.appendChild(hiddenAction);
+                        
+                        // For mobile compatibility, use the form submit method
+                        form.submit();
+                        return true;
+                    }
+
+                    // Check if system is disabled due to configuration
+                    if (dataNet.error) {
+                        showError(dataNet.error);
+                        return false;
+                    }
+
+                    // 2) If not same network, request GPS and validate radius
+                    if (!('geolocation' in navigator)) {
+                        showError('Your device does not support GPS. Please connect to Store Wi‑Fi or enable location.');
+                        return false;
+                    }
+
+                    const position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 15000, // Increased timeout for mobile
+                            maximumAge: 60000 // Allow cached location up to 1 minute
+                        });
+                    });
+
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    const res = await fetch('/api/attendance/check-location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ lat, lng })
+                    });
+                    
+                    if (!res.ok) {
+                        throw new Error('Location check failed');
+                    }
+                    
+                    const data = await res.json();
+                    if (data.allowed) {
+                        const hiddenAction = document.createElement('input');
+                        hiddenAction.type = 'hidden';
+                        hiddenAction.name = 'action';
+                        hiddenAction.value = actionValue;
+                        form.appendChild(hiddenAction);
+                        form.submit();
+                        return true;
+                    } else {
+                        // Check if it's a system configuration error
+                        if (data.error) {
+                            showError(data.error);
+                        } else {
+                            const dist = data.distance_m ?? 'unknown';
+                            showError(`You are too far from the store. Distance: ${dist}m (limit: ${data.radius_m}m).`);
+                        }
+                        return false;
+                    }
+                } catch (err) {
+                    console.error('Geolocation error:', err);
+                    let msg = '';
+                    let solution = '';
+                    
+                    if (err && err.code === 1) {
+                        msg = '📍 Location access denied.';
+                        solution = '✅ Solutions: (1) Allow location in browser settings, or (2) Connect to Store Wi-Fi';
+                    } else if (err && err.code === 2) {
+                        msg = '🛰️ GPS signal not available.';
+                        solution = '✅ Solutions: (1) Go outside for better GPS signal, or (2) Connect to Store Wi-Fi';
+                    } else if (err && err.code === 3) {
+                        msg = '⏰ Location detection timed out.';
+                        solution = '✅ Solutions: (1) Try again in a moment, or (2) Connect to Store Wi-Fi';
+                    } else {
+                        msg = '📱 Location services unavailable.';
+                        solution = '✅ Solutions: (1) Enable GPS in device settings, or (2) Connect to Store Wi-Fi';
+                    }
+                    
+                    showDetailedError(msg, solution);
+                    return false;
+                } finally {
+                    isSubmitting = false;
+                    if (btn) {
+                        btn.disabled = false;
+                        // Restore original button text
+                        const originalText = btn.getAttribute('data-original-text');
+                        if (originalText) {
+                            btn.innerHTML = originalText;
+                        } else {
+                            // Fallback restoration
+                            const action = btn.value;
+                            switch(action) {
+                                case 'time_in':
+                                    btn.innerHTML = '<i class="fas fa-play me-2"></i>Mark Time In';
+                                    break;
+                                case 'break_in':
+                                    btn.innerHTML = '<i class="fas fa-coffee me-2"></i>Start Lunch Break';
+                                    break;
+                                case 'break_out':
+                                    btn.innerHTML = '<i class="fas fa-utensils me-2"></i>End Lunch Break';
+                                    break;
+                                case 'time_out':
+                                    btn.innerHTML = '<i class="fas fa-stop me-2"></i>Mark Time Out';
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Enhanced error display for mobile with detailed solutions
+            function showDetailedError(message, solution) {
+                const alertHtml = `
+                    <div class="alert alert-warning alert-dismissible fade show auto-hide-alert fixed-top-alert" role="alert" style="font-size: 0.95rem; border-left: 5px solid #ff6b35;">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-map-marker-alt me-2 mt-1" style="color: #e74c3c; font-size: 1.2rem;"></i>
+                            <div class="flex-grow-1">
+                                <strong style="font-size: 1rem;">${message}</strong><br>
+                                <small class="text-muted" style="font-size: 0.85rem;">${solution}</small><br>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="requestLocationAgain()" style="font-weight: 600;">
+                                        <i class="fas fa-location-arrow me-1"></i>Try GPS Again
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="showWiFiHelp()" style="font-weight: 600;">
+                                        <i class="fas fa-wifi me-1"></i>WiFi Help
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                
+                // Remove existing alerts
+                const existingAlerts = document.querySelectorAll('.auto-hide-alert');
+                existingAlerts.forEach(alert => alert.remove());
+                
+                // Add new alert
+                document.body.insertAdjacentHTML('afterbegin', alertHtml);
+                
+                // Auto-hide after 12 seconds (longer duration)
+                setTimeout(() => {
+                    const alert = document.querySelector('.auto-hide-alert');
+                    if (alert) {
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                        bsAlert.close();
+                    }
+                }, 12000);
+            }
+
+            // Simple error for system configuration issues
+            function showError(message) {
+                const alertHtml = `
+                    <div class="alert alert-danger alert-dismissible fade show auto-hide-alert fixed-top-alert" role="alert" style="font-size: 0.95rem; border-left: 5px solid #dc3545;">
+                        <i class="fas fa-exclamation-triangle me-10" style="font-size: 1.2rem;"></i>
+                        <strong style="font-size: 1rem;">System Error!</strong> <span style="font-size: 0.9rem;">${message}</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                
+                const existingAlerts = document.querySelectorAll('.auto-hide-alert');
+                existingAlerts.forEach(alert => alert.remove());
+                document.body.insertAdjacentHTML('afterbegin', alertHtml);
+                
+                // Auto-hide after 10 seconds (longer duration)
+                setTimeout(() => {
+                    const alert = document.querySelector('.auto-hide-alert');
+                    if (alert) {
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                        bsAlert.close();
+                    }
+                }, 10000);
+            }
+
+            // Store original button text and Hook buttons to geofence check
+            ['time_in','break_in','break_out','time_out'].forEach(action => {
+                const button = document.querySelector(`button[name="action"][value="${action}"]`);
+                if (button) {
+                    // Store original text
+                    button.setAttribute('data-original-text', button.innerHTML);
+                    
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        checkLocationAndSubmit(action);
+                    });
+                }
+            });
+
+            // Auto-detect location on page load for better UX
+            function detectLocationOnLoad() {
+                if ('geolocation' in navigator) {
+                    // Show a subtle notification that we're checking location
+                    const locationStatus = document.getElementById('locationStatus');
+                    if (locationStatus) {
+                        locationStatus.innerHTML = '<small class="text-info"><i class="fas fa-spinner fa-spin me-1"></i>Detecting your location...</small>';
+                    }
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            const accuracy = position.coords.accuracy;
+                            
+                            console.log(`GPS detected: ${lat}, ${lng} (accuracy: ${accuracy}m)`);
+                            
+                            // Check if within range immediately
+                            checkLocationStatus(lat, lng);
+                        },
+                        function(error) {
+                            console.log('Location detection failed:', error);
+                            if (locationStatus) {
+                                if (error.code === 1) {
+                                    locationStatus.innerHTML = '<small class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>Location access needed - Please allow location for GPS attendance</small>';
+                                } else {
+                                    locationStatus.innerHTML = '<small class="text-muted"><i class="fas fa-wifi me-1"></i>Connect to Store WiFi for easy attendance marking</small>';
+                                }
+                            }
+                        },
+                        {
+                            enableHighAccuracy: true,  // Better accuracy for you
+                            timeout: 8000,             // Longer timeout
+                            maximumAge: 60000          // 1 minute cache
+                        }
+                    );
+                } else {
+                    const locationStatus = document.getElementById('locationStatus');
+                    if (locationStatus) {
+                        locationStatus.innerHTML = '<small class="text-muted"><i class="fas fa-wifi me-1"></i>GPS not supported - Use Store WiFi for attendance</small>';
+                    }
+                }
+            }
+
+            // Check location status and show helpful info
+            async function checkLocationStatus(lat, lng) {
+                try {
+                    const res = await fetch('/api/attendance/check-location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ lat, lng })
+                    });
+                    
+                    const data = await res.json();
+                    const locationStatus = document.getElementById('locationStatus');
+                    
+                    if (data.allowed) {
+                        if (locationStatus) {
+                            if (data.network && data.network.allowed_network) {
+                                locationStatus.innerHTML = '<small class="text-success"><i class="fas fa-wifi me-1"></i>✅ Connected to Store WiFi - Ready to mark attendance!</small>';
+                            } else {
+                                const distance = data.distance_m ? Math.round(data.distance_m) : 0;
+                                locationStatus.innerHTML = `<small class="text-success"><i class="fas fa-map-marker-alt me-1"></i>✅ GPS Location Verified - ${distance}m from store (limit: ${data.radius_m}m)</small>`;
+                            }
+                        }
+                    } else {
+                        if (locationStatus) {
+                            const distance = data.distance_m ? Math.round(data.distance_m) : 'unknown';
+                            locationStatus.innerHTML = `<small class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>⚠️ Too far from store: ${distance}m (limit: ${data.radius_m}m)</small>`;
+                        }
+                    }
+                } catch (error) {
+                    console.log('Location status check failed:', error);
+                    const locationStatus = document.getElementById('locationStatus');
+                    if (locationStatus) {
+                        locationStatus.innerHTML = '<small class="text-muted"><i class="fas fa-exclamation-circle me-1"></i>Unable to verify location - Try again or use Store WiFi</small>';
+                    }
+                }
+            }
+
+            // Helper functions for user actions
+            window.requestLocationAgain = function() {
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            showDetailedError(
+                                '✅ GPS detected successfully!', 
+                                'Your location has been updated. Try marking attendance again.'
+                            );
+                        },
+                        function(error) {
+                            showDetailedError(
+                                '❌ GPS still not available.', 
+                                'Please check device settings or try connecting to Store WiFi instead.'
+                            );
+                        },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                } else {
+                    showDetailedError(
+                        '❌ GPS not supported on this device.', 
+                        'Please connect to Store WiFi to mark attendance.'
+                    );
+                }
+            }
+
+            window.showWiFiHelp = function() {
+                const helpHtml = `
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <h6><i class="fas fa-wifi me-2"></i>How to Connect to Store WiFi:</h6>
+                        <ol class="mb-2" style="font-size: 0.9rem;">
+                            <li>Open your device's WiFi settings</li>
+                            <li>Look for the Store WiFi network</li>
+                            <li>Connect using the store password</li>
+                            <li>Return to this page and try again</li>
+                        </ol>
+                        <small class="text-muted">💡 Tip: Store WiFi allows instant attendance marking without GPS!</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                
+                // Remove existing alerts first
+                document.querySelectorAll('.alert').forEach(alert => {
+                    if (alert.textContent.includes('How to Connect')) alert.remove();
+                });
+                
+                document.body.insertAdjacentHTML('afterbegin', helpHtml);
+            }
+
+            // Test function to demonstrate different error scenarios
+            window.testErrorMessages = function() {
+                const errorScenarios = [
+                    {
+                        title: '📍 GPS Permission Denied',
+                        message: '📍 Location access denied.',
+                        solution: '✅ Solutions: (1) Allow location in browser settings, or (2) Connect to Store Wi-Fi'
+                    },
+                    {
+                        title: '🛰️ GPS Signal Problems', 
+                        message: '🛰️ GPS signal not available.',
+                        solution: '✅ Solutions: (1) Go outside for better GPS signal, or (2) Connect to Store Wi-Fi'
+                    },
+                    {
+                        title: '⏰ Location Timeout',
+                        message: '⏰ Location detection timed out.',
+                        solution: '✅ Solutions: (1) Try again in a moment, or (2) Connect to Store Wi-Fi'
+                    },
+                    {
+                        title: '📱 GPS Unavailable',
+                        message: '📱 Location services unavailable.',
+                        solution: '✅ Solutions: (1) Enable GPS in device settings, or (2) Connect to Store Wi-Fi'
+                    }
+                ];
+                
+                let currentTest = 0;
+                
+                function showNextError() {
+                    if (currentTest < errorScenarios.length) {
+                        const scenario = errorScenarios[currentTest];
+                        showDetailedError(scenario.message, scenario.solution);
+                        currentTest++;
+                        
+                        setTimeout(() => {
+                            const existingAlerts = document.querySelectorAll('.auto-hide-alert');
+                            existingAlerts.forEach(alert => alert.remove());
+                            
+                            if (currentTest < errorScenarios.length) {
+                                setTimeout(showNextError, 1000); // Longer gap between messages
+                            } else {
+                                setTimeout(() => {
+                                    const demoComplete = `
+                                        <div class="alert alert-success alert-dismissible fade show fixed-top-alert" role="alert" style="font-size: 0.95rem;">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            <strong>Demo Complete!</strong> Those are the error messages employees see when they have location problems.
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    `;
+                                    document.body.insertAdjacentHTML('afterbegin', demoComplete);
+                                    
+                                    // Auto-hide demo complete message
+                                    setTimeout(() => {
+                                        const alert = document.querySelector('.alert-success');
+                                        if (alert) {
+                                            const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                                            bsAlert.close();
+                                        }
+                                    }, 8000);
+                                }, 1000);
+                            }
+                        }, 5000); // Show each message for 5 seconds
+                    }
+                }
+                
+                showNextError();
+            }
+
+            // Mobile-specific optimizations
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                // Prevent zoom on form interactions
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                }
+                
+                // Add mobile-specific styling
+                document.body.classList.add('mobile-device');
+            }
+        });
+        </script>
 
         {{-- === TOOLBAR ABOVE TABLE === --}}
         <div class="d-flex flex-wrap mb-3 gap-2">

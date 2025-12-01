@@ -14,6 +14,59 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuestPageController;
 use App\Http\Controllers\FeedbackController;
 use Illuminate\Support\Facades\Route;
+// Admin: Store locations and allowed networks
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('stores', \App\Http\Controllers\Admin\StoreController::class)->except(['show']);
+    Route::post('stores/{store}/toggle-status', [\App\Http\Controllers\Admin\StoreController::class, 'toggleStatus'])->name('stores.toggle-status');
+    
+    Route::resource('networks', \App\Http\Controllers\Admin\AllowedNetworkController::class)->except(['show']);
+    Route::post('networks/{network}/toggle-status', [\App\Http\Controllers\Admin\AllowedNetworkController::class, 'toggleStatus'])->name('networks.toggle-status');
+});
+
+// Debug route to check IP detection
+Route::get('/debug-ip', function() {
+    return response()->json([
+        'detected_ip' => request()->ip(),
+        'all_ips' => [
+            'HTTP_CLIENT_IP' => $_SERVER['HTTP_CLIENT_IP'] ?? null,
+            'HTTP_X_FORWARDED_FOR' => $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null,
+            'HTTP_X_FORWARDED' => $_SERVER['HTTP_X_FORWARDED'] ?? null,
+            'HTTP_FORWARDED_FOR' => $_SERVER['HTTP_FORWARDED_FOR'] ?? null,
+            'HTTP_FORWARDED' => $_SERVER['HTTP_FORWARDED'] ?? null,
+            'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
+        ],
+        'database_allowed_ips' => \App\Models\AllowedNetwork::where('active', true)->pluck('ip_ranges')->flatten()->toArray()
+    ]);
+});
+
+// Mobile compatibility test route
+Route::get('/mobile-test', function() {
+    $userAgent = request()->header('User-Agent', '');
+    $isMobile = preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry/i', $userAgent);
+    
+    return response()->json([
+        'is_mobile' => $isMobile,
+        'user_agent' => $userAgent,
+        'device_info' => [
+            'is_ios' => preg_match('/iPhone|iPad|iPod/i', $userAgent),
+            'is_android' => preg_match('/Android/i', $userAgent),
+            'is_brave' => strpos($userAgent, 'Brave') !== false,
+            'browser_capabilities' => [
+                'supports_javascript' => true, // We can't really detect this server-side
+                'screen_width' => 'unknown', // Would need client-side detection
+            ]
+        ],
+        'headers' => request()->headers->all()
+    ]);
+});
+
+// Mobile test page
+Route::get('/mobile-test-page', function() {
+    return view('mobile-test');
+});
+
+// Geo-fencing API: validate employee location before allowing attendance actions
+Route::middleware(['auth'])->post('/api/attendance/check-location', [\App\Http\Controllers\AttendanceController::class, 'checkLocation']);
 
 Route::get('/', function () {
     return view('welcome');

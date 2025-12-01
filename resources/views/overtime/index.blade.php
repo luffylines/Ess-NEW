@@ -7,21 +7,7 @@
             </a>
         </div>
 
-        @if(session('success'))
-            <div id="alert-message" class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                <div>{{ session('success') }}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div id="alert-message" class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <div>{{ session('error') }}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        @include('partials.flash-messages')
 
         <div class="card shadow-sm rounded-3">
             @if($overtimeRequests->count() > 0)

@@ -5,16 +5,7 @@
             <p class="mt-2">Fill out the form below to request overtime approval from your manager.</p>
         </div>
 
-        @if($errors->any())
-            <div id="error-alert" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-                <ul class="mb-0 ps-3">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        @include('partials.flash-messages')
 
         <div class="bg-white rounded shadow p-4">
             <form method="POST" action="{{ route('overtime.store') }}" enctype="multipart/form-data">

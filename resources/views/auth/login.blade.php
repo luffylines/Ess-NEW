@@ -13,22 +13,7 @@
         <h3 class="text fw-semibold mb-1 text-center">Welcome Back</h3>
         <p class="text mb-4 text-center">Use your Employee ID or Gmail to log in</p>
 
-        <!-- Session Status -->
-        @if (session('status'))
-            <div class="alert alert-success">{{ session('status') }}</div>
-        @endif
-
-        <!-- Error Messages -->
-        @if ($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+        @include('partials.flash-messages')
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
@@ -71,9 +56,10 @@
             </div>
 
             <!-- Google reCAPTCHA -->
-            <div class="mb-1 text-center">
-                <!-- Using Google's test site key that works on any domain -->
-                <div class="g-recaptcha d-inline-block" data-sitekey="6Lfv5fArAAAAAPvO-IYEtHxiwPmU4YRYmYifrw8j" data-callback="recaptchaCallback" data-error-callback="recaptchaError"></div>
+            <div class="mb-1 text-center recaptcha-container">
+                <!-- reCAPTCHA will be rendered here by the explicit API -->
+                <div id="recaptcha-widget" class="g-recaptcha d-inline-block" 
+                     data-sitekey="6Lfv5fArAAAAAPvO-IYEtHxiwPmU4YRYmYifrw8j"></div>
                 @error('g-recaptcha-response')
                     <div class="text-danger mt-2">{{ $message }}</div>
                 @enderror
@@ -120,17 +106,62 @@
             : `<img src="{{ asset('img/eyeon.png') }}" width="22" alt="Show">`;
     });
 
-    // reCAPTCHA callbacks
-    function recaptchaCallback(response) {
+    // reCAPTCHA callbacks (make them global so the API can access them)
+    window.recaptchaCallback = function(response) {
         console.log('reCAPTCHA success:', response);
         document.getElementById('recaptcha-error').style.display = 'none';
-    }
+    };
 
-    function recaptchaError() {
+    window.recaptchaError = function() {
         console.error('reCAPTCHA error occurred');
         document.getElementById('recaptcha-error').innerHTML = 'reCAPTCHA failed to load. Please refresh the page.';
         document.getElementById('recaptcha-error').style.display = 'block';
+    };
+
+    // Mobile device detection and reCAPTCHA handling
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
+
+    // Enhanced form submission for mobile compatibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.querySelector('form');
+        const submitButton = loginForm.querySelector('button[type="submit"]');
+        
+        loginForm.addEventListener('submit', function(e) {
+            // Check if grecaptcha is loaded and if reCAPTCHA is completed
+            if (typeof grecaptcha !== 'undefined') {
+                const recaptchaResponse = grecaptcha.getResponse();
+                
+                if (!recaptchaResponse) {
+                    e.preventDefault();
+                    document.getElementById('recaptcha-error').innerHTML = 'Please complete the reCAPTCHA verification.';
+                    document.getElementById('recaptcha-error').style.display = 'block';
+                    return false;
+                }
+            } else {
+                // If reCAPTCHA didn't load, show warning but allow form submission on mobile
+                if (isMobileDevice()) {
+                    console.warn('reCAPTCHA not loaded on mobile device, allowing submission');
+                } else {
+                    e.preventDefault();
+                    document.getElementById('recaptcha-error').innerHTML = 'reCAPTCHA service is not available. Please refresh the page.';
+                    document.getElementById('recaptcha-error').style.display = 'block';
+                    return false;
+                }
+            }
+            
+            // Disable submit button to prevent double submission
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Logging in...';
+            
+            // Re-enable after 5 seconds in case of error
+            setTimeout(() => {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Login';
+            }, 5000);
+        });
+    });
     
     // Handle Remember Me functionality
     document.addEventListener('DOMContentLoaded', function() {
@@ -215,8 +246,43 @@
     
     @media screen and (max-width: 400px) {
     .g-recaptcha {
-      transform: scale(0.75);
+      transform: scale(0.77);
       transform-origin: 0 0;
+      margin: 0 auto;
+    }
+    
+    .recaptcha-container {
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    /* Ensure form doesn't break on very small screens */
+    .card-body {
+      padding: 1.5rem !important;
+    }
+  }
+
+  /* Additional mobile optimizations */
+  @media screen and (max-width: 576px) {
+    .g-recaptcha {
+      transform: scale(0.85);
+      transform-origin: center center;
+    }
+    
+    .recaptcha-container {
+      margin: 0.5rem 0;
+    }
+    
+    /* Prevent horizontal scroll on mobile */
+    body {
+      overflow-x: hidden;
+    }
+    
+    .card {
+      margin: 1rem;
+      max-width: calc(100vw - 2rem);
     }
   }
     .btn-gradient-primary {

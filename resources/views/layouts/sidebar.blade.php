@@ -49,6 +49,16 @@
                             <i class="fas fa-history nav-icon me-2"></i> Activity Logs
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.stores.index') }}" class="nav-link">
+                            <i class="fas fa-map-marker-alt nav-icon me-2"></i> Store Locations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.networks.index') }}" class="nav-link">
+                            <i class="fas fa-network-wired nav-icon me-2"></i> Allowed Networks
+                        </a>
+                    </li>
                 @endif
 
                 {{-- HR AND MANAGER --}}

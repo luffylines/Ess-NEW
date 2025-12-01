@@ -14,30 +14,7 @@
         </div>
     </div>
 
-    <!-- Alerts -->
-    @if(session('success'))
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" style="border-left: 4px solid #28a745 !important; border-radius: 10px;">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <strong>Success!</strong> {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" style="border-left: 4px solid #dc3545 !important; border-radius: 10px;">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <strong>Error!</strong> {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            </div>
-        </div>
-    @endif
+    @include('partials.flash-messages')
 
     <!-- Statistics Cards -->
     <div class="row mb-3">

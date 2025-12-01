@@ -5,15 +5,7 @@
             <p class="text-muted mt-2">Update your overtime request details below.</p>
         </div>
 
-        @if($errors->any())
-            <div class="border px-4 rounded mb-3">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+        @include('partials.flash-messages')
 
         <div class="bg-white rounded shadow p-4">
             <form method="POST" action="{{ route('overtime.update', $overtimeRequest) }}" enctype="multipart/form-data">

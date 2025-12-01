@@ -4,20 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <!-- Success/Error Messages -->
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show auto-hide-alert" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show auto-hide-alert" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+            @include('partials.flash-messages')
 
             <div class="card shadow-sm">
                 <div class="card-header bg-danger text-white">

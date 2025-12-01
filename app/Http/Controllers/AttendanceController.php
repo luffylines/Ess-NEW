@@ -8,10 +8,107 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\User;
 use PDF;
+use Illuminate\Http\JsonResponse;
+use App\Helpers\GeoHelper;
+use App\Helpers\NetworkHelper;
+use Illuminate\Support\Facades\Config;
+use App\Models\Store;
+use App\Models\AllowedNetwork;
+
 
 class AttendanceController extends Controller
 {
     // Show attendance records
+        public function checkLocation(Request $request): JsonResponse
+    {
+        // Accept optional lat/lng so we can allow same-network without GPS
+        $request->validate([
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',
+        ]);
+
+        $lat = $request->filled('lat') ? (float)$request->input('lat') : null;
+        $lng = $request->filled('lng') ? (float)$request->input('lng') : null;
+
+        // Check for active store - if no active store, deny access immediately
+        $activeStore = Store::where('active', true)->orderBy('id')->first();
+        if (!$activeStore) {
+            return response()->json([
+                'allowed' => false,
+                'error' => 'No active store location configured. Please contact administrator.',
+                'distance_m' => null,
+                'radius_m' => 0,
+                'center' => ['lat' => 0, 'lng' => 0],
+                'user' => ['id' => Auth::id()],
+                'network' => [
+                    'client_ip' => $request->ip(),
+                    'allowed_network' => false,
+                    'configured' => [],
+                ],
+            ]);
+        }
+
+        $radius = (float)($activeStore->radius_meters ?? 50);
+        $centerLat = (float)$activeStore->lat;
+        $centerLng = (float)$activeStore->lng;
+
+        // Get allowed networks from DB - must be active
+        $allowedNetworks = [];
+        $activeNetworks = AllowedNetwork::where('active', true)->get();
+        if ($activeNetworks->isNotEmpty()) {
+            foreach ($activeNetworks as $net) {
+                if (is_array($net->ip_ranges)) {
+                    $allowedNetworks = array_merge($allowedNetworks, $net->ip_ranges);
+                }
+            }
+        }
+
+        // If no active networks configured, deny network-based access
+        $networkAllowed = false;
+        if (!empty($allowedNetworks)) {
+            // Get client IP with proper header checking
+            $clientIp = $request->ip();
+            $forwardedIp = $request->header('X-Forwarded-For');
+            if ($forwardedIp) {
+                $clientIp = trim(explode(',', $forwardedIp)[0]); // Get first IP if multiple
+            }
+            
+            $networkAllowed = NetworkHelper::ipAllowed($clientIp, $allowedNetworks);
+        }
+
+        // GPS-based location check
+        $allowed = false;
+        $distance = null;
+        
+        if ($lat !== null && $lng !== null) {
+            $allowed = GeoHelper::withinRadius($lat, $lng, $centerLat, $centerLng, $radius);
+            $distance = GeoHelper::distanceMeters($lat, $lng, $centerLat, $centerLng);
+        }
+
+        // Final decision: allow only if either network is allowed OR GPS location is within radius
+        // Both store and network must be active for any access
+        $finalAllowed = ($allowed || $networkAllowed);
+
+        return response()->json([
+            'allowed' => $finalAllowed,
+            'distance_m' => $distance !== null ? round($distance, 2) : null,
+            'radius_m' => $radius,
+            'center' => ['lat' => $centerLat, 'lng' => $centerLng],
+            'user' => ['id' => Auth::id()],
+            'network' => [
+                'client_ip' => $request->ip(),
+                'allowed_network' => $networkAllowed,
+                'configured' => $allowedNetworks,
+                'active_networks_count' => $activeNetworks->count(),
+            ],
+            'store' => [
+                'active' => true,
+                'name' => $activeStore->name,
+                'location' => ['lat' => $centerLat, 'lng' => $centerLng],
+                'radius_meters' => $radius,
+            ]
+        ]);
+    }
     public function myAttendance(Request $request)
     {
         $user = Auth::user();
@@ -71,7 +168,67 @@ class AttendanceController extends Controller
                                    ->where('date', $today)
                                    ->first();
 
-        return view('attendance.my', compact('attendances', 'todayAttendance'));
+        // Check system availability (store and network status)
+        $systemStatus = $this->checkSystemAvailability();
+
+        return view('attendance.my', compact('attendances', 'todayAttendance', 'systemStatus'));
+    }
+
+    // Helper method to check if attendance system is available
+    private function checkSystemAvailability()
+    {
+        // Check for active store first
+        $activeStore = Store::where('active', true)->first();
+        $totalStores = Store::count();
+        
+        // Check for active networks
+        $activeNetworks = AllowedNetwork::where('active', true)->count();
+        $totalNetworks = AllowedNetwork::count();
+
+        // Priority 1: No stores configured at all
+        if ($totalStores === 0) {
+            return [
+                'available' => false,
+                'error' => 'Attendance system is not configured. No store locations found.',
+                'details' => 'System administrator needs to configure at least one store location first.'
+            ];
+        }
+
+        // Priority 2: Stores exist but none are active
+        if (!$activeStore) {
+            return [
+                'available' => false,
+                'error' => 'Attendance system is temporarily disabled. No active store location.',
+                'details' => 'All store locations are set to INACTIVE. Please contact administrator.'
+            ];
+        }
+
+        // Priority 3: No networks configured at all
+        if ($totalNetworks === 0) {
+            return [
+                'available' => false,
+                'error' => 'Attendance system is not configured. No allowed networks found.',
+                'details' => 'System administrator needs to configure at least one allowed network first.'
+            ];
+        }
+
+        // Priority 4: Networks exist but none are active
+        if ($activeNetworks === 0) {
+            return [
+                'available' => false,
+                'error' => 'Attendance system is temporarily disabled. No active networks configured.',
+                'details' => 'All allowed networks are set to INACTIVE. Please contact administrator.'
+            ];
+        }
+
+        // System is fully operational
+        return [
+            'available' => true,
+            'store' => $activeStore,
+            'networks_count' => $activeNetworks,
+            'total_stores' => $totalStores,
+            'total_networks' => $totalNetworks
+        ];
     }
 
     // Helper method to calculate attendance status

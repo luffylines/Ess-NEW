@@ -24,23 +24,57 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        // Validate request including reCAPTCHA
+        // Validate basic fields first
         $request->validate([
             'login' => 'required|string',
             'password' => 'required|string',
-            'g-recaptcha-response' => 'required|string',
         ]);
 
-        // Verify Google reCAPTCHA
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret' => config('services.recaptcha.secret_key'),
-            'response' => $request->input('g-recaptcha-response'),
-        ]);
+        // Check if reCAPTCHA response exists
+        if (!$request->has('g-recaptcha-response') || empty($request->input('g-recaptcha-response'))) {
+            return back()
+                ->withInput($request->except(['password', 'g-recaptcha-response']))
+                ->withErrors(['g-recaptcha-response' => 'Please complete the reCAPTCHA verification.']);
+        }
 
-        $result = $response->json();
+        // Verify Google reCAPTCHA with better error handling
+        try {
+            $response = Http::timeout(10)->asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => config('services.recaptcha.secret_key'),
+                'response' => $request->input('g-recaptcha-response'),
+                'remoteip' => $request->ip(),
+            ]);
 
-        if (!($result['success'] ?? false)) {
-            return back()->withErrors(['g-recaptcha-response' => 'reCAPTCHA verification failed.']);
+            $result = $response->json();
+
+            if (!($result['success'] ?? false)) {
+                $errorCodes = $result['error-codes'] ?? [];
+                $errorMessage = 'reCAPTCHA verification failed.';
+                
+                // Provide specific error messages for common issues
+                if (in_array('timeout-or-duplicate', $errorCodes)) {
+                    $errorMessage = 'reCAPTCHA expired. Please try again.';
+                } elseif (in_array('invalid-input-response', $errorCodes)) {
+                    $errorMessage = 'Invalid reCAPTCHA. Please refresh and try again.';
+                }
+                
+                return back()
+                    ->withInput($request->except(['password', 'g-recaptcha-response']))
+                    ->withErrors(['g-recaptcha-response' => $errorMessage]);
+            }
+        } catch (\Exception $e) {
+            // If reCAPTCHA service is down, log error but allow login for mobile users
+            \Log::error('reCAPTCHA verification failed: ' . $e->getMessage());
+            
+            // For mobile devices, we can be more lenient
+            $userAgent = $request->header('User-Agent', '');
+            $isMobile = preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry/i', $userAgent);
+            
+            if (!$isMobile) {
+                return back()
+                    ->withInput($request->except(['password', 'g-recaptcha-response']))
+                    ->withErrors(['g-recaptcha-response' => 'reCAPTCHA service unavailable. Please try again later.']);
+            }
         }
 
         // Determine if login input is email or employee_id

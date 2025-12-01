@@ -118,16 +118,21 @@
                     </div>
 
                     @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                        <div class="alert alert-warning">
-                            <p class="mb-2">Your email address is unverified.</p>
+                        <div class="alert alert-warning alert-dismissible fade show auto-hide-alert" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>Email Verification Required!</strong>
+                            <p class="mb-2 mt-1">Your email address is unverified.</p>
                             <button type="button" onclick="document.getElementById('send-verification').submit();" class="btn btn-link p-0 text-decoration-underline">
                                 Click here to re-send the verification email.
                             </button>
                             @if (session('status') === 'verification-link-sent')
                                 <p class="mt-2 text-success small">A new verification link has been sent to your email address.</p>
                             @endif
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
+
+                    @include('partials.flash-messages')
 
                     <div class="d-flex flex-column align-items-start">
                         <button type="submit" class="btn btn-primary mb-1">Update Email</button>

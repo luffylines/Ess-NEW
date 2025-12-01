@@ -22,8 +22,31 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Google reCAPTCHA -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <!-- Google reCAPTCHA with mobile optimization -->
+    <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit" async defer></script>
+    
+    <script>
+        var onRecaptchaLoad = function() {
+            // Mobile-friendly reCAPTCHA initialization
+            var recaptchaElements = document.getElementsByClassName('g-recaptcha');
+            for (var i = 0; i < recaptchaElements.length; i++) {
+                var element = recaptchaElements[i];
+                var sitekey = element.getAttribute('data-sitekey');
+                
+                // Check if we're on mobile and adjust size
+                var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                var size = isMobile ? 'compact' : 'normal';
+                
+                grecaptcha.render(element, {
+                    'sitekey': sitekey,
+                    'callback': window.recaptchaCallback,
+                    'error-callback': window.recaptchaError,
+                    'size': size,
+                    'theme': 'light'
+                });
+            }
+        };
+    </script>
     
 
     <!-- Scripts -->

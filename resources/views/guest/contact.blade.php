@@ -287,11 +287,7 @@
         We'd love to hear what you think about the Employee Self-Service System.
     </p>
 
-    @if(session('success'))
-        <div class="alert alert-success text-center">
-            {{ session('success') }}
-        </div>
-    @endif
+    @include('partials.flash-messages')
 
     <div class="row">
         <!-- Feedback Form (Left Side) -->
@@ -340,6 +336,7 @@
         </div>
     </div>
 </div>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

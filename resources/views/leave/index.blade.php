@@ -10,11 +10,7 @@
             </a>
         </div>
 
-        @if(session('success'))
-            <div class="border px-4 rounded mb-3">
-                {{ session('success') }}
-            </div>
-        @endif
+        @include('partials.flash-messages')
 
         @if($leaveRequests->count() > 0)
             <div class="overflow-x-auto">
