@@ -7,17 +7,18 @@
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                 <div>
-                    <h2 class="h3 mb-1">
+                    <h2 class="h3 h4-mobile mb-1">
                         <i class="fas fa-tachometer-alt text-primary me-2"></i>
-                        Attendance Management Dashboard
+                        <span class="d-block d-sm-inline">Attendance Management</span>
                     </h2>
-                    <p class=" mb-0">Manage employee attendance and track daily presence</p>
+                    <p class="mb-0 text-muted small">Manage employee attendance and track daily presence</p>
                 </div>
-                <div>
-                    <a href="{{ route('hr.pending-approvals') }}" class="btn btn-warning">
-                        <i class="fas fa-clock me-2"></i>Pending Approvals 
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <a href="{{ route('hr.pending-approvals') }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-clock me-1"></i>
+                        <span class="d-none d-sm-inline">Pending</span> Approvals 
                         @if($stats['pending_approvals'] > 0)
                             <span class="badge bg-light text-dark ms-1">{{ $stats['pending_approvals'] }}</span>
                         @endif
@@ -43,54 +44,62 @@
     @endif
 
     <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+    <div class="row mb-4 g-3">
+        <div class="col-6 col-md-3">
             <div class="card bg-primary text-white h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-users fa-2x me-3"></i>
-                        <div>
-                            <h4 class="card-title mb-0">{{ $stats['total_employees'] }}</h4>
-                            <p class="card-text mb-0">Total Employees</p>
+                        <i class="fas fa-users fa-lg me-2 flex-shrink-0"></i>
+                        <div class="text-truncate">
+                            <h5 class="card-title mb-0 fs-6 fs-md-5">{{ $stats['total_employees'] }}</h5>
+                            <p class="card-text mb-0 small">
+                                <span class="d-none d-sm-inline">Total</span> Employees
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3">
             <div class="card bg-success text-white h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-user-check fa-2x me-3"></i>
-                        <div>
-                            <h4 class="card-title mb-0">{{ $stats['present_today'] }}</h4>
-                            <p class="card-text mb-0">Present Today</p>
+                        <i class="fas fa-user-check fa-lg me-2 flex-shrink-0"></i>
+                        <div class="text-truncate">
+                            <h5 class="card-title mb-0 fs-6 fs-md-5">{{ $stats['present_today'] }}</h5>
+                            <p class="card-text mb-0 small">
+                                Present <span class="d-none d-sm-inline">Today</span>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3">
             <div class="card bg-danger text-white h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-user-times fa-2x me-3"></i>
-                        <div>
-                            <h4 class="card-title mb-0">{{ $stats['missed_today'] }}</h4>
-                            <p class="card-text mb-0">Missed Today</p>
+                        <i class="fas fa-user-times fa-lg me-2 flex-shrink-0"></i>
+                        <div class="text-truncate">
+                            <h5 class="card-title mb-0 fs-6 fs-md-5">{{ $stats['missed_today'] }}</h5>
+                            <p class="card-text mb-0 small">
+                                Missed <span class="d-none d-sm-inline">Today</span>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3">
             <div class="card bg-warning text-white h-100">
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-clock fa-2x me-3"></i>
-                        <div>
-                            <h4 class="card-title mb-0">{{ $stats['pending_approvals'] }}</h4>
-                            <p class="card-text mb-0">Pending Approvals</p>
+                        <i class="fas fa-clock fa-lg me-2 flex-shrink-0"></i>
+                        <div class="text-truncate">
+                            <h5 class="card-title mb-0 fs-6 fs-md-5">{{ $stats['pending_approvals'] }}</h5>
+                            <p class="card-text mb-0 small">
+                                Pending <span class="d-none d-sm-inline">Approvals</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -150,7 +159,7 @@
     <div class="row">
         <!-- Today's Attendance Overview -->
         <div class="col-md-8 mb-4">
-            <div class="card shadow-sm h-100">
+            <div class="card-1 card shadow-sm h-100">
                 <div class="card-header ">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-calendar-day me-2"></i>Today's Attendance - {{ $today->format('F d, Y') }}
@@ -159,8 +168,8 @@
                 <div class="card-body p-0">
                     @if($employees->count() > 0)
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-dark">
+                            <table class="card-1 table-hover mb-0">
+                                <thead class="card-1">
                                     <tr>
                                         <th>Employee</th>
                                         <th>Status</th>
@@ -174,7 +183,7 @@
                                         @php
                                             $attendance = $todayAttendances[$employee->id] ?? null;
                                         @endphp
-                                        <tr class="align-middle">
+                                        <tr class=" align-middle">
                                             <td>
                                                        <div class="d-flex align-items-center">
                                                     @if($employee->profile_photo && file_exists(public_path('storage/' . $employee->profile_photo)))
@@ -188,7 +197,7 @@
                                                     @endif
                                                     <div>
                                                         <h6 class="mb-0 fw-bold">{{ $employee->name }}</h6>
-                                                        <small class="text-muted">ID: {{ $employee->employee_id ?? 'N/A' }}</small>
+                                                        <small class="">ID: {{ $employee->employee_id ?? 'N/A' }}</small>
                                                     </div>
                                                 </div>
                                             </td>
@@ -220,7 +229,7 @@
                                                         <span>{{ $attendance->time_in->format('h:i A') }}</span>
                                                     </div>
                                                 @else
-                                                    <span class="text-muted">-</span>
+                                                    <span class="">-</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -230,7 +239,7 @@
                                                         <span>{{ $attendance->time_out->format('h:i A') }}</span>
                                                     </div>
                                                 @else
-                                                    <span class="text-muted">-</span>
+                                                    <span class="">-</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">
@@ -394,11 +403,33 @@
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+    border-top: none;
+    font-weight: 400;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 15px;
 
+}
+ /* Dark Mode */
+.dark .card-1 {
+    background-color: #1e1e2f !important;
+    color: #ffffff !important;
+    border-color: #2c2c3b;
+    border-top: none;
+    font-weight: 400;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 15px;
+}
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+.card-1 table th,
+.card-1 table td {
+    font-size: 12px !important;  
 }
 
 /* Avatar Circles */
@@ -417,7 +448,7 @@
 }
 
 .avatar-initials {
-    font-size: 16px;
+    font-size: 1px;
     font-weight: 700;
 }
 
@@ -841,6 +872,82 @@
 .modal-footer {
     border-top: 2px solid #e9ecef;
     border-radius: 0 0 15px 15px;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .h4-mobile {
+        font-size: 1.25rem !important;
+    }
+    
+    .card {
+        margin-bottom: 0.5rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.25rem !important;
+        margin-bottom: 0.25rem;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-content {
+        border-radius: 1rem;
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0.75rem;
+    }
+    
+    .input-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .input-group .btn {
+        border-radius: 0.375rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .table td,
+    .table th {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
 }
 </style>
 

@@ -23,11 +23,9 @@ class OvertimeRequest extends Model
 
     protected $casts = [
         'overtime_date' => 'date',
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
         'total_hours' => 'decimal:2',
-        'created_at' => 'datetime:H:i',
-        'updated_at' => 'datetime:H:i',
         'approved_at' => 'datetime',
     ];
 

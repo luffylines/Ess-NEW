@@ -26,7 +26,7 @@
                         Overtime Date <span class="text-red-500">*</span>
                     </label>
                     <input type="date" id="overtime_date" name="overtime_date" 
-                           value="{{ old('overtime_date', $overtimeRequest->overtime_date->format('Y-m-d')) }}" 
+                           value="{{ old('overtime_date', $overtimeRequest->overtime_date) }}" 
                            min="{{ date('Y-m-d') }}"
                            class="w-100 px-3 py-2 border" 
                            required>
@@ -39,7 +39,7 @@
                             Start Time <span class="text-red-500">*</span>
                         </label>
                         <input type="time" id="start_time" name="start_time" 
-                               value="{{ old('start_time', $overtimeRequest->start_time->format('H:i')) }}"
+                               value="{{ old('start_time', $overtimeRequest->start_time) }}"
                                class="w-100 px-3 py-2 border" 
                                required>
                     </div>
@@ -48,7 +48,7 @@
                             End Time <span class="text-red-500">*</span>
                         </label>
                         <input type="time" id="end_time" name="end_time" 
-                               value="{{ old('end_time', $overtimeRequest->end_time->format('H:i')) }}"
+                               value="{{ old('end_time', $overtimeRequest->end_time) }}"
                                class="w-100 px-3 py-2 border" 
                                required>
                     </div>

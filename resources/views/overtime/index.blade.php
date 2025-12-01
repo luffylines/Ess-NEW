@@ -42,7 +42,7 @@
                                 <tr class="align-middle">
                                     <td class="text-nowrap">{{ $request->overtime_date ? $request->overtime_date->format('M d, Y') : 'N/A' }}</td>
                                     <td class="text-nowrap font-monospace">
-                                        {{ ($request->start_time ? date('h:i A', strtotime($request->start_time)) : 'N/A') }} - {{ ($request->end_time ? date('h:i A', strtotime($request->end_time)) : 'N/A') }}
+                                        {{ ($request->start_time ? \Carbon\Carbon::parse($request->start_time)->format('h:i A') : 'N/A') }} - {{ ($request->end_time ? \Carbon\Carbon::parse($request->end_time)->format('h:i A') : 'N/A') }}
                                     </td>
                                     <td class="fw-semibold text-primary">{{ number_format($request->total_hours, 2) }} hr</td>
                                     <td class="text-truncate" style="max-width: 200px;" title="{{ $request->reason }}">

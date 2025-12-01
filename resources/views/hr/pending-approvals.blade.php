@@ -117,10 +117,17 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                                                 style="width: 32px; height: 32px;">
-                                                <span class="text-white fw-bold">{{ substr($attendance->user->name, 0, 1) }}</span>
-                                            </div>
+                                            @if($attendance->user->profile_photo && file_exists(public_path('storage/' . $attendance->user->profile_photo)))
+                                                <img src="{{ asset('storage/' . $attendance->user->profile_photo) }}" 
+                                                     class="rounded-circle me-2" 
+                                                     style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
+                                                     alt="{{ $attendance->user->name }}">
+                                            @else
+                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                     style="width: 32px; height: 32px; border: 2px solid #0d6efd;">
+                                                    <span class="text-white fw-bold" style="font-size: 14px;">{{ substr($attendance->user->name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
                                             <div>
                                                 <span class="fw-medium">{{ $attendance->user->name }}</span>
                                                 <br><small class="text-muted">ID: {{ $attendance->user->employee_id ?? 'N/A' }}</small>

@@ -142,7 +142,7 @@
     background-color: #ffffff;
     color: #212529;
     border-right: 1px solid #dee2e6;
-    transition: width 0.3s ease, all 0.3s ease;
+    transition: width 0.3s ease, left 0.3s ease;
     overflow: hidden;
     z-index: 1040;
     display: flex;
@@ -246,15 +246,86 @@ body.dark .main-sidebar {
     border-right: 1px solid #2c2c2c;
 }
 
-/* Responsive (mobile view) */
-@media (max-width: 768px) {
+/* Mobile responsive styles */
+@media (max-width: 992px) {
     .main-sidebar {
-        left: -250px;
-        width: 250px;
+        left: -280px;
+        width: 280px;
         transition: left 0.3s ease;
+        z-index: 1045;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    .main-sidebar.active {
+    .main-sidebar.mobile-active {
+        left: 0;
+    }
+
+    /* Always show content on mobile */
+    .main-sidebar.mobile-active #userPanel,
+    .main-sidebar.mobile-active .menu-text,
+    .main-sidebar.mobile-active .brand-text,
+    .main-sidebar.mobile-active #logoutSection {
+        display: block !important;
+    }
+
+    /* Remove hover behavior on mobile */
+    .main-sidebar:not(.mobile-active):hover {
+        width: 60px;
+    }
+
+    /* Mobile navigation improvements */
+    .nav-link {
+        padding: 12px 20px;
+        font-size: 16px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-link:last-child {
+        border-bottom: none;
+    }
+
+    /* Better mobile dropdown */
+    .nav .nav {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 5px;
+        margin: 5px 0;
+    }
+
+    .nav .nav .nav-link {
+        padding: 10px 30px;
+        font-size: 15px;
+    }
+
+    /* Mobile profile section */
+    .user-panel {
+        padding: 20px 0;
+        text-align: center;
+    }
+
+    .profile-pic {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Mobile logout button */
+    .logout-container {
+        padding: 20px;
+    }
+
+    .logout-container button {
+        width: 100%;
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-sidebar {
+        width: 100vw;
+        left: -100vw;
+    }
+
+    .main-sidebar.mobile-active {
         left: 0;
     }
 }
@@ -269,26 +340,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 🖥️ Desktop hover behavior
     function enableHoverBehavior() {
-        sidebar.classList.remove('expanded');
-        sidebar.addEventListener('mouseenter', () => sidebar.classList.add('expanded'));
-        sidebar.addEventListener('mouseleave', () => sidebar.classList.remove('expanded'));
+        sidebar.classList.remove('expanded', 'mobile-active');
+        
+        const handleMouseEnter = () => {
+            if (window.innerWidth > 992) {
+                sidebar.classList.add('expanded');
+            }
+        };
+        
+        const handleMouseLeave = () => {
+            if (window.innerWidth > 992) {
+                sidebar.classList.remove('expanded');
+            }
+        };
+        
+        sidebar.addEventListener('mouseenter', handleMouseEnter);
+        sidebar.addEventListener('mouseleave', handleMouseLeave);
     }
 
-    // 📱 Mobile toggle behavior
-    function enableClickBehavior() {
+    // 📱 Mobile behavior (handled by main layout JS)
+    function enableMobileBehavior() {
         sidebar.classList.remove('expanded');
-        sidebar.classList.remove('active');
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
+        // Mobile functionality is handled in the main layout
     }
 
     // Check screen width to set correct behavior
     function checkViewport() {
-        if (window.innerWidth > 768) {
+        if (window.innerWidth > 992) {
             enableHoverBehavior();
         } else {
-            enableClickBehavior();
+            enableMobileBehavior();
         }
     }
 
@@ -296,40 +377,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Re-check when resizing window
     window.addEventListener('resize', () => {
-        sidebar.classList.remove('expanded', 'active');
+        sidebar.classList.remove('expanded', 'mobile-active');
         checkViewport();
     });
 
-    // Dropdown toggles
-    const attendanceToggle = document.getElementById('attendanceToggle');
-    const attendanceMenu = document.getElementById('attendanceMenu');
-    const deductionsToggle = document.getElementById('deductionsToggle');
-    const deductionsMenu = document.getElementById('deductionsMenu');
-
-    if (attendanceToggle && attendanceMenu) {
-        attendanceToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (attendanceMenu.style.display === 'none' || attendanceMenu.style.display === '') {
-                attendanceMenu.style.display = 'block';
-                attendanceToggle.classList.add('active');
-            } else {
-                attendanceMenu.style.display = 'none';
-                attendanceToggle.classList.remove('active');
-            }
-        });
+    // Enhanced dropdown toggles
+    function setupDropdown(toggleId, menuId) {
+        const toggle = document.getElementById(toggleId);
+        const menu = document.getElementById(menuId);
+        
+        if (toggle && menu) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close other dropdowns
+                document.querySelectorAll('.nav .nav').forEach(otherMenu => {
+                    if (otherMenu !== menu) {
+                        otherMenu.style.display = 'none';
+                        otherMenu.parentElement.querySelector('.dropdown-toggle').classList.remove('active');
+                    }
+                });
+                
+                // Toggle current dropdown
+                const isVisible = menu.style.display === 'block';
+                menu.style.display = isVisible ? 'none' : 'block';
+                toggle.classList.toggle('active', !isVisible);
+            });
+        }
     }
 
-    if (deductionsToggle && deductionsMenu) {
-        deductionsToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (deductionsMenu.style.display === 'none' || deductionsMenu.style.display === '') {
-                deductionsMenu.style.display = 'block';
-                deductionsToggle.classList.add('active');
-            } else {
-                deductionsMenu.style.display = 'none';
-                deductionsToggle.classList.remove('active');
-            }
-        });
-    }
+    // Setup all dropdowns
+    setupDropdown('attendanceToggle', 'attendanceMenu');
+    setupDropdown('deductionsToggle', 'deductionsMenu');
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-item')) {
+            document.querySelectorAll('.nav .nav').forEach(menu => {
+                menu.style.display = 'none';
+                const toggle = menu.parentElement.querySelector('.dropdown-toggle');
+                if (toggle) toggle.classList.remove('active');
+            });
+        }
+    });
 });
 </script>

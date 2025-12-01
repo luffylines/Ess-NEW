@@ -3,8 +3,8 @@
 @section('content')
 <div class="container">
     <!-- Main Welcome Section -->
-    <div class="row justify-content-center mb-5">
-        <div class="col-md-8">
+    <div class="row justify-content-center mb-2">
+        <div class="col-md-100">
             <div class="card shadow-lg border-0 rounded-lg">
                 <!-- Header Section -->
                 <div class="card-header text-center custom-header text-white rounded-top">
@@ -36,7 +36,7 @@
                         <div class="col-md-3 mb-1">
                             <div class="icon-box text-center">
                                 <i class="fas fa-calendar-alt fa-3x text-success"></i>
-                                <h5 class="mt-2">Leave Management</h5>
+                                <h5 class="mt-100">Leave Management</h5>
                                 <p>Request and manage your time off.</p>
                             </div>
                         </div>

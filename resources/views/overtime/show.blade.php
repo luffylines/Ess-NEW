@@ -54,31 +54,19 @@
                             <div class="mb-2">
                                 <strong class="text-secondary">Date:</strong>
                                 <span class="ms-2">
-                                    @if($overtimeRequest->overtime_date)
-                                        {{ \Carbon\Carbon::parse($overtimeRequest->overtime_date)->format('M d, Y') }}
-                                    @else
-                                        Date not available
-                                    @endif
+                                    {{ $overtimeRequest->overtime_date ? $overtimeRequest->overtime_date->format('M d, Y') : 'Date not available' }}
                                 </span>
                             </div>
                             <div class="mb-2">
                                 <strong class="text-secondary">Start Time:</strong>
                                 <span class="ms-2 badge bg-info text-dark">
-                                    @if($overtimeRequest->start_time)
-                                        {{ date('h:i A', strtotime($overtimeRequest->start_time)) }}
-                                    @else
-                                        Time not available
-                                    @endif
+                                    {{ $overtimeRequest->start_time ? date('h:i A', strtotime($overtimeRequest->start_time)) : 'Time not available' }}
                                 </span>
                             </div>
                             <div class="mb-2">
                                 <strong class="text-secondary">End Time:</strong>
                                 <span class="ms-2 badge bg-info text-dark">
-                                    @if($overtimeRequest->end_time)
-                                        {{ date('h:i A', strtotime($overtimeRequest->end_time)) }}
-                                    @else
-                                        Time not available
-                                    @endif
+                                    {{ $overtimeRequest->end_time ? date('h:i A', strtotime($overtimeRequest->end_time)) : 'Time not available' }}
                                 </span>
                             </div>
                             <div class="mb-0">
