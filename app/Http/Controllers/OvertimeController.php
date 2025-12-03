@@ -77,7 +77,7 @@ class OvertimeController extends Controller
     }
 
     // Show a specific overtime request
-    public function show(OvertimeRequest $overtimeRequest)
+    public function show(OvertimeRequest $overtime)
     {
         $user = Auth::user();
 
@@ -86,15 +86,20 @@ class OvertimeController extends Controller
         // 2. User owns the record
         if (in_array($user->role, ['admin', 'hr', 'employee', 'manager'])) {
             // Admin/HR/Manager can view any record
-        } elseif ($user->role === 'employee' && $overtimeRequest->user_id !== $user->id) {
+        } elseif ($user->role === 'employee' && $overtime->user_id !== $user->id) {
             abort(403, 'You can only view your own overtime requests.');
         }
 
+        // Load the related user and approver data
+        $overtime->load(['user', 'approvedBy']);
+
+        // Pass as overtimeRequest for consistency with the view
+        $overtimeRequest = $overtime;
         return view('overtime.show', compact('overtimeRequest'));
     }
 
     // Show form to edit an overtime request
-    public function edit(OvertimeRequest $overtimeRequest)
+    public function edit(OvertimeRequest $overtime)
     {
         $user = Auth::user();
 
@@ -103,17 +108,22 @@ class OvertimeController extends Controller
         // 2. User owns the record AND it's pending
         if (in_array($user->role, ['admin', 'hr', 'employee', 'manager'])) {
             // Admin/HR/Manager can edit any record
-        } elseif ($user->role === 'employee' && $overtimeRequest->user_id !== $user->id) {
+        } elseif ($user->role === 'employee' && $overtime->user_id !== $user->id) {
             abort(403, 'You can only edit your own overtime requests.');
-        } elseif ($user->role === 'employee' && $overtimeRequest->status !== 'pending') {
+        } elseif ($user->role === 'employee' && $overtime->status !== 'pending') {
             abort(403, 'You can only edit pending overtime requests.');
         }
 
+        // Load the related user data
+        $overtime->load('user');
+
+        // Pass as overtimeRequest for consistency with the view
+        $overtimeRequest = $overtime;
         return view('overtime.edit', compact('overtimeRequest'));
     }
 
     // Update an overtime request
-    public function update(Request $request, OvertimeRequest $overtimeRequest)
+    public function update(Request $request, OvertimeRequest $overtime)
     {
         $user = Auth::user();
 
@@ -122,9 +132,9 @@ class OvertimeController extends Controller
         // 2. User owns the record AND it's pending
         if (in_array($user->role, ['admin', 'hr', 'employee', 'manager'])) {
             // Admin/HR/Manager can update any record
-        } elseif ($user->role === 'employee' && $overtimeRequest->user_id !== $user->id) {
+        } elseif ($user->role === 'employee' && $overtime->user_id !== $user->id) {
             abort(403, 'You can only update your own overtime requests.');
-        } elseif ($user->role === 'employee' && $overtimeRequest->status !== 'pending') {
+        } elseif ($user->role === 'employee' && $overtime->status !== 'pending') {
             abort(403, 'You can only update pending overtime requests.');
         }
 
@@ -150,12 +160,12 @@ class OvertimeController extends Controller
         $totalMinutes = $startTime->diffInMinutes($endTime, false);
         $totalHours = round($totalMinutes / 60, 2);
 
-        $documentPath = $overtimeRequest->supporting_document;
+        $documentPath = $overtime->supporting_document;
         if ($request->hasFile('supporting_document')) {
             $documentPath = $request->file('supporting_document')->store('overtime_documents', 'public');
         }
 
-        $overtimeRequest->update([
+        $overtime->update([
             'overtime_date' => $request->overtime_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
@@ -169,7 +179,7 @@ class OvertimeController extends Controller
     }
 
     // Delete an overtime request
-    public function destroy(OvertimeRequest $overtimeRequest)
+    public function destroy(OvertimeRequest $overtime)
     {
         $user = Auth::user();
 
@@ -178,13 +188,13 @@ class OvertimeController extends Controller
         // 2. User owns the record AND it's pending
         if (in_array($user->role, ['admin', 'hr', 'employee', 'manager'])) {
             // Admin/HR/Manager can delete any record
-        } elseif ($user->role === 'employee' && $overtimeRequest->user_id !== $user->id) {
+        } elseif ($user->role === 'employee' && $overtime->user_id !== $user->id) {
             abort(403, 'You can only delete your own overtime requests.');
-        } elseif ($user->role === 'employee' && $overtimeRequest->status !== 'pending') {
+        } elseif ($user->role === 'employee' && $overtime->status !== 'pending') {
             abort(403, 'You can only delete pending overtime requests.');
         }
 
-        $overtimeRequest->delete();
+        $overtime->delete();
 
         return redirect()->route('overtime.index')
             ->with('success', 'Overtime request deleted successfully!');

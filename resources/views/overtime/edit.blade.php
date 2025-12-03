@@ -8,7 +8,7 @@
         @include('partials.flash-messages')
 
         <div class="bg-white rounded shadow p-4">
-            <form method="POST" action="{{ route('overtime.update', $overtimeRequest) }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('overtime.update', $overtimeRequest->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -18,7 +18,7 @@
                         Overtime Date <span class="text-red-500">*</span>
                     </label>
                     <input type="date" id="overtime_date" name="overtime_date" 
-                           value="{{ old('overtime_date', $overtimeRequest->overtime_date) }}" 
+                           value="{{ old('overtime_date', $overtimeRequest->overtime_date ? $overtimeRequest->overtime_date->format('Y-m-d') : '') }}" 
                            min="{{ date('Y-m-d') }}"
                            class="w-100 px-3 py-2 border" 
                            required>
@@ -83,17 +83,25 @@
                     </p>
                 </div>
 
-                <!-- Submit Buttons -->
-                <div class="d-flex align-items-center justify-content-between">
-                    <a href="{{ route('overtime.show', $overtimeRequest) }}" 
-                       class="px-4 py-2 text-secondary bg-secondary">
-                        Cancel
-                    </a>
-                    <button type="submit" 
-                            class="py-2 text-white">
-                        Update Request
-                    </button>
-                </div>
+<!-- Submit Buttons -->
+<div class="d-flex align-items-center justify-content-between">
+    
+    <!-- Cancel (Red) -->
+    <a href="{{ route('overtime.show', $overtimeRequest) }}" 
+       class="btn btn-danger d-flex align-items-center gap-2 px-4 py-2">
+        <i class="fas fa-times-circle"></i>
+        Cancel
+    </a>
+
+    <!-- Update Request (Blue) -->
+    <button type="submit" 
+            class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2">
+        <i class="fas fa-save"></i>
+        Update Request
+    </button>
+
+</div>
+
             </form>
         </div>
     </div>

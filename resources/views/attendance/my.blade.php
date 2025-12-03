@@ -614,121 +614,103 @@
                 }
             }
 
-            // Helper functions for user actions
             window.requestLocationAgain = function() {
-                if ('geolocation' in navigator) {
-                    navigator.geolocation.getCurrentPosition(
-                        function(position) {
-                            showDetailedError(
-                                '✅ GPS detected successfully!', 
-                                'Your location has been updated. Try marking attendance again.'
-                            );
-                        },
-                        function(error) {
-                            showDetailedError(
-                                '❌ GPS still not available.', 
-                                'Please check device settings or try connecting to Store WiFi instead.'
-                            );
-                        },
-                        { enableHighAccuracy: true, timeout: 10000 }
-                    );
-                } else {
+
+                // Must be triggered by a user gesture → this allows browser to re-show prompt
+                if (!('geolocation' in navigator)) {
                     showDetailedError(
-                        '❌ GPS not supported on this device.', 
+                        '❌ GPS not supported on this device.',
                         'Please connect to Store WiFi to mark attendance.'
                     );
+                    return;
                 }
-            }
 
-            window.showWiFiHelp = function() {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        showDetailedError(
+                            '✅ GPS detected successfully!',
+                            'Your location has been updated. Try marking attendance again.'
+                        );
+                    },
+                    function(error) {
+
+                        // If user blocked the permission
+                        if (error.code === error.PERMISSION_DENIED) {
+                            showDetailedError(
+                                '⚠ Your browser is blocking GPS access.',
+                                'Please enable Location Permission for this site in your browser settings.'
+                            );
+
+                            // Open browser settings for location (Chrome only)
+                            if (navigator.permissions) {
+                                navigator.permissions.query({ name: 'geolocation' }).then(status => {
+                                    if (status.state === 'denied') {
+                                        try {
+                                            // Chrome special URL to open settings
+                                            window.open('chrome://settings/content/location');
+                                        } catch (e) {
+                                            console.log("Settings cannot be opened automatically.");
+                                        }
+                                    }
+                                });
+                            }
+                            return;
+                        }
+
+                        // Other errors
+                        showDetailedError(
+                            '❌ GPS still not available.',
+                            'Please check device settings or try connecting to Store WiFi instead.'
+                        );
+                    },
+
+                    // Request again, high accuracy
+                    { enableHighAccuracy: true, timeout: 30000 }
+                );
+            };
+
+            window.showWiFiHelp = function () {
+
                 const helpHtml = `
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        <h6><i class="fas fa-wifi me-2"></i>How to Connect to Store WiFi:</h6>
+                    <div class="alert alert-info alert-dismissible fade show fixed-top-alert wifi-help-alert"
+                        role="alert"
+                        style="font-size: 0.95rem; border-left: 5px solid #0dcaf0;">
+                        
+                        <h6 class="mb-1">
+                            <i class="fas fa-wifi me-2"></i>
+                            How to Connect to Store WiFi:
+                        </h6>
+
                         <ol class="mb-2" style="font-size: 0.9rem;">
                             <li>Open your device's WiFi settings</li>
                             <li>Look for the Store WiFi network</li>
                             <li>Connect using the store password</li>
                             <li>Return to this page and try again</li>
                         </ol>
-                        <small class="text-muted">💡 Tip: Store WiFi allows instant attendance marking without GPS!</small>
+
+                        <small class="text-muted">
+                            💡 Tip: Store WiFi allows instant attendance marking without GPS!
+                        </small>
+
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 `;
-                
-                // Remove existing alerts first
-                document.querySelectorAll('.alert').forEach(alert => {
-                    if (alert.textContent.includes('How to Connect')) alert.remove();
-                });
-                
-                document.body.insertAdjacentHTML('afterbegin', helpHtml);
-            }
 
-            // Test function to demonstrate different error scenarios
-            window.testErrorMessages = function() {
-                const errorScenarios = [
-                    {
-                        title: '📍 GPS Permission Denied',
-                        message: '📍 Location access denied.',
-                        solution: '✅ Solutions: (1) Allow location in browser settings, or (2) Connect to Store Wi-Fi'
-                    },
-                    {
-                        title: '🛰️ GPS Signal Problems', 
-                        message: '🛰️ GPS signal not available.',
-                        solution: '✅ Solutions: (1) Go outside for better GPS signal, or (2) Connect to Store Wi-Fi'
-                    },
-                    {
-                        title: '⏰ Location Timeout',
-                        message: '⏰ Location detection timed out.',
-                        solution: '✅ Solutions: (1) Try again in a moment, or (2) Connect to Store Wi-Fi'
-                    },
-                    {
-                        title: '📱 GPS Unavailable',
-                        message: '📱 Location services unavailable.',
-                        solution: '✅ Solutions: (1) Enable GPS in device settings, or (2) Connect to Store Wi-Fi'
+                // Remove previous WiFi-help alerts only
+                document.querySelectorAll('.wifi-help-alert').forEach(a => a.remove());
+
+                // Insert at top
+                document.body.insertAdjacentHTML('afterbegin', helpHtml);
+
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    const alert = document.querySelector('.wifi-help-alert');
+                    if (alert) {
+                        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                        bsAlert.close();
                     }
-                ];
-                
-                let currentTest = 0;
-                
-                function showNextError() {
-                    if (currentTest < errorScenarios.length) {
-                        const scenario = errorScenarios[currentTest];
-                        showDetailedError(scenario.message, scenario.solution);
-                        currentTest++;
-                        
-                        setTimeout(() => {
-                            const existingAlerts = document.querySelectorAll('.auto-hide-alert');
-                            existingAlerts.forEach(alert => alert.remove());
-                            
-                            if (currentTest < errorScenarios.length) {
-                                setTimeout(showNextError, 1000); // Longer gap between messages
-                            } else {
-                                setTimeout(() => {
-                                    const demoComplete = `
-                                        <div class="alert alert-success alert-dismissible fade show fixed-top-alert" role="alert" style="font-size: 0.95rem;">
-                                            <i class="fas fa-check-circle me-2"></i>
-                                            <strong>Demo Complete!</strong> Those are the error messages employees see when they have location problems.
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    `;
-                                    document.body.insertAdjacentHTML('afterbegin', demoComplete);
-                                    
-                                    // Auto-hide demo complete message
-                                    setTimeout(() => {
-                                        const alert = document.querySelector('.alert-success');
-                                        if (alert) {
-                                            const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-                                            bsAlert.close();
-                                        }
-                                    }, 8000);
-                                }, 1000);
-                            }
-                        }, 5000); // Show each message for 5 seconds
-                    }
-                }
-                
-                showNextError();
-            }
+                }, 10000);
+            };
 
             // Mobile-specific optimizations
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

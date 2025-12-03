@@ -15,6 +15,8 @@
     </div>
 @endif
 
+
+
 @if(session('status'))
     <div class="alert alert-info alert-dismissible fade show auto-hide-alert" role="alert">
         <i class="fas fa-info-circle me-2"></i>

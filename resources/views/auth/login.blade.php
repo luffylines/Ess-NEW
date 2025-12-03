@@ -26,9 +26,6 @@
                        required autofocus
                        class="form-control form-control-lg rounded-3 shadow-sm"
                        placeholder="Enter Employee ID or Gmail">
-                @error('login')
-                    <div class="text-danger mt-1">{{ $message }}</div>
-                @enderror
             </div>
 
             <!-- Password -->
@@ -43,9 +40,6 @@
                         <img src="{{ asset('img/eyeoff.png') }}" width="22" alt="Toggle Password">
                     </span>
                 </div>
-                @error('password')
-                    <div class="text-danger mt-1">{{ $message }}</div>
-                @enderror
             </div>
 
             <!-- Remember Me -->
@@ -60,9 +54,6 @@
                 <!-- reCAPTCHA will be rendered here by the explicit API -->
                 <div id="recaptcha-widget" class="g-recaptcha d-inline-block" 
                      data-sitekey="6Lfv5fArAAAAAPvO-IYEtHxiwPmU4YRYmYifrw8j"></div>
-                @error('g-recaptcha-response')
-                    <div class="text-danger mt-2">{{ $message }}</div>
-                @enderror
                 <div id="recaptcha-error" class="text-danger mt-2" style="display: none;"></div>
                 
             </div>
@@ -106,62 +97,89 @@
             : `<img src="{{ asset('img/eyeon.png') }}" width="22" alt="Show">`;
     });
 
-    // reCAPTCHA callbacks (make them global so the API can access them)
-    window.recaptchaCallback = function(response) {
-        console.log('reCAPTCHA success:', response);
-        document.getElementById('recaptcha-error').style.display = 'none';
-    };
-
-    window.recaptchaError = function() {
-        console.error('reCAPTCHA error occurred');
-        document.getElementById('recaptcha-error').innerHTML = 'reCAPTCHA failed to load. Please refresh the page.';
-        document.getElementById('recaptcha-error').style.display = 'block';
-    };
-
     // Mobile device detection and reCAPTCHA handling
     function isMobileDevice() {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
+// Enhanced form submission with flash-message support
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.querySelector('form');
+    const submitButton = loginForm.querySelector('button[type="submit"]');
 
-    // Enhanced form submission for mobile compatibility
-    document.addEventListener('DOMContentLoaded', function() {
-        const loginForm = document.querySelector('form');
-        const submitButton = loginForm.querySelector('button[type="submit"]');
-        
-        loginForm.addEventListener('submit', function(e) {
-            // Check if grecaptcha is loaded and if reCAPTCHA is completed
-            if (typeof grecaptcha !== 'undefined') {
-                const recaptchaResponse = grecaptcha.getResponse();
-                
-                if (!recaptchaResponse) {
-                    e.preventDefault();
-                    document.getElementById('recaptcha-error').innerHTML = 'Please complete the reCAPTCHA verification.';
-                    document.getElementById('recaptcha-error').style.display = 'block';
-                    return false;
-                }
-            } else {
-                // If reCAPTCHA didn't load, show warning but allow form submission on mobile
-                if (isMobileDevice()) {
-                    console.warn('reCAPTCHA not loaded on mobile device, allowing submission');
-                } else {
-                    e.preventDefault();
-                    document.getElementById('recaptcha-error').innerHTML = 'reCAPTCHA service is not available. Please refresh the page.';
-                    document.getElementById('recaptcha-error').style.display = 'block';
-                    return false;
-                }
+    function showFlashMessage(message, type = 'danger') {
+
+        // Remove any existing temp flash messages
+        const oldFlash = document.querySelector(".temp-flash");
+        if (oldFlash) oldFlash.remove();
+
+        const alertBox = document.createElement('div');
+        alertBox.className = `alert alert-${type} alert-dismissible fade show auto-hide-alert temp-flash`;
+        alertBox.style.position = 'relative';
+        alertBox.style.marginTop = '10px';
+        alertBox.innerHTML = `
+            <i class="fas fa-robot me-2"></i>
+            <strong>reCAPTCHA Error:</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        // Add progress bar
+        const progressBar = document.createElement('div');
+        progressBar.style.cssText = `
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            animation: progressBar 5s linear forwards;
+        `;
+        alertBox.appendChild(progressBar);
+
+        // Append to top of form (under logo)
+        loginForm.prepend(alertBox);
+
+        // Auto-hide
+        setTimeout(() => {
+            if (alertBox) {
+                const bsAlert = new bootstrap.Alert(alertBox);
+                bsAlert.close();
             }
-            
-            // Disable submit button to prevent double submission
-            submitButton.disabled = true;
-            submitButton.innerHTML = 'Logging in...';
-            
-            // Re-enable after 5 seconds in case of error
-            setTimeout(() => {
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'Login';
-            }, 5000);
-        });
+        }, 5000);
+    }
+
+    loginForm.addEventListener('submit', function(e) {
+
+        // If reCAPTCHA exists
+        if (typeof grecaptcha !== 'undefined') {
+            const recaptchaResponse = grecaptcha.getResponse();
+
+            if (!recaptchaResponse) {
+                e.preventDefault();
+                showFlashMessage('Please complete the reCAPTCHA verification.');
+                return false;
+            }
+
+        } else {
+            // If reCAPTCHA fails to load
+            if (!isMobileDevice()) {
+                e.preventDefault();
+                showFlashMessage('reCAPTCHA service is not available. Please refresh the page.');
+                return false;
+            }
+        }
+
+        // Disable button during submission
+        submitButton.disabled = true;
+        submitButton.innerHTML = 'Logging in...';
+
+        // Re-enable after 5 seconds if form failed
+        setTimeout(() => {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Login';
+        }, 5000);
     });
+});
+
     
     // Handle Remember Me functionality
     document.addEventListener('DOMContentLoaded', function() {

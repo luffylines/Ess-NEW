@@ -41,7 +41,6 @@
         </div>
 
         @include('partials.flash-messages')
-        @endif
 
         <div class="row">
             <!-- Main Payroll Content -->

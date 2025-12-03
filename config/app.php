@@ -123,4 +123,21 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SMS Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for SMS services including Semaphore API and Android USB
+    | SMS fallback option.
+    |
+    */
+
+    'sms_api_url' => env('SMS_API_URL'),
+    'sms_api_key' => env('SMS_API_KEY'),
+    'sms_sender_id' => env('SMS_SENDER_ID'),
+    'sms_android_enabled' => env('SMS_ANDROID_ENABLED', false),
+    'sms_android_adb_path' => env('SMS_ANDROID_ADB_PATH', 'adb'),
+    'sms_android_device_id' => env('SMS_ANDROID_DEVICE_ID', 'auto'),
+
 ];

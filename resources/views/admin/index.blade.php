@@ -88,10 +88,10 @@
                                 <td class="text-capitalize">{{ $employee->role }}</td>
                                 <td>{{ $employee->phone ?? '—' }}</td>
                                 <td>
-                                    @if($employee->remember_token)
-                                        <span class="badge badge-warning">Pending Setup</span>
-                                    @else
+                                    @if($employee->email_verified_at)
                                         <span class="badge badge-success">Active</span>
+                                    @else
+                                        <span class="badge badge-warning">Pending Setup</span>
                                     @endif
                                 </td>
                                 <td class="text-center">

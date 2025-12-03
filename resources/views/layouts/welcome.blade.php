@@ -210,6 +210,21 @@
                             @if(auth()->user()->role === 'admin')
                                 <li class="nav-item"><a class="nav-link" href="{{ route('admin.index') }}"><i class="fas fa-users nav-icon me-2"></i> Employees</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('admin.activity-logs.index') }}"><i class="fas fa-history nav-icon me-2"></i> Activity Logs</a></li>
+                                                    <li class="nav-item">
+                                <a href="{{ route('admin.stores.index') }}" class="nav-link">
+                                    <i class="fas fa-map-marker-alt nav-icon me-2"></i> Store Locations
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.networks.index') }}" class="nav-link">
+                                    <i class="fas fa-network-wired nav-icon me-2"></i> Allowed Networks
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.sms.index') }}" class="nav-link">
+                                    <i class="fas fa-sms nav-icon me-2"></i> SMS Configuration
+                                </a>
+                            </li>
 
                             @elseif(auth()->user()->role === 'hr' || auth()->user()->role === 'manager')
                                                     <li class="nav-item">
@@ -240,7 +255,7 @@
                             </li>
                         </ul>
                     </li>
-                    
+                    <li class="nav-item"><a href="{{ route('schedules.index') }}" class="nav-link"><i class="fas fa-calendar-week me-2"></i>Manage Schedules</a></li>
                     <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i>Approve Leave</a></li>
                     <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="fas fa-clock me-2"></i>Approve Overtime</a></li>
                     <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="fas fa-file-alt me-2"></i>Generate Reports</a></li>
@@ -251,6 +266,7 @@
                                 <li class="nav-item"><a class="nav-link" href="{{ route('attendance.my') }}">My Attendance</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('attendance.requests') }}">Request Leave</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('overtime.index') }}">Overtime</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{{ route('schedules.my') }}"><i class="fas fa-calendar-alt me-2"></i>My Schedule</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{ route('payslip.index') }}">Payslips</a></li>
                             @endif
                         @endauth

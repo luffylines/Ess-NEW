@@ -36,27 +36,32 @@
                 @if(auth()->user()->role === 'admin')
                     <li class="nav-item">
                         <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> Dashboard
+                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> <span class="menu-text">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.index') }}" class="nav-link">
-                            <i class="fas fa-users nav-icon me-2"></i> Employees
+                            <i class="fas fa-users nav-icon me-2"></i> <span class="menu-text">Employees</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.activity-logs.index') }}" class="nav-link">
-                            <i class="fas fa-history nav-icon me-2"></i> Activity Logs
+                            <i class="fas fa-history nav-icon me-2"></i> <span class="menu-text">Activity Logs</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.stores.index') }}" class="nav-link">
-                            <i class="fas fa-map-marker-alt nav-icon me-2"></i> Store Locations
+                            <i class="fas fa-map-marker-alt nav-icon me-2"></i> <span class="menu-text">Store Locations</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.networks.index') }}" class="nav-link">
-                            <i class="fas fa-network-wired nav-icon me-2"></i> Allowed Networks
+                            <i class="fas fa-network-wired nav-icon me-2"></i> <span class="menu-text">Allowed Networks</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.sms.index') }}" class="nav-link">
+                            <i class="fas fa-sms nav-icon me-2"></i> <span class="menu-text">SMS Configuration</span>
                         </a>
                     </li>
                 @endif
@@ -65,19 +70,19 @@
                 @if(auth()->user()->role === 'hr' || auth()->user()->role === 'manager')
                     <li class="nav-item">
                         <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> Dashboard
+                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> <span class="menu-text">Dashboard</span>
                         </a>
                     </li>
                     
                     <!-- Attendance Management Dropdown -->
                     <li class="nav-item">
                         <a href="#" class="nav-link dropdown-toggle" id="attendanceToggle">
-                            <i class="fas fa-calendar-check nav-icon me-2"></i> Attendance Management
+                            <i class="fas fa-calendar-check nav-icon me-2"></i> <span class="menu-text">Attendance Management</span>
                         </a>
                         <ul class="nav flex-column ms-4" id="attendanceMenu" style="display: none;">
                             <li class="nav-item">
                                 <a href="{{ route('hr.pending-approvals') }}" class="nav-link">
-                                    <i class="far fa-circle me-2"></i>Pending Approvals
+                                    <i class="far fa-circle me-2"></i><span class="menu-text">Pending Approvals</span>
                                     @php
                                         $pendingCount = \App\Models\Attendance::where('status', 'pending')->count();
                                     @endphp
@@ -88,41 +93,42 @@
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('hr.create-for-employee.form') }}" class="nav-link">
-                                    <i class="far fa-circle me-2"></i>Create Employee Attendance
+                                    <i class="far fa-circle me-2"></i><span class="menu-text">Create Employee Attendance</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('hr.attendance') }}" class="nav-link">
-                                    <i class="far fa-circle me-2"></i>Monitor Attendance
+                                    <i class="far fa-circle me-2"></i><span class="menu-text">Monitor Attendance</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    
+                    <li class="nav-item"><a href="{{ route('schedules.index') }}" class="nav-link"><i class="fas fa-calendar-week me-2"></i><span class="menu-text">Manage Schedules</span></a></li>
                     <!-- Payroll Management -->
                     <li class="nav-item">
                         <a href="{{ route('hr.payroll.index') }}" class="nav-link">
-                            <i class="fas fa-calculator nav-icon me-2"></i> Payroll Management
+                            <i class="fas fa-calculator nav-icon me-2"></i> <span class="menu-text">Payroll Management</span>
                         </a>
                     </li>
                     
-                    <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i>Approve Leave</a></li>
-                    <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="fas fa-clock me-2"></i>Approve Overtime</a></li>
-                    <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="fas fa-file-alt me-2"></i>Generate Reports</a></li>
+                    <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i><span class="menu-text">Approve Leave</span></a></li>
+                    <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="fas fa-clock me-2"></i><span class="menu-text">Approve Overtime</span></a></li>
+                    <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="fas fa-file-alt me-2"></i><span class="menu-text">Generate Reports</span></a></li>
                 @endif
 
                 {{-- EMPLOYEE ONLY --}}
                 @if(auth()->user()->role === 'employee')
                     <li class="nav-item">
                         <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> Dashboard
+                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> <span class="menu-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="nav-item"><a href="{{ route('profile.edit') }}" class="nav-link"><i class="fas fa-user me-2"></i>My Profile</a></li>
-                    <li class="nav-item"><a href="{{ route('attendance.my') }}" class="nav-link"><i class="fas fa-calendar-check me-2"></i>My Attendance</a></li>
-                    <li class="nav-item"><a href="{{ route('overtime.index') }}" class="nav-link"><i class="fas fa-business-time me-2"></i>My Overtime</a></li>
-                    <li class="nav-item"><a href="{{ route('leave.index') }}" class="nav-link"><i class="fas fa-plane me-2"></i>My Leave Requests</a></li>
-                    <li class="nav-item"><a href="{{ route('payslip.index') }}" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i>Payslips</a></li>
+                    <li class="nav-item"><a href="{{ route('attendance.my') }}" class="nav-link"><i class="fas fa-calendar-check me-2"></i><span class="menu-text">My Attendance</span></a></li>
+                    <li class="nav-item"><a href="{{ route('profile.edit') }}" class="nav-link"><i class="fas fa-user me-2"></i><span class="menu-text">My Profile</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('schedules.my') }}"><i class="fas fa-calendar-alt me-2"></i><span class="menu-text">My Schedule</span></a></li>             
+                    <li class="nav-item"><a href="{{ route('overtime.index') }}" class="nav-link"><i class="fas fa-business-time me-2"></i><span class="menu-text">My Overtime</span></a></li>
+                    <li class="nav-item"><a href="{{ route('leave.index') }}" class="nav-link"><i class="fas fa-plane me-2"></i><span class="menu-text">My Leave Requests</span></a></li>
+                    <li class="nav-item"><a href="{{ route('payslip.index') }}" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i><span class="menu-text">Payslips</span></a></li>
                     
                 @endif
 
@@ -143,6 +149,9 @@
 
 {{-- ✅ Sidebar Styles --}}
 <style>
+.main-sidebar:not(.expanded) .menu-text {
+    display: none;
+}
 .main-sidebar {
     width: 60px;
     height: 100vh;
@@ -236,6 +245,9 @@
     border-radius: 4px;
     transition: background 0.2s ease;
     font-size: 15px;
+    height: 50px;
+    
+    
 }
 
 .nav-link:hover {

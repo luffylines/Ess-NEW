@@ -266,12 +266,13 @@
 
             /* Placeholder fix for dark mode */
             body.dark textarea::placeholder {
-                color: #eee !important;
+                color: #000000 !important;
             }
 
             body.dark textarea.form-control {
-                color: #fff;
+               
             }
+            
 
         </style>
 

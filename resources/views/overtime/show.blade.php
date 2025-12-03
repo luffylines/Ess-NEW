@@ -60,13 +60,13 @@
                             <div class="mb-2">
                                 <strong class="text-secondary">Start Time:</strong>
                                 <span class="ms-2 badge bg-info text-dark">
-                                    {{ $overtimeRequest->start_time ? date('h:i A', strtotime($overtimeRequest->start_time)) : 'Time not available' }}
+                                    {{ $overtimeRequest->start_time ? \Carbon\Carbon::parse($overtimeRequest->start_time)->format('h:i A') : 'Time not available' }}
                                 </span>
                             </div>
                             <div class="mb-2">
                                 <strong class="text-secondary">End Time:</strong>
                                 <span class="ms-2 badge bg-info text-dark">
-                                    {{ $overtimeRequest->end_time ? date('h:i A', strtotime($overtimeRequest->end_time)) : 'Time not available' }}
+                                    {{ $overtimeRequest->end_time ? \Carbon\Carbon::parse($overtimeRequest->end_time)->format('h:i A') : 'Time not available' }}
                                 </span>
                             </div>
                             <div class="mb-0">
@@ -164,11 +164,11 @@
                             You can edit or delete this request while it's pending approval.
                         </small>
                         <div class="btn-group">
-                            <a href="{{ route('overtime.edit', $overtimeRequest) }}" 
+                            <a href="{{ route('overtime.edit', $overtimeRequest->id) }}" 
                                class="btn btn-warning btn-sm">
                                 <i class="fas fa-edit me-1"></i>Edit Request
                             </a>
-                            <form method="POST" action="{{ route('overtime.destroy', $overtimeRequest) }}" class="d-inline">
+                            <form method="POST" action="{{ route('overtime.destroy', $overtimeRequest->id) }}" class="d-inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" 

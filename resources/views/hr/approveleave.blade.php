@@ -2,13 +2,18 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    <!-- Classic Elegant Header -->
-    <div class="row mb-1">
+    <!-- Modern Header -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="text-center border-bottom pb-4 mb-4">
-                <h1 class="display-5 fw-bold text-primary mb-2" style="font-family: 'Georgia', serif;">Leave Request Management</h1>
-                <p class="lead  mb-0">Review and approve employee leave applications with elegance and efficiency</p>
-                <div class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1 fw-bold">Leave Request Management</h1>
+                    <p class="mb-0">Review and approve employee leave applications</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+                        <i class="fas fa-refresh me-1"></i>Refresh
+                    </button>
                 </div>
             </div>
         </div>
@@ -17,37 +22,42 @@
     @include('partials.flash-messages')
 
     <!-- Statistics Cards -->
-    <div class="row mb-3">
-        <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px; border-top: 4px solid #007bff;">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-clock fa-3x text-primary"></i>
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-clock fa-lg text-primary"></i>
                     </div>
-                    <h3 class="fw-bold text-primary mb-1">{{ count($leaveRequests) }}</h3>
-                    <p class="text-muted mb-0">Pending Requests</p>
+                    <div>
+                        <h4 class="fw-bold text-primary mb-0">{{ count($leaveRequests) }}</h4>
+                        <p class="text-muted mb-0 small">Pending Requests</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px; border-top: 4px solid #28a745;">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-check-circle fa-3x text-success"></i>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-check-circle fa-lg text-success"></i>
                     </div>
-                    <h3 class="fw-bold text-success mb-1">{{ date('j') }}</h3>
-                    <p class="text-muted mb-0">Processed Today</p>
+                    <div>
+                        <h4 class="fw-bold text-success mb-0">{{ date('j') }}</h4>
+                        <p class="text-muted mb-0 small">Processed Today</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="card border-0 shadow-sm text-center" style="border-radius: 15px; border-top: 4px solid #ffc107;">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-calendar-alt fa-3x text-warning"></i>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-calendar-alt fa-lg text-warning"></i>
                     </div>
-                    <h3 class="fw-bold text-warning mb-1">{{ date('F') }}</h3>
-                    <p class="text-muted mb-0">Current Period</p>
+                    <div>
+                        <h4 class="fw-bold text-warning mb-0">{{ date('F') }}</h4>
+                        <p class="text-muted mb-0 small">Current Period</p>
                 </div>
             </div>
         </div>
@@ -87,12 +97,20 @@
                                         <tr style="border-left: 4px solid transparent;" onmouseover="this.style.borderLeftColor='#007bff'" onmouseout="this.style.borderLeftColor='transparent'">
                                             <td class="px-4 py-4">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
-                                                        <span class="text-white fw-bold">{{ strtoupper(substr($request->user->name, 0, 2)) }}</span>
-                                                    </div>
+                                                    @if($request->user->profile_photo && file_exists(public_path('storage/' . $request->user->profile_photo)))
+                                                        <img src="{{ asset('storage/' . $request->user->profile_photo) }}" 
+                                                             alt="{{ $request->user->name }}" 
+                                                             class="rounded-circle me-3" 
+                                                             style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #dee2e6;">
+                                                    @else
+                                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                             style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                                            <span class="text-white fw-bold">{{ strtoupper(substr($request->user->name, 0, 2)) }}</span>
+                                                        </div>
+                                                    @endif
                                                     <div>
-                                                        <h6 class="mb-0 fw-semibold">{{ $request->user->name }}</h6>
-                                                        <small class="text-muted">Employee</small>
+                                                        <h6 class="mb-0 fw-semibold" style="font-size: 0.9rem;">{{ $request->user->name }}</h6>
+                                                        <small class="text-muted" style="font-size: 0.75rem;">{{ $request->user->position ?? 'Employee' }}</small>
                                                     </div>
                                                 </div>
                                             </td>
@@ -118,40 +136,22 @@
                                                 </div>
                                             </td>
                                             <td class="px-4 py-4">
-                                                <div class="btn-group-vertical w-100" style="gap: 8px;">
-                                                    <!-- Approve Form -->
-                                                    <form method="POST" action="{{ route('hr.approveleave') }}" class="mb-2">
-                                                        @csrf
-                                                        <input type="hidden" name="request_id" value="{{ $request->id }}">
-                                                        <input type="hidden" name="action" value="approve">
-                                                        <div class="mb-2">
-                                                            <input type="text" name="manager_remarks" 
-                                                                   placeholder="Add approval notes..." 
-                                                                   class="form-control form-control-sm" 
-                                                                   style="border-radius: 8px; border: 1px solid #e0e0e0;">
-                                                        </div>
-                                                        <button type="submit" class="btn btn-success btn-sm w-100 fw-semibold" 
-                                                                style="border-radius: 8px; padding: 8px 16px;">
-                                                            <i class="fas fa-check me-2"></i>Approve
-                                                        </button>
-                                                    </form>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <!-- Quick Action Buttons -->
+                                                    <button class="btn btn-success btn-sm" 
+                                                            onclick="showApprovalModal({{ $request->id }}, 'approve', '{{ addslashes($request->user->name) }}')">
+                                                        <i class="fas fa-check me-1"></i>Approve
+                                                    </button>
+                                                    <button class="btn btn-danger btn-sm" 
+                                                            onclick="showApprovalModal({{ $request->id }}, 'reject', '{{ addslashes($request->user->name) }}')">
+                                                        <i class="fas fa-times me-1"></i>Reject
+                                                    </button>
                                                     
-                                                    <!-- Reject Form -->
-                                                    <form method="POST" action="{{ route('hr.approveleave') }}">
-                                                        @csrf
-                                                        <input type="hidden" name="request_id" value="{{ $request->id }}">
-                                                        <input type="hidden" name="action" value="reject">
-                                                        <div class="mb-2">
-                                                            <input type="text" name="manager_remarks" 
-                                                                   placeholder="Reason for rejection..." 
-                                                                   class="form-control form-control-sm" 
-                                                                   style="border-radius: 8px; border: 1px solid #e0e0e0;">
-                                                        </div>
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-semibold" 
-                                                                style="border-radius: 8px; padding: 8px 16px;">
-                                                            <i class="fas fa-times me-2"></i>Reject
-                                                        </button>
-                                                    </form>
+                                                    <!-- View Details Button -->
+                                                    <button class="btn btn-outline-primary btn-sm" 
+                                                            onclick="showLeaveDetails({{ $request->id }}, '{{ addslashes($request->reason) }}', '{{ $request->start_date->format('M d, Y') }}', '{{ $request->end_date->format('M d, Y') }}', '{{ $request->total_days }}')">
+                                                        <i class="fas fa-eye me-1"></i>Details
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -178,8 +178,100 @@
         </div>
     </div>
 </div>
+
+<!-- Approval/Rejection Modal -->
+<div class="modal fade" id="approvalModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approvalModalTitle">Approve Leave Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="approvalForm" method="POST" action="{{ route('hr.approveleave') }}">
+                @csrf
+                <input type="hidden" name="request_id" id="modalRequestId">
+                <input type="hidden" name="action" id="modalAction">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Employee:</strong> <span id="modalEmployeeName"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="remarksLabel">Manager Remarks</label>
+                        <textarea name="manager_remarks" id="modalRemarks" class="form-control" rows="3" 
+                                  placeholder="Add your comments..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" id="modalSubmitBtn">Approve</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Leave Request Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-4"><strong>Duration:</strong></div>
+                    <div class="col-sm-8" id="detailsDuration"></div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-sm-4"><strong>Period:</strong></div>
+                    <div class="col-sm-8" id="detailsPeriod"></div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-sm-4"><strong>Reason:</strong></div>
+                    <div class="col-sm-8" id="detailsReason"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 <!-- JavaScript for Theme Switching -->
 <script>
+// Modal functions
+function showApprovalModal(requestId, action, employeeName) {
+    document.getElementById('modalRequestId').value = requestId;
+    document.getElementById('modalAction').value = action;
+    document.getElementById('modalEmployeeName').textContent = employeeName;
+    
+    if (action === 'approve') {
+        document.getElementById('approvalModalTitle').textContent = 'Approve Leave Request';
+        document.getElementById('remarksLabel').textContent = 'Approval Notes (Optional)';
+        document.getElementById('modalRemarks').placeholder = 'Add approval notes...';
+        document.getElementById('modalSubmitBtn').textContent = 'Approve';
+        document.getElementById('modalSubmitBtn').className = 'btn btn-success';
+    } else {
+        document.getElementById('approvalModalTitle').textContent = 'Reject Leave Request';
+        document.getElementById('remarksLabel').textContent = 'Rejection Reason (Required)';
+        document.getElementById('modalRemarks').placeholder = 'Please provide reason for rejection...';
+        document.getElementById('modalSubmitBtn').textContent = 'Reject';
+        document.getElementById('modalSubmitBtn').className = 'btn btn-danger';
+    }
+    
+    new bootstrap.Modal(document.getElementById('approvalModal')).show();
+}
+
+function showLeaveDetails(requestId, reason, startDate, endDate, totalDays) {
+    document.getElementById('detailsDuration').textContent = totalDays + ' day' + (totalDays == 1 ? '' : 's');
+    document.getElementById('detailsPeriod').textContent = startDate + ' to ' + endDate;
+    document.getElementById('detailsReason').textContent = reason;
+    
+    new bootstrap.Modal(document.getElementById('detailsModal')).show();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 
     function applyTheme() {

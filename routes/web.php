@@ -151,12 +151,23 @@ Route::middleware(['auth'])->group(function () {
     
     //generate Schedule
     // Route to show the generate shift schedule form
-Route::get('/attendance/generateShiftSchedule', [AttendanceController::class, 'showGenerateShiftScheduleForm'])->name('attendance.showGenerateShiftSchedule');
+    Route::get('/attendance/generateShiftSchedule', [AttendanceController::class, 'showGenerateShiftScheduleForm'])->name('attendance.showGenerateShiftSchedule');
+    
+    // Route to handle the form submission for generating shift schedule
+    Route::post('/attendance/generateShiftSchedule', [AttendanceController::class, 'generateShiftSchedule'])->name('attendance.generateShiftSchedule');
 
-// Route to handle the form submission for generating shift schedule
-Route::post('/attendance/generateShiftSchedule', [AttendanceController::class, 'generateShiftSchedule'])->name('attendance.generateShiftSchedule');
-
-    // Attendance request page for employee
+    // Work Schedule Management
+    Route::middleware(['auth'])->group(function () {
+        // Employee routes - view own schedules
+        Route::get('/my-schedules', [\App\Http\Controllers\WorkScheduleController::class, 'mySchedules'])->name('schedules.my');
+        Route::post('/schedules/{schedule}/acknowledge', [\App\Http\Controllers\WorkScheduleController::class, 'acknowledge'])->name('schedules.acknowledge');
+        
+        // Manager/HR routes - manage all schedules
+        Route::middleware(['role:manager,hr,admin'])->group(function () {
+            Route::resource('schedules', \App\Http\Controllers\WorkScheduleController::class);
+            Route::post('/schedules/bulk-create', [\App\Http\Controllers\WorkScheduleController::class, 'bulkCreate'])->name('schedules.bulk-create');
+        });
+    });    // Attendance request page for employee
     Route::get('/attendance/requests', [AttendanceController::class, 'requestForm'])->name('attendance.requests');
     // Submit attendance request
     Route::post('/attendance/requests', [AttendanceController::class, 'submitRequest'])->name('attendance.requests.submit');
@@ -199,15 +210,17 @@ Route::middleware(['auth', 'admin'])->group(function () {
      ->name('admin.employees.resend');
 
 
-    Route::view('/admin/loans/sss', 'loans.sss')->name('admin.loans.sss');
-    Route::view('/admin/loans/pagibig', 'loans.pagibig')->name('admin.loans.pagibig');
-    Route::view('/admin/loans/company', 'loans.company')->name('admin.loans.company');
-    
     // Activity Logs
     Route::get('/admin/activity-logs', [ActivityLogController::class, 'index'])->name('admin.activity-logs.index');
     Route::get('/admin/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('admin.activity-logs.show');
     Route::get('/admin/activity-logs/export/pdf/{id?}', [ActivityLogController::class, 'exportPdf'])->name('admin.activity-logs.export.pdf');
     Route::get('/admin/activity-logs/export/csv/{id?}', [ActivityLogController::class, 'exportCsv'])->name('admin.activity-logs.export.csv');
+    
+    // SMS Configuration
+    Route::get('/admin/sms', [\App\Http\Controllers\Admin\SmsController::class, 'index'])->name('admin.sms.index');
+    Route::post('/admin/sms/test', [\App\Http\Controllers\Admin\SmsController::class, 'test'])->name('admin.sms.test');
+    Route::get('/admin/sms/check-devices', [\App\Http\Controllers\Admin\SmsController::class, 'checkDevices'])->name('admin.sms.check-devices');
+    Route::get('/admin/sms/test-adb', [\App\Http\Controllers\Admin\SmsController::class, 'testAdb'])->name('admin.sms.test-adb');
 });
 
 // Public routes for employee profile completion

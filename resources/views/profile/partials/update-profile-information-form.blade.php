@@ -91,9 +91,6 @@
 
                     <div class="d-flex flex-column align-items-start">
                         <button type="submit" class="btn btn-primary mb-1">Save Changes</button>
-                        @if (session('status') === 'profile-updated')
-                            <span class="text-success small">Profile updated successfully.</span>
-                        @endif
                     </div>
                 </form>
             </div>
@@ -136,9 +133,6 @@
 
                     <div class="d-flex flex-column align-items-start">
                         <button type="submit" class="btn btn-primary mb-1">Update Email</button>
-                        @if (session('status') === 'email-updated')
-                            <span class="text-success small">Email updated successfully.</span>
-                        @endif
                     </div>
                 </form>
             </div>
@@ -186,9 +180,6 @@
 
                     <div class="d-flex flex-column align-items-start">
                         <button type="submit" class="btn btn-primary mb-1">Save</button>
-                        @if (session('status') === 'password-updated')
-                            <span class="text-success small">Password updated successfully.</span>
-                        @endif
                     </div>
                 </form>
             </div>
@@ -302,6 +293,63 @@ body.dark {
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
 }
+
+/* Mobile alert positioning */
+@media (max-width: 768px) {
+    .alert {
+        margin: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .fixed-top-alert {
+        position: fixed !important;
+        top: 280px !important;  /* Much lower - below header, employee name, title, date, and card header */
+        left: 10px !important;
+        right: 10px !important;
+        transform: none !important;
+        z-index: 9999 !important;
+        max-width: none !important;
+        width: auto !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important; /* More prominent shadow */
+    }
+    
+    .fixed-top-alert .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Desktop alert positioning */
+@media (min-width: 769px) {
+    .fixed-top-alert {
+        position: fixed !important;
+        top: 70px !important; /* Much lower - below navbar, employee name, title, date, and card header */
+        right: 20% !important;
+        transform: translateX(40%) !important;
+        z-index: 9999 !important;
+        max-width: 600px !important;
+        width: 90% !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+    }
+}
+
+/* Progress bar styles for alerts */
+.alert-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background-color: rgba(255,255,255,0.7);
+    transition: width 0.1s linear;
+}
+
+.alert-danger .alert-progress-bar {
+    background-color: rgba(255,255,255,0.8);
+}
+
+.alert-success .alert-progress-bar {
+    background-color: rgba(255,255,255,0.8);
+}
 </style>
 
 <script>
@@ -345,5 +393,98 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Enhanced alert system with progress bars
+    function showAlert(message, type = 'success', duration = 10000) {
+        const alertType = type === 'error' ? 'danger' : type;
+        const icon = type === 'error' ? 'fas fa-exclamation-triangle' : 
+                     type === 'success' ? 'fas fa-check-circle' : 
+                     'fas fa-info-circle';
+        
+        const alertHtml = `
+            <div class="alert alert-${alertType} alert-dismissible fade show auto-hide-alert fixed-top-alert" role="alert" style="font-size: 0.95rem; border-left: 5px solid ${type === 'error' ? '#dc3545' : '#198754'}; position: relative; overflow: hidden;">
+                <i class="${icon} me-2" style="font-size: 1.2rem;"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="alert-progress-bar" style="width: 100%;"></div>
+            </div>
+        `;
+        
+        // Remove existing alerts
+        const existingAlerts = document.querySelectorAll('.auto-hide-alert');
+        existingAlerts.forEach(alert => alert.remove());
+        
+        // Add new alert
+        document.body.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        const newAlert = document.querySelector('.auto-hide-alert');
+        const progressBar = newAlert.querySelector('.alert-progress-bar');
+        
+        // Animate progress bar
+        let width = 100;
+        const interval = 50; // Update every 50ms
+        const decrement = 100 / (duration / interval);
+        
+        const progressInterval = setInterval(() => {
+            width -= decrement;
+            if (width <= 0) {
+                width = 0;
+                clearInterval(progressInterval);
+                
+                // Auto-hide the alert
+                if (newAlert && newAlert.parentNode) {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(newAlert);
+                    bsAlert.close();
+                }
+            }
+            if (progressBar) {
+                progressBar.style.width = width + '%';
+            }
+        }, interval);
+        
+        // Clear interval if alert is manually closed
+        newAlert.addEventListener('closed.bs.alert', () => {
+            clearInterval(progressInterval);
+        });
+    }
+
+    // Simple error function for system configuration issues
+    function showError(message) {
+        showAlert(message, 'error', 10000);
+    }
+
+    // Simple success function
+    function showSuccess(message) {
+        showAlert(message, 'success', 8000);
+    }
+
+    // Check for session status and show appropriate alerts
+    @if (session('status') === 'profile-updated')
+        showSuccess('Profile updated successfully!');
+    @endif
+
+    @if (session('status') === 'email-updated')
+        showSuccess('Email updated successfully!');
+    @endif
+
+    @if (session('status') === 'password-updated')
+        showSuccess('Password updated successfully!');
+    @endif
+
+    @if (session('status') === 'verification-link-sent')
+        showSuccess('A new verification link has been sent to your email address.');
+    @endif
+
+    // Show validation errors as alerts
+    @if ($errors->any())
+        @foreach ($errors->all() as $error)
+            showError('{{ $error }}');
+        @endforeach
+    @endif
+
+    // Make functions globally accessible
+    window.showAlert = showAlert;
+    window.showError = showError;
+    window.showSuccess = showSuccess;
 });
 </script>

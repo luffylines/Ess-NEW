@@ -47,10 +47,10 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ route('overtime.show', $request) }}" class="text-primary text-decoration-none me-3">View</a>
+                                        <a href="{{ route('overtime.show', $request->id) }}" class="text-primary text-decoration-none me-3">View</a>
                                         @if($request->status === 'pending')
-                                            <a href="{{ route('overtime.edit', $request) }}" class="text-warning text-decoration-none me-3">Edit</a>
-                                            <form method="POST" action="{{ route('overtime.destroy', $request) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this request?');">
+                                            <a href="{{ route('overtime.edit', $request->id) }}" class="text-warning text-decoration-none me-3">Edit</a>
+                                            <form method="POST" action="{{ route('overtime.destroy', $request->id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this request?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger text-decoration-none">Delete</button>
