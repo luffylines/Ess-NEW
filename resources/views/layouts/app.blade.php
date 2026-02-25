@@ -432,6 +432,13 @@
             });
         </script>
 
+        {{-- AI Chatbot Assistant (Global) --}}
+        @auth
+            @if(auth()->user()->role === 'employee')
+                @include('components.ai-chatbot')
+            @endif
+        @endauth
+
         @stack('scripts')
     </body>
     </html>

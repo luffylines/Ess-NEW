@@ -60,10 +60,30 @@ class PayslipController extends Controller
                 'payslip' => $payslip
             ])->setPaper('A4');
 
+            // Add password protection using employee ID
+            $password = $payslip->employee_id; // Employee ID as password
+            
+            // Access underlying dompdf instance and set encryption
+            $dompdf = $pdf->getDomPDF();
+            
+            // Render the PDF first
+            $dompdf->render();
+            
+            // Get the canvas and set encryption using dynamic method call to avoid static analysis errors
+            $canvas = $dompdf->getCanvas();
+            $method = 'get_cpdf';
+            if (method_exists($canvas, $method)) {
+                $cpdf = $canvas->$method();
+                if (method_exists($cpdf, 'setEncryption')) {
+                    $cpdf->setEncryption($password, $password, ['print', 'copy']);
+                    Log::info('PDF encryption applied for payslip ID: ' . $payslip->id . ' with employee ID: ' . $payslip->employee_id);
+                }
+            }
+
             $filename = 'Payslip_' . str_replace(' ', '_', $payslip->employee_name) . '_' . $payslip->pay_period_year . '_' . str_pad($payslip->pay_period_month, 2, '0', STR_PAD_LEFT) . '.pdf';
 
             // Generate PDF content
-            $pdfContent = $pdf->output();
+            $pdfContent = $dompdf->output();
             
             // Log successful PDF generation
             Log::info('PDF generated successfully for payslip ID: ' . $payslip->id . ', Size: ' . strlen($pdfContent) . ' bytes');

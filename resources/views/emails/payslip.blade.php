@@ -137,7 +137,13 @@
         </div>
 
         <div class="attachment-note">
-            <strong><i>📎 PDF Attachment:</i></strong> Your detailed payslip is attached as a PDF file. You can download and save it for your records.
+            <strong><i>📎 PDF Attachment:</i></strong> Your detailed payslip is attached as a password-protected PDF file. 
+            <br><br>
+            <strong style="color: #dc3545;">🔒 PDF Password:</strong> <code style="background: #fff; padding: 4px 8px; border-radius: 3px; font-size: 14px; color: #dc3545; font-weight: bold;">{{ $payslip->employee_id }}</code>
+            <br><br>
+            <small style="color: #666;">
+                <i class="fas fa-info-circle"></i> For security purposes, the PDF is encrypted with your Employee ID as the password. Please use your Employee ID (<strong>{{ $payslip->employee_id }}</strong>) to open the file.
+            </small>
         </div>
 
         <p>You can also access your payslips anytime through the employee portal:</p>

@@ -22,6 +22,29 @@
 
         @include('partials.flash-messages')
 
+        <!-- Security Notice -->
+        <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-start">
+                <i class="fas fa-lock fa-2x me-3 mt-1"></i>
+                <div>
+                    <h5 class="alert-heading mb-2">
+                        <i class="fas fa-shield-alt me-1"></i>Password-Protected PDF
+                    </h5>
+                    <p class="mb-2">
+                        For security purposes, your payslip PDF is encrypted with a password. 
+                    </p>
+                    <p class="mb-0">
+                        <strong class="text-danger">📌 Password to open PDF:</strong> 
+                        <code class="bg-white px-3 py-1 rounded text-danger fs-6 fw-bold">{{ $payslip->employee_id }}</code>
+                        <small class="d-block mt-1 text-muted">
+                            (Use your Employee ID: <strong>{{ $payslip->employee_id }}</strong> as the password)
+                        </small>
+                    </p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <div class="row">
             <!-- Payslip Main Content -->
             <div class="col-lg-8 mb-4">

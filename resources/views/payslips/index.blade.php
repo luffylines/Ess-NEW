@@ -7,10 +7,10 @@
                 <h1 class="h3 fw-bold text-primary mb-1">
                     <i class="fas fa-file-invoice-dollar me-2"></i>My Payslips
                 </h1>
-                <p class="text-muted mb-0">View and download your salary payslips (automatically emailed to you)</p>
+                <p class="mb-0">View and download your salary payslips (automatically emailed to you)</p>
             </div>
             <div class="text-end">
-                <small class="text-muted">{{ \Carbon\Carbon::now()->format('l, F j, Y') }}</small>
+                <small class="">{{ \Carbon\Carbon::now()->format('l, F j, Y') }}</small>
             </div>
         </div>
 
@@ -76,6 +76,22 @@
         </div>
 
         @if($payslips->count() > 0)
+            <!-- Security Notice -->
+            <div class="alert alert-warning mb-4" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-lock fa-2x me-3"></i>
+                    <div class="flex-fill">
+                        <h6 class="alert-heading mb-2">
+                            <i class="fas fa-shield-alt me-1"></i>Password-Protected Payslips
+                        </h6>
+                        <p class="mb-0">
+                            <strong>🔐 Important:</strong> All payslip PDFs are password-protected for your security. 
+                            Use your <strong>Employee ID</strong> (<code class="bg-white px-2 py-1 rounded">{{ auth()->user()->employee_id }}</code>) as the password to open downloaded files.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Payslips Table -->
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">

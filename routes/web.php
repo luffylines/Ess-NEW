@@ -180,6 +180,9 @@ Route::middleware(['auth'])->group(function () {
     // Leave requests for employees
     Route::resource('leave', App\Http\Controllers\LeaveController::class);
 
+    // AI Chatbot
+    Route::post('/api/chatbot', [App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
+
 });
 
 // HR/Manager Payroll Routes
