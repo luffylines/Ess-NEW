@@ -7,8 +7,8 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 class="h3 mb-1 text-dark fw-bold">My Leave Requests</h1>
-                    <p class="text-muted mb-0">Track and manage your leave applications</p>
+                    <h1 class="h3 mb-1 fw-bold">My Leave Requests</h1>
+                    <p class=" mb-0">Track and manage your leave applications</p>
                 </div>
                 <a href="{{ route('leave.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Request Leave
@@ -29,7 +29,7 @@
                     </div>
                     <div>
                         <h4 class="fw-bold text-primary mb-0">{{ $leaveRequests->where('status', 'approved')->count() }}</h4>
-                        <p class="text-muted mb-0 small">Approved</p>
+                        <p class=" mb-0 small">Approved</p>
                     </div>
                 </div>
             </div>
@@ -42,7 +42,7 @@
                     </div>
                     <div>
                         <h4 class="fw-bold text-warning mb-0">{{ $leaveRequests->where('status', 'pending')->count() }}</h4>
-                        <p class="text-muted mb-0 small">Pending</p>
+                        <p class=" mb-0 small">Pending</p>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
                     </div>
                     <div>
                         <h4 class="fw-bold text-danger mb-0">{{ $leaveRequests->where('status', 'rejected')->count() }}</h4>
-                        <p class="text-muted mb-0 small">Rejected</p>
+                        <p class=" mb-0 small">Rejected</p>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                     </div>
                     <div>
                         <h4 class="fw-bold text-info mb-0">{{ $leaveRequests->count() }}</h4>
-                        <p class="text-muted mb-0 small">Total Requests</p>
+                        <p class=" mb-0 small">Total Requests</p>
                     </div>
                 </div>
             </div>
@@ -78,9 +78,9 @@
     <!-- Leave Requests Table -->
     <div class="card border-0 shadow-sm" style="border-radius: 15px;">
         <div class="card-header bg-white border-0 pb-0" style="border-radius: 15px 15px 0 0;">
-            <h5 class="fw-bold mb-3">Leave History</h5>
+            <h5 class="fw-bold text-muted mb-3">Leave History</h5>
             @if($leaveRequests->count() > 0)
-                <span class="badge bg-info text-white fs-6 px-3 py-2 rounded-pill">{{ $leaveRequests->count() }} total requests</span>
+                <span class="badge bg-info fs-6 px-3 py-2 rounded-pill">{{ $leaveRequests->count() }} total requests</span>
             @endif
         </div>
         <div class="card-body p-0">
@@ -89,13 +89,13 @@
                     <table class="table table-hover mb-0" style="border-radius: 0 0 15px 15px; overflow: hidden;">
                         <thead class="table-light">
                             <tr>
-                                <th class="border-0 px-4 py-3 fw-bold text-uppercase text-muted" style="font-size: 0.85rem;">Request</th>
-                                <th class="border-0 px-4 py-3 fw-bold text-uppercase text-muted" style="font-size: 0.85rem;">Type</th>
-                                <th class="border-0 px-4 py-3 fw-bold text-uppercase text-muted" style="font-size: 0.85rem;">Period</th>
-                                <th class="border-0 px-4 py-3 fw-bold text-uppercase text-muted text-center" style="font-size: 0.85rem;">Days</th>
-                                <th class="border-0 px-4 py-3 fw-bold text-uppercase text-muted" style="font-size: 0.85rem;">Status</th>
-                                <th class="border-0 px-4 py-3 fw-bold text-uppercase text-muted" style="font-size: 0.85rem;">Submitted</th>
-                                <th class="border-0 px-4 py-3 fw-bold text-uppercase text-muted text-center" style="font-size: 0.85rem;">Actions</th>
+                                <th class="border-0 px-4 py-3 fw-bold text-uppercase " style="font-size: 0.85rem;">Request</th>
+                                <th class="border-0 px-4 py-3 fw-bold text-uppercase " style="font-size: 0.85rem;">Type</th>
+                                <th class="border-0 px-4 py-3 fw-bold text-uppercase " style="font-size: 0.85rem;">Period</th>
+                                <th class="border-0 px-4 py-3 fw-bold text-uppercase  text-center" style="font-size: 0.85rem;">Days</th>
+                                <th class="border-0 px-4 py-3 fw-bold text-uppercase " style="font-size: 0.85rem;">Status</th>
+                                <th class="border-0 px-4 py-3 fw-bold text-uppercase " style="font-size: 0.85rem;">Submitted</th>
+                                <th class="border-0 px-4 py-3 fw-bold text-uppercase  text-center" style="font-size: 0.85rem;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -108,7 +108,7 @@
                                             </div>
                                             <div>
                                                 <h6 class="mb-0 fw-semibold">#{{ $request->id }}</h6>
-                                                <small class="text-muted">Request ID</small>
+                                                <small class="">Request ID</small>
                                             </div>
                                         </div>
                                     </td>
@@ -165,10 +165,10 @@
             @else
                 <div class="text-center py-5">
                     <div class="mb-4">
-                        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                        <i class="fas fa-calendar-times fa-4x mb-3"></i>
                     </div>
-                    <h4 class="fw-bold text-muted mb-2">No Leave Requests</h4>
-                    <p class="text-muted mb-4">You haven't submitted any leave requests yet. Start by creating your first request.</p>
+                    <h4 class="fw-bold  mb-2">No Leave Requests</h4>
+                    <p class=" mb-4">You haven't submitted any leave requests yet. Start by creating your first request.</p>
                     <a href="{{ route('leave.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>Request Your First Leave
                     </a>

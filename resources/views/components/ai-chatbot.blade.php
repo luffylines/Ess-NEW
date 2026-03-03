@@ -32,9 +32,10 @@
                     <ul class="help-list">
                         <li>💰 <strong>Your Payslip</strong> - Check salary details</li>
                         <li>📅 <strong>Your Schedule</strong> - View shift times</li>
-                        <li>🏖️ <strong>Leave Balance</strong> - Check available days</li>
-                        <li>🎉 <strong>Holidays</strong> - Upcoming events</li>
                         <li>⏰ <strong>Attendance</strong> - Your daily records</li>
+                        <li>🏖️ <strong>Leave Balance</strong> - Check available days</li>
+                        <li>⏳ <strong>Overtime</strong> - Your OT hours</li>
+                        <li>🎉 <strong>Holidays</strong> - Upcoming events</li>
                     </ul>
                     <p>What would you like to know?</p>
                 </div>
@@ -42,6 +43,9 @@
         </div>
 
         <div class="chatbot-quick-actions">
+            <button class="quick-action-btn" onclick="sendQuickMessage('My attendance')">
+                <i class="fas fa-clock"></i> Attendance
+            </button>
             <button class="quick-action-btn" onclick="sendQuickMessage('What is my shift?')">
                 <i class="fas fa-calendar-day"></i> Shift
             </button>
@@ -53,6 +57,9 @@
             </button>
             <button class="quick-action-btn" onclick="sendQuickMessage('Leave balance?')">
                 <i class="fas fa-calendar-check"></i> Leaves
+            </button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('My overtime')">
+                <i class="fas fa-business-time"></i> Overtime
             </button>
             <button class="quick-action-btn" onclick="sendQuickMessage('My profile info')">
                 <i class="fas fa-user"></i> Profile
@@ -356,12 +363,13 @@
     }
 
     .chatbot-quick-actions {
-        padding: 10px 16px;
+        padding: 10px 12px;
         border-top: 1px solid #e9ecef;
         display: flex;
-        gap: 6px;
+        gap: 5px;
         flex-wrap: wrap;
         flex-shrink: 0;
+        justify-content: center;
     }
 
     /* Light mode quick actions */
@@ -377,16 +385,24 @@
     }
 
     .quick-action-btn {
-        flex: 1;
-        min-width: 100px;
-        padding: 10px 14px;
+        flex: 0 1 auto;
+        min-width: 75px;
+        max-width: 95px;
+        padding: 8px 10px;
         border: 2px solid #6366f1;
-        border-radius: 24px;
-        font-size: 12px;
+        border-radius: 20px;
+        font-size: 11px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s;
         white-space: nowrap;
+        text-align: center;
+    }
+    
+    .quick-action-btn i {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 3px;
     }
 
     /* Light mode quick action buttons */
@@ -716,7 +732,9 @@
         
         .quick-action-btn {
             font-size: 10px;
-            padding: 7px 9px;
+            padding: 7px 8px;
+            min-width: 70px;
+            max-width: 85px;
         }
 
         .btn-send, .btn-voice, .btn-attach {
@@ -775,11 +793,21 @@
             height: 28px;
             font-size: 13px;
         }
+        
+        .chatbot-quick-actions {
+            padding: 8px 10px;
+            gap: 4px;
+        }
 
         .quick-action-btn {
-            min-width: 75px;
-            font-size: 10px;
-            padding: 6px 8px;
+            min-width: 65px;
+            max-width: 75px;
+            font-size: 9px;
+            padding: 6px 7px;
+        }
+        
+        .quick-action-btn i {
+            font-size: 14px;
         }
 
         .chatbot-input {
@@ -815,11 +843,22 @@
         .chatbot-header {
             padding: 12px;
         }
+        
+        .chatbot-quick-actions {
+            padding: 7px 8px;
+            gap: 3px;
+        }
 
         .quick-action-btn {
-            min-width: 70px;
-            font-size: 9px;
-            padding: 5px 6px;
+            min-width: 60px;
+            max-width: 70px;
+            font-size: 8.5px;
+            padding: 5px 5px;
+        }
+        
+        .quick-action-btn i {
+            font-size: 13px;
+            margin-bottom: 2px;
         }
 
         .message-content {

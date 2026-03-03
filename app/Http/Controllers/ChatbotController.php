@@ -301,7 +301,7 @@ class ChatbotController extends Controller
             }
 
             $response .= "Want to know how to request a shift change? <a href='#' onclick='sendMessage(\"yes, show me shift tutorial\")' class='chat-link'>Yes, tell me</a><br><br>";
-            $response .= "<a href='/schedule' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>📅 View My Schedule</a>";
+            $response .= "<a href='/my-schedules' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>📅 View My Schedule</a>";
             
             return $response;
         }
@@ -339,7 +339,7 @@ class ChatbotController extends Controller
                        "📋 Type: {$context['next_holiday']->type}<br>" .
                        "⏳ In {$daysUntil} days<br><br>" .
                        "Want to know how holiday pay works? <a href='#' onclick='sendMessage(\"yes, show me holiday tutorial\")' class='chat-link'>Yes, guide me</a><br><br>" .
-                       "<a href='/holidays' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>🎉 View All Holidays</a>";
+                       "<a href='/dashboard' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>🎉 View Dashboard</a>";
             } else {
                 return "There are no upcoming holidays scheduled. Keep working! 💪";
             }
@@ -360,7 +360,7 @@ class ChatbotController extends Controller
                    "📊 <strong>Annual Allowance:</strong> {$context['leave_balance']} days<br>" .
                    "📉 <strong>Days Used:</strong> {$context['leave_taken']} days<br><br>" .
                    "Need help applying for leave? <a href='#' onclick='sendMessage(\"yes, show me leave tutorial\")' class='chat-link'>Yes, show me</a><br><br>" .
-                   "<a href='/leave-requests' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>🏖️ Apply for Leave</a>";
+                   "<a href='/leave' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>🏖️ Apply for Leave</a>";
         }
 
         // Guide for Leave Application
@@ -379,7 +379,7 @@ class ChatbotController extends Controller
                    "✅ <strong>Days Present:</strong> {$context['attendance_this_month']} days<br>" .
                    "📊 Month: " . Carbon::now()->format('F Y') . "<br><br>" .
                    "Want to know how to time in/out? <a href='#' onclick='sendMessage(\"yes, show me attendance tutorial\")' class='chat-link'>Yes, explain</a><br><br>" .
-                   "<a href='/attendance' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>⏰ View My Attendance</a>";
+                   "<a href='/attendance/my' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 5px;'>⏰ View My Attendance</a>";
         }
 
         // Guide for Time In/Out
@@ -443,7 +443,7 @@ class ChatbotController extends Controller
                "<strong>Step 2:</strong> View your schedule for the week/month<br>" .
                "<strong>Step 3 (Request Change):</strong> Contact your <strong>Store Manager</strong> or Supervisor<br>" .
                "<strong>Step 4:</strong> Once approved, changes will appear in your schedule<br><br>" .
-               "<a href='/schedule' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>📅 View My Schedule Now</a>";
+               "<a href='/my-schedules' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>📅 View My Schedule Now</a>";
     }
 
     private function getHolidayGuide()
@@ -455,7 +455,7 @@ class ChatbotController extends Controller
                "<strong>Step 1:</strong> Go to <strong>Dashboard</strong> - see upcoming holidays<br>" .
                "<strong>Step 2:</strong> Check your payslip to see holiday pay calculations<br><br>" .
                "<em>Note: Policies may vary based on your contract</em> 💵<br><br>" .
-               "<a href='/holidays' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>🎉 View Holidays</a>";
+               "<a href='/dashboard' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>🎉 View Dashboard</a>";
     }
 
     private function getLeaveGuide()
@@ -467,7 +467,7 @@ class ChatbotController extends Controller
                "<strong>Step 4:</strong> Choose your <strong>Dates</strong><br>" .
                "<strong>Step 5:</strong> Add a reason and click <strong>Submit</strong><br>" .
                "<strong>Step 6:</strong> Wait for your manager's approval - you'll get an email! 📩<br><br>" .
-               "<a href='/leave-requests' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>🏖️ Apply for Leave Now</a>";
+               "<a href='/leave' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>🏖️ Apply for Leave Now</a>";
     }
 
     private function getAttendanceGuide() 
@@ -479,6 +479,6 @@ class ChatbotController extends Controller
                "<strong>Important:</strong> Ensure your GPS/Location is enabled if required by your store 📍<br><br>" .
                "<strong>To view your records:</strong><br>" .
                "Click <strong>My Attendance</strong> from the sidebar to see your daily records<br><br>" .
-               "<a href='/attendance' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>⏰ View My Attendance</a>";
+               "<a href='/attendance/my' class='btn btn-primary btn-sm' style='color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); display: inline-block; margin-top: 10px;'>⏰ View My Attendance</a>";
     }
 }
