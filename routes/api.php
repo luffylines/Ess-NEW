@@ -36,6 +36,3 @@ Route::prefix('holidays')->group(function () {
     // Get upcoming holidays
     Route::get('/upcoming', [HolidayController::class, 'upcomingHolidays']);
 });
-
-// AI Chatbot Route
-Route::middleware('auth:sanctum')->post('/chatbot', [App\Http\Controllers\ChatbotController::class, 'chat']);

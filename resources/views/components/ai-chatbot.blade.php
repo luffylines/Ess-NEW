@@ -324,6 +324,27 @@
         box-shadow: 0 2px 8px rgba(67, 56, 202, 0.3);
     }
 
+    .chat-link {
+        color: #4338ca;
+        text-decoration: underline;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .chat-link:hover {
+        color: #3730a3;
+    }
+
+    body.dark .chat-link {
+        color: #a5b4fc;
+    }
+
+    .message-content .btn {
+        margin-top: 10px;
+        display: inline-block;
+        text-align: center;
+    }
+
     .help-list {
         margin: 10px 0;
         padding-left: 20px;
@@ -809,10 +830,69 @@
 
 <script>
     let selectedFile = null;
+    let chatLoaded = false;
 
-    function toggleChatbot() {
+    async function toggleChatbot() {
         const window = document.getElementById('chatbot-window');
         window.classList.toggle('active');
+        
+        // Load history when opened for the first time
+        if (window.classList.contains('active') && !chatLoaded) {
+            await loadChatHistory();
+        }
+    }
+
+    async function loadChatHistory() {
+        try {
+            console.log('Loading chat history...');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfToken) {
+                console.log('No CSRF token found, skipping history load');
+                chatLoaded = true;
+                return;
+            }
+
+            const response = await fetch('/api/chatbot/history', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken.content,
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+            
+            console.log('History API response status:', response.status);
+
+            if (!response.ok) {
+                console.log('No chat history available or user not authenticated');
+                chatLoaded = true;
+                return;
+            }
+
+            const messages = await response.json();
+            console.log('Retrieved messages:', messages);
+            
+            if (Array.isArray(messages) && messages.length > 0) {
+                const container = document.getElementById('chatbot-messages');
+                container.innerHTML = ''; // Clear initial greeting if history exists
+                
+                messages.forEach(msg => {
+                    if (msg && msg.message && msg.sender_type) {
+                        console.log('Adding historical message:', msg.sender_type, msg.message.substring(0, 50) + '...');
+                        addMessage(msg.message, msg.sender_type, false); // false to not scroll every time
+                    }
+                });
+                
+                container.scrollTop = container.scrollHeight;
+                console.log('Chat history loaded successfully');
+            } else {
+                console.log('No messages found in history');
+            }
+            chatLoaded = true;
+        } catch (error) {
+            console.error('Error loading chat history:', error);
+            console.log('History load failed, continuing with empty chat');
+            chatLoaded = true;
+        }
     }
 
     function handleKeyPress(event) {
@@ -848,11 +928,20 @@
         document.getElementById('file-preview').style.display = 'none';
     }
 
-    async function sendMessage() {
+    async function sendMessage(customMessage = null) {
         const input = document.getElementById('chatbot-input-field');
-        const message = input.value.trim();
+        const message = customMessage || input.value.trim();
         
         if (!message && !selectedFile) return;
+
+        console.log('Sending message:', message);
+
+        // Check CSRF token before sending
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            addMessage('Error: CSRF token not found. Please refresh the page.', 'bot');
+            return;
+        }
 
         // Prepare message text
         let messageText = message;
@@ -862,7 +951,7 @@
 
         // Add user message
         addMessage(messageText, 'user');
-        input.value = '';
+        if (!customMessage) input.value = '';
         
         // Clear file if attached
         if (selectedFile) {
@@ -874,29 +963,55 @@
 
         // Send to backend
         try {
+            console.log('Making API call to /api/chatbot');
             const response = await fetch('/api/chatbot', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': csrfToken.content,
+                    'Accept': 'application/json'
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({ message: message })
             });
 
+            console.log('API response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error Response:', errorText);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
+            console.log('API response data:', data);
             
             // Remove typing indicator
             removeTypingIndicator();
 
             // Add bot response
-            addMessage(data.response, 'bot');
+            if (data.response) {
+                addMessage(data.response, 'bot');
+                // Mark that chatbot has been used for future sessions
+                sessionStorage.setItem('chatbot_was_used', 'true');
+            } else {
+                addMessage('Sorry, I received an empty response. Please try again.', 'bot');
+            }
         } catch (error) {
+            console.error('Chat error:', error);
             removeTypingIndicator();
-            addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            let errorMessage = 'Sorry, I encountered an error. ';
+            if (error.message) {
+                errorMessage += `Error: ${error.message}`;
+            }
+            if (error.status) {
+                errorMessage += ` (Status: ${error.status})`;
+            }
+            addMessage(errorMessage, 'bot');
         }
     }
 
-    function addMessage(text, type) {
+    function addMessage(text, type, shouldScroll = true) {
         const messagesContainer = document.getElementById('chatbot-messages');
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}-message`;
@@ -925,7 +1040,9 @@
         messagesContainer.appendChild(messageDiv);
         
         // Scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        if (shouldScroll) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
     }
 
     function showTypingIndicator() {
@@ -1003,10 +1120,8 @@
                 let finalTranscript = '';
 
                 // Process all results from the beginning
-                for (let i = 0; i < event.results.length; i++) {
+                for (let i = event.resultIndex; i < event.results.length; i++) {
                     const transcript = event.results[i][0].transcript;
-                    console.log(`Result ${i}: "${transcript}" (final: ${event.results[i].isFinal}, confidence: ${event.results[i][0].confidence})`);
-                    
                     if (event.results[i].isFinal) {
                         finalTranscript += transcript + ' ';
                     } else {
@@ -1014,32 +1129,12 @@
                     }
                 }
 
-                // Accumulate final transcript
-                if (finalTranscript) {
-                    fullTranscript += finalTranscript;
-                    console.log('📌 Final transcript accumulated:', fullTranscript);
-                }
-
                 const input = document.getElementById('chatbot-input-field');
                 if (input) {
-                    // Show both final and interim transcript
-                    const displayText = (fullTranscript + interimTranscript).trim();
-                    input.value = displayText;
-                    console.log('✍️ Updated input field:', displayText);
-                    console.log('📱 Input value length:', input.value.length);
-                    
-                    // Trigger input event for better compatibility
-                    const inputEvent = new Event('input', { bubbles: true });
-                    input.dispatchEvent(inputEvent);
-                    
-                    // Focus the input field
-                    try {
-                        input.focus();
-                    } catch (e) {
-                        console.log('⚠️ Could not focus input:', e);
+                    if (finalTranscript) {
+                        fullTranscript += finalTranscript;
                     }
-                } else {
-                    console.error('❌ Input field not found!');
+                    input.value = (fullTranscript + interimTranscript).trim();
                 }
             };
 
@@ -1175,4 +1270,24 @@
     console.log('🎤 webkitSpeechRecognition:', 'webkitSpeechRecognition' in window);
     console.log('🎤 SpeechRecognition:', 'SpeechRecognition' in window);
     console.log('✅ Speech Recognition API available:', !!(window.SpeechRecognition || window.webkitSpeechRecognition));
+
+    // Auto-load chat history when page loads (after a short delay to ensure DOM is ready)
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, checking CSRF token...');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            console.error('CSRF token not found! This will cause API calls to fail.');
+        } else {
+            console.log('CSRF token found:', csrfToken.content.substring(0, 10) + '...');
+        }
+
+        setTimeout(async function() {
+            if (sessionStorage.getItem('chatbot_was_used') === 'true') {
+                console.log('Previous chat session detected, loading history...');
+                await loadChatHistory();
+            } else {
+                console.log('No previous chat session found.');
+            }
+        }, 500);
+    });
 </script>

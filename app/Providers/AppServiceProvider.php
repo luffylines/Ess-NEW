@@ -24,5 +24,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
+        
+        // Force HTTPS URLs when accessed via HTTPS (fixes mixed content warnings in ngrok)
+        if (request()->isSecure() || request()->header('X-Forwarded-Proto') === 'https') {
+            \URL::forceScheme('https');
+        }
     }
 }

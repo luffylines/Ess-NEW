@@ -257,5 +257,10 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name
 Route::get('/otp/verify', [OtpController::class, 'showVerifyForm'])->name('otp.verify');
 Route::post('/otp/verify', [OtpController::class, 'verify'])->name('otp.check');
 
+// AI Chatbot Routes
+Route::middleware(['auth'])->group(function () {
+    Route::post('/api/chatbot', [App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
+    Route::get('/api/chatbot/history', [App\Http\Controllers\ChatbotController::class, 'getHistory'])->name('chatbot.history');
+});
 
 require __DIR__.'/auth.php';
