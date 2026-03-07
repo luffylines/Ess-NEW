@@ -70,39 +70,90 @@
         }
     </style>
 </head>
-<body class="bg-light">
+<body class="bg-light guest-auth-body">
 
-    <div class="container-fluid min-vh-100">
-        <div class="row min-vh-100 g-0">
-
-            <!-- Left Side: Image - Hidden on mobile, visible on tablet+ -->
-            <div class="col-lg-6 col-xl-7 d-none d-md-block position-relative">
-                <div class="position-absolute top-0 start-0 w-100 h-100" 
-                     style="background: linear-gradient(135deg, #ea6692 0%, #e61ba2 100%);">
-                    <div class="d-flex align-items-center justify-content-center h-100 text-white text-center p-4">
-                        <div>
-                            <h1 class="display-4 fw-bold mb-3">Welcome</h1>
-                            <p class="lead">Your Employee Management System</p>
-                        </div>
-                    </div>
+    <div class="guest-auth-shell">
+        <div class="guest-auth-row">
+            <div class="guest-auth-hero">
+                <div>
+                    <h1 class="display-4 fw-bold mb-3">Welcome</h1>
+                    <p class="lead mb-0">Your Employee Management System</p>
                 </div>
             </div>
 
-            <!-- Right Side: Content -->
-            <!-- Right Side: Centered Content -->
-            <div class="col-12 col-md-12 col-lg-6 col-xl-5 d-flex align-items-center justify-content-center">
-                <div class="w-100 d-flex align-items-center justify-content-center p-3 p-sm-4 p-md-5">
+            <div class="guest-auth-content">
+                <div class="guest-auth-content-inner">
                     <div class="desktop-max-width w-100">
-                        <!-- Mobile Logo/Brand - Only visible on mobile -->
-
                         @yield('content')
                     </div>
                 </div>
-
+            </div>
         </div>
     </div>
 
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        .guest-auth-body {
+            min-height: 100vh;
+        }
+
+        .guest-auth-shell {
+            min-height: 100vh;
+        }
+
+        .guest-auth-row {
+            min-height: 100vh;
+            display: flex;
+            background: #f3f4f6;
+        }
+
+        .guest-auth-hero {
+            flex: 0 0 58%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ea6692 0%, #e61ba2 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .guest-auth-content {
+            flex: 0 0 42%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .guest-auth-content-inner {
+            width: 100%;
+            max-width: 540px;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .guest-auth-row {
+                display: block;
+            }
+
+            .guest-auth-hero {
+                display: none;
+            }
+
+            .guest-auth-content {
+                min-height: 100vh;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .guest-auth-content-inner {
+                max-width: 540px;
+            }
+        }
+    </style>
 </body>
 </html>
