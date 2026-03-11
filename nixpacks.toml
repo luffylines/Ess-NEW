@@ -3,6 +3,8 @@ nixPkgs = ["...", "php82Extensions.pdo_mysql", "php82Extensions.mysql"]
 
 [phases.build]
 cmds = [
+    "npm ci",
+    "npm run build",
     "mkdir -p storage/framework/{sessions,views,cache}",
     "mkdir -p storage/logs",
     "mkdir -p bootstrap/cache",
