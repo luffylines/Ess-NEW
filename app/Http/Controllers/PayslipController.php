@@ -53,7 +53,7 @@ class PayslipController extends Controller
         }
 
         // Increase execution time for PDF generation on slower servers
-        set_time_limit(120);
+        set_time_limit(50);
 
         $payslip->markAsDownloaded();
 
@@ -91,13 +91,13 @@ class PayslipController extends Controller
             // Log successful PDF generation
             Log::info('PDF generated successfully for payslip ID: ' . $payslip->id . ', Size: ' . strlen($pdfContent) . ' bytes');
 
-            // Send email with PDF attachment immediately (in background process)
+            // Send email with PDF attachment in the background (queued)
             try {
-                Mail::to($payslip->user->email)->send(new PayslipEmail($payslip, $pdfContent));
-                Log::info('Email sent successfully for payslip ID: ' . $payslip->id);
+                Mail::to($payslip->user->email)->queue(new PayslipEmail($payslip, $pdfContent));
+                Log::info('Email queued successfully for payslip ID: ' . $payslip->id);
             } catch (\Exception $e) {
                 // Silently fail email - don't interrupt download
-                Log::warning('Failed to send payslip email: ' . $e->getMessage());
+                Log::warning('Failed to queue payslip email: ' . $e->getMessage());
             }
 
             // Return PDF download with proper headers for all devices

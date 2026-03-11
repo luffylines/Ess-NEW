@@ -65,8 +65,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getProfilePhotoUrlAttribute()
     {
-        if ($this->profile_photo && file_exists(public_path('storage/profile_photos/' . $this->profile_photo))) {
-            return asset('storage/profile_photos/' . $this->profile_photo);
+        if ($this->profile_photo && file_exists(public_path('storage/' . $this->profile_photo))) {
+            return asset('storage/' . $this->profile_photo);
         }
         return null;
     }

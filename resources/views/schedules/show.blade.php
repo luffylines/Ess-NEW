@@ -51,8 +51,8 @@
                                     <i class="fas fa-user me-2"></i>Employee Information
                                 </h6>
                                 <div class="d-flex align-items-center mb-3">
-                                    @if($schedule->employee->profile_photo)
-                                        <img src="{{ asset('storage/' . $schedule->employee->profile_photo) }}" 
+                                    @if($schedule->employee->profile_photo_url)
+                                        <img src="{{ $schedule->employee->profile_photo_url }}" 
                                              class="rounded-circle me-3" 
                                              width="64" height="64" style="object-fit: cover;">
                                     @else

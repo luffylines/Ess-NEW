@@ -1249,13 +1249,13 @@
 
         if (isRecording) {
             console.log('⏹️ Stopping voice recognition');
+            isRecording = false;
+            const btn = document.getElementById('btn-voice');
+            if (btn) btn.classList.remove('recording');
             try {
                 recognition.stop();
             } catch (error) {
                 console.error('Error stopping recognition:', error);
-                isRecording = false;
-                const btn = document.getElementById('btn-voice');
-                if (btn) btn.classList.remove('recording');
             }
         } else {
             console.log('▶️ Starting voice recognition');

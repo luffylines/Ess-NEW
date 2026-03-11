@@ -71,8 +71,8 @@
                                 <td class="fw-semibold">{{ $employee->employee_id ?? $employee->id }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        @if($employee->profile_photo)
-                                            <img src="{{ asset('storage/' . $employee->profile_photo) }}"
+                                        @if($employee->profile_photo_url)
+                                            <img src="{{ $employee->profile_photo_url }}"
                                                  alt="Profile" class="rounded-circle me-2 shadow-sm" width="40" height="40">
                                         @else
                                             <img src="{{ asset('img/default-avatar.png') }}"

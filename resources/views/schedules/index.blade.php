@@ -91,8 +91,8 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                @if($schedule->employee->profile_photo)
-                                                    <img src="{{ asset('storage/' . $schedule->employee->profile_photo) }}" 
+                                                @if($schedule->employee->profile_photo_url)
+                                                    <img src="{{ $schedule->employee->profile_photo_url }}" 
                                                          class="rounded-circle me-2" 
                                                          width="32" height="32" style="object-fit: cover;">
                                                 @else

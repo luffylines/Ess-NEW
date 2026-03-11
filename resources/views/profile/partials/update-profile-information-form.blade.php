@@ -19,8 +19,8 @@
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Profile Photo</label>
                         <div class="d-flex align-items-center gap-3">
-                            @if($user->profile_photo)
-                                <img src="{{ asset('storage/' . $user->profile_photo) }}" 
+                            @if($user->profile_photo_url)
+                                <img src="{{ $user->profile_photo_url }}" 
                                      alt="Profile Photo"
                                      id="profile-photo-preview"
                                      class="rounded-circle border"
