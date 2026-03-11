@@ -103,7 +103,7 @@ public function store(Request $request)
             throw new \Exception('Failed to generate invitation token');
         }
         
-        Mail::to($user->email)->send(new InviteEmployee($user));
+        Mail::to($user->email)->queue(new InviteEmployee($user));
         $message = "Employee added successfully! Employee ID: {$employeeId}. Invitation email sent to {$user->email}.";
     } catch (\Exception $e) {
         Log::error('Failed to send invitation email: ' . $e->getMessage());
@@ -191,12 +191,14 @@ public function completeStore(Request $request, $token)
     $user = User::findOrFail($id);
 
     if (!$user->remember_token) {
-        return response()->json(['error' => 'User already active. No invitation needed.'], 400);
+        // Regenerate token so invitation can be resent
+        $user->remember_token = Str::random(60);
+        $user->save();
     }
 
     try {
-        Mail::to($user->email)->send(new InviteEmployee($user));
-        return response()->json(['message' => 'Invitation resent successfully.']);
+        Mail::to($user->email)->queue(new InviteEmployee($user));
+        return response()->json(['message' => 'Invitation email queued successfully.']);
     } catch (\Exception $e) {
         Log::error("Failed to resend invitation: " . $e->getMessage());
         return response()->json(['error' => 'Failed to resend invitation.'], 500);
