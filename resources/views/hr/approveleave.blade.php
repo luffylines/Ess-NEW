@@ -97,8 +97,8 @@
                                         <tr style="border-left: 4px solid transparent;" onmouseover="this.style.borderLeftColor='#007bff'" onmouseout="this.style.borderLeftColor='transparent'">
                                             <td class="px-4 py-4">
                                                 <div class="d-flex align-items-center">
-                                                    @if($request->user->profile_photo && file_exists(public_path('storage/' . $request->user->profile_photo)))
-                                                        <img src="{{ asset('storage/' . $request->user->profile_photo) }}" 
+                                                    @if($request->user->profile_photo_url)
+                                                        <img src="{{ $request->user->profile_photo_url }}" 
                                                              alt="{{ $request->user->name }}" 
                                                              class="rounded-circle me-3" 
                                                              style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #dee2e6;">

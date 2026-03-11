@@ -173,8 +173,8 @@
                                         <tr class=" align-middle">
                                             <td>
                                                        <div class="d-flex align-items-center">
-                                                    @if($employee->profile_photo && file_exists(public_path('storage/' . $employee->profile_photo)))
-                                                        <img src="{{ asset('storage/' . $employee->profile_photo) }}" 
+                                                    @if($employee->profile_photo_url)
+                                                        <img src="{{ $employee->profile_photo_url }}" 
                                                              alt="Profile" class="rounded-circle me-3" width="45" height="45"
                                                              style="object-fit: cover; border: 3px solid #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
                                                     @else
@@ -328,8 +328,8 @@
                                 @foreach($missedAttendanceEmployees->take(4) as $employee)
                                     <div class="missed-item">
                                         <div class="missed-info">
-                                            @if($employee->profile_photo && file_exists(public_path('storage/' . $employee->profile_photo)))
-                                                <img src="{{ asset('storage/' . $employee->profile_photo) }}" 
+                                            @if($employee->profile_photo_url)
+                                                <img src="{{ $employee->profile_photo_url }}" 
                                                      alt="Profile" class="rounded-circle me-2" width="30" height="30"
                                                      style="object-fit: cover; border: 2px solid #ff9a9e;">
                                             @else

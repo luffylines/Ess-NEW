@@ -104,8 +104,8 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            @if($attendance->user->profile_photo && file_exists(public_path('storage/' . $attendance->user->profile_photo)))
-                                                <img src="{{ asset('storage/' . $attendance->user->profile_photo) }}" 
+                                            @if($attendance->user->profile_photo_url)
+                                                <img src="{{ $attendance->user->profile_photo_url }}" 
                                                      class="rounded-circle me-2" 
                                                      style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
                                                      alt="{{ $attendance->user->name }}">

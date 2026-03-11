@@ -12,8 +12,8 @@
 
     <!-- User Profile Section -->
     <div class="user-panel text-center mt-3 mb-3" id="userPanel">
-       @if(auth()->user()->profile_photo && file_exists(public_path('storage/' . auth()->user()->profile_photo)))
-            <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" 
+       @if(auth()->user()->profile_photo_url)
+            <img src="{{ auth()->user()->profile_photo_url }}" 
                 class="img-circle profile-pic" 
                 alt="User Image">
         @else

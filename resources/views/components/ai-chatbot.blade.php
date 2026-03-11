@@ -1060,8 +1060,8 @@
         
         if (type === 'user') {
             // User messages show their profile photo
-            @if(auth()->check() && auth()->user()->profile_photo && file_exists(public_path('storage/' . auth()->user()->profile_photo)))
-                avatar.innerHTML = '<img src="{{ asset("storage/" . auth()->user()->profile_photo) }}" alt="You" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
+            @if(auth()->check() && auth()->user()->profile_photo_url)
+                avatar.innerHTML = '<img src="{{ auth()->user()->profile_photo_url }}" alt="You" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
             @else
                 avatar.innerHTML = '<i class="fas fa-user"></i>';
             @endif
