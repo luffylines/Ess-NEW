@@ -15,62 +15,6 @@ use App\Http\Controllers\GuestPageController;
 use App\Http\Controllers\FeedbackController;
 use Illuminate\Support\Facades\Route;
 
-// TEMPORARY diagnostic route - DELETE after debugging
-Route::get('/railway-debug', function () {
-    $output = "<h2>Railway Diagnostic</h2><pre>";
-
-    // PHP extensions
-    $output .= "=== PHP " . phpversion() . " ===\n";
-    $output .= "pdo_mysql: " . (extension_loaded('pdo_mysql') ? 'YES' : 'NO') . "\n";
-    $output .= "mysqli: " . (extension_loaded('mysqli') ? 'YES' : 'NO') . "\n\n";
-
-    // Env vars
-    $output .= "=== Config ===\n";
-    $output .= "APP_ENV: " . config('app.env') . "\n";
-    $output .= "APP_DEBUG: " . (config('app.debug') ? 'true' : 'false') . "\n";
-    $output .= "APP_URL: " . config('app.url') . "\n";
-    $output .= "DB_CONNECTION: " . config('database.default') . "\n";
-    $output .= "DB_HOST: " . config('database.connections.mysql.host') . "\n";
-    $output .= "DB_PORT: " . config('database.connections.mysql.port') . "\n";
-    $output .= "DB_DATABASE: " . config('database.connections.mysql.database') . "\n";
-    $output .= "DB_USERNAME: " . config('database.connections.mysql.username') . "\n";
-    $output .= "SESSION_DRIVER: " . config('session.driver') . "\n";
-    $output .= "CACHE_STORE: " . config('cache.default') . "\n\n";
-
-    // DB test
-    $output .= "=== Database Test ===\n";
-    try {
-        \DB::connection()->getPdo();
-        $tables = \DB::select('SHOW TABLES');
-        $output .= "Connection: SUCCESS\n";
-        $output .= "Tables: " . count($tables) . "\n";
-    } catch (\Exception $e) {
-        $output .= "Connection: FAILED\n";
-        $output .= "Error: " . $e->getMessage() . "\n";
-    }
-
-    // Storage check
-    $output .= "\n=== Storage ===\n";
-    $dirs = ['storage/logs', 'storage/framework/sessions', 'storage/framework/views', 'storage/framework/cache', 'bootstrap/cache'];
-    foreach ($dirs as $d) {
-        $path = base_path($d);
-        $output .= "$d: " . (is_dir($path) ? 'exists' : 'MISSING') . ", " . (is_writable($path) ? 'writable' : 'NOT writable') . "\n";
-    }
-
-    // Laravel log
-    $output .= "\n=== Laravel Log (last 2000 chars) ===\n";
-    $logFile = storage_path('logs/laravel.log');
-    if (file_exists($logFile)) {
-        $log = file_get_contents($logFile);
-        $output .= htmlspecialchars(substr($log, -2000));
-    } else {
-        $output .= "No log file\n";
-    }
-
-    $output .= "</pre>";
-    return $output;
-});
-
 // Admin: Store locations and allowed networks
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('stores', \App\Http\Controllers\Admin\StoreController::class)->except(['show']);

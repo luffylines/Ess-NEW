@@ -52,6 +52,9 @@ class PayslipController extends Controller
             abort(403, 'Unauthorized access to this payslip');
         }
 
+        // Increase execution time for PDF generation on slower servers
+        set_time_limit(120);
+
         $payslip->markAsDownloaded();
 
         try {
