@@ -222,19 +222,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/test-email', function () {
         $config = [
             'mailer' => config('mail.default'),
-            'host' => config('mail.mailers.smtp.host'),
-            'port' => config('mail.mailers.smtp.port'),
-            'scheme' => config('mail.mailers.smtp.scheme'),
-            'username' => config('mail.mailers.smtp.username') ? 'SET' : 'NOT SET',
-            'password' => config('mail.mailers.smtp.password') ? 'SET' : 'NOT SET',
+            'resend_key' => config('services.resend.key') ? 'SET' : 'NOT SET',
             'from' => config('mail.from'),
-            'encryption_env' => env('MAIL_ENCRYPTION'),
-            'scheme_env' => env('MAIL_SCHEME'),
         ];
 
         try {
             \Illuminate\Support\Facades\Mail::raw('Test email from Railway - ' . now(), function ($message) {
-                $message->to(config('mail.mailers.smtp.username'))
+                $message->to(config('mail.from.address'))
                         ->subject('Railway Email Test ' . now());
             });
             return response()->json(['status' => 'SUCCESS', 'config' => $config, 'message' => 'Email sent!']);
@@ -243,7 +237,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 'status' => 'FAILED',
                 'config' => $config,
                 'error' => $e->getMessage(),
-                'trace' => collect(explode("\n", $e->getTraceAsString()))->take(10)->toArray(),
             ], 500);
         }
     });
