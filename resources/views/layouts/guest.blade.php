@@ -77,7 +77,7 @@
             <div class="guest-auth-hero">
                 <div>
                     <h1 class="display-4 fw-bold mb-3">Welcome</h1>
-                    <p class="lead mb-0">Your Employee Management System</p>
+                    <p class="lead mb-0">Place Of Beauty - Employee Self-Service System</p>
                 </div>
             </div>
 

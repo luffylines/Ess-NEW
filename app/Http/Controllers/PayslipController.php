@@ -93,8 +93,8 @@ class PayslipController extends Controller
 
             // Send email with PDF attachment in the background (queued)
             try {
-                Mail::to($payslip->user->email)->queue(new PayslipEmail($payslip, $pdfContent));
-                Log::info('Email queued successfully for payslip ID: ' . $payslip->id);
+                Mail::to($payslip->user->email)->send(new PayslipEmail($payslip, $pdfContent));
+                Log::info('Email sent successfully for payslip ID: ' . $payslip->id);
             } catch (\Exception $e) {
                 // Silently fail email - don't interrupt download
                 Log::warning('Failed to queue payslip email: ' . $e->getMessage());

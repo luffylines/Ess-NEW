@@ -103,7 +103,7 @@ public function store(Request $request)
             throw new \Exception('Failed to generate invitation token');
         }
         
-        Mail::to($user->email)->queue(new InviteEmployee($user));
+        Mail::to($user->email)->send(new InviteEmployee($user));
         $message = "Employee added successfully! Employee ID: {$employeeId}. Invitation email sent to {$user->email}.";
     } catch (\Exception $e) {
         Log::error('Failed to send invitation email: ' . $e->getMessage());
