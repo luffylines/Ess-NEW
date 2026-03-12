@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class FeedbackController extends Controller
 {
@@ -15,17 +16,22 @@ class FeedbackController extends Controller
             'feedback' => 'required|string|max:2000',
         ]);
 
-        // Send email to developer
-        Mail::raw("
-            Name: {$validated['name']}
-            Email: {$validated['email']}
-            Feedback: {$validated['feedback']}
-        ", function ($message) use ($validated) {
-            $message->to('chba.aring.sjc@phinmaed.com')
-                    ->subject('New System Feedback from ' . $validated['name'])
-                    ->replyTo($validated['email']);
-        });
+        try {
+            // Send email to developer
+            Mail::raw("
+                Name: {$validated['name']}
+                Email: {$validated['email']}
+                Feedback: {$validated['feedback']}
+            ", function ($message) use ($validated) {
+                $message->to('chba.aring.sjc@phinmaed.com')
+                        ->subject('New System Feedback from ' . $validated['name'])
+                        ->replyTo($validated['email']);
+            });
 
-        return back()->with('success', 'Thank you for your feedback!');
+            return back()->with('success', 'Thank you for your feedback!');
+        } catch (\Exception $e) {
+            Log::error('Feedback email failed: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send feedback. Please try again later.')->withInput();
+        }
     }
 }
