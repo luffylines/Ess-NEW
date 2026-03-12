@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\SendOtpMail;
 use Carbon\Carbon;
 
@@ -100,7 +101,12 @@ class LoginController extends Controller
         );
 
         // Send OTP email
-        Mail::to($user->email)->send(new SendOtpMail($otp));
+        try {
+            Mail::to($user->email)->send(new SendOtpMail($otp));
+        } catch (\Exception $e) {
+            Log::error('Failed to send OTP email: ' . $e->getMessage());
+            return back()->withErrors(['login' => 'Unable to send OTP email. Please try again later.']);
+        }
 
         // Temporarily store user ID, credentials and remember preference in session
         session([
