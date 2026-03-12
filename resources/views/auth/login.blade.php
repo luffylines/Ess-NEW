@@ -53,7 +53,7 @@
             <div class="mb-1 text-center recaptcha-container">
                 <!-- reCAPTCHA will be rendered here by the explicit API -->
                 <div id="recaptcha-widget" class="g-recaptcha d-inline-block" 
-                     data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                     data-sitekey="6Lfv5fArAAAAAPvO-IYEtHxiwPmU4YRYmYifrw8j"></div>
                 <div id="recaptcha-error" class="text-danger mt-2" style="display: none;"></div>
                 
             </div>
