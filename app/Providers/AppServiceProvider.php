@@ -31,12 +31,16 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Fix SMTP mail scheme at runtime for cloud deployments
-        // Port 465 requires 'smtps' scheme, port 587 uses 'smtp' with STARTTLS
+        // Port 465 requires 'smtps', port 587 auto-negotiates STARTTLS (scheme=null)
         $smtpConfig = config('mail.mailers.smtp');
-        if (!empty($smtpConfig) && empty($smtpConfig['scheme'])) {
+        if (!empty($smtpConfig)) {
             $port = (int) ($smtpConfig['port'] ?? 0);
-            if ($port === 465) {
+            $currentScheme = $smtpConfig['scheme'] ?? null;
+            if ($port === 465 && $currentScheme !== 'smtps') {
                 config(['mail.mailers.smtp.scheme' => 'smtps']);
+            } elseif ($port === 587 && $currentScheme !== null && $currentScheme !== 'smtps') {
+                // Port 587 uses STARTTLS which is auto-negotiated when scheme is null
+                config(['mail.mailers.smtp.scheme' => null]);
             }
         }
     }

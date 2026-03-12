@@ -217,6 +217,37 @@ Route::middleware(['auth', 'role:hr,manager,admin'])->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin', [EmployeeController::class, 'index'])->name('admin.index');
+
+    // Email diagnostic test (temporary - remove after fixing)
+    Route::get('/admin/test-email', function () {
+        $config = [
+            'mailer' => config('mail.default'),
+            'host' => config('mail.mailers.smtp.host'),
+            'port' => config('mail.mailers.smtp.port'),
+            'scheme' => config('mail.mailers.smtp.scheme'),
+            'username' => config('mail.mailers.smtp.username') ? 'SET' : 'NOT SET',
+            'password' => config('mail.mailers.smtp.password') ? 'SET' : 'NOT SET',
+            'from' => config('mail.from'),
+            'encryption_env' => env('MAIL_ENCRYPTION'),
+            'scheme_env' => env('MAIL_SCHEME'),
+        ];
+
+        try {
+            \Illuminate\Support\Facades\Mail::raw('Test email from Railway - ' . now(), function ($message) {
+                $message->to(config('mail.mailers.smtp.username'))
+                        ->subject('Railway Email Test ' . now());
+            });
+            return response()->json(['status' => 'SUCCESS', 'config' => $config, 'message' => 'Email sent!']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'FAILED',
+                'config' => $config,
+                'error' => $e->getMessage(),
+                'trace' => collect(explode("\n", $e->getTraceAsString()))->take(10)->toArray(),
+            ], 500);
+        }
+    });
+
     Route::get('/admin/employees', [EmployeeController::class, 'index'])->name('admin.employees.index');
     Route::get('/admin/employees/create', [EmployeeController::class, 'create'])->name('admin.employees.create');
     Route::post('/admin/employees', [EmployeeController::class, 'store'])->name('admin.employees.store');
