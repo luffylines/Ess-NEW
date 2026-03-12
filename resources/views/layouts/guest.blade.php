@@ -74,16 +74,14 @@
 
     <div class="guest-auth-shell">
         <div class="guest-auth-row">
-            <div class="guest-auth-hero">
-                <div>
-                    <h1 class="display-4 fw-bold mb-3">Welcome</h1>
-                    <p class="lead mb-0">Place Of Beauty - Employee Self-Service System</p>
-                </div>
+            <!-- Welcome Banner: always visible, styled for mobile/desktop -->
+            <div class="guest-auth-hero text-center d-flex flex-column justify-content-center align-items-center">
+                <h1 class="display-4 fw-bold mb-2">Welcome</h1>
+                <p class="lead mb-0">Place Of Beauty - Employee Self-Service System</p>
             </div>
-
-            <div class="guest-auth-content">
-                <div class="guest-auth-content-inner">
-                    <div class="desktop-max-width w-100">
+            <div class="guest-auth-content d-flex flex-column justify-content-center align-items-center">
+                <div class="guest-auth-content-inner w-100">
+                    <div class="auth-card shadow rounded-4 bg-white p-4 mx-auto">
                         @yield('content')
                     </div>
                 </div>
@@ -98,60 +96,77 @@
         .guest-auth-body {
             min-height: 100vh;
         }
-
         .guest-auth-shell {
             min-height: 100vh;
         }
-
         .guest-auth-row {
             min-height: 100vh;
             display: flex;
             background: #f3f4f6;
         }
-
         .guest-auth-hero {
-            flex: 0 0 58%;
+            flex: 0 0 50%;
             min-height: 100vh;
             background: linear-gradient(135deg, #ea6692 0%, #e61ba2 100%);
-            color: #ffffff;
+            color: #fff;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 2rem;
+            padding: 2rem 1rem;
         }
-
         .guest-auth-content {
-            flex: 0 0 42%;
+            flex: 0 0 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            padding: 2rem 1rem;
         }
-
         .guest-auth-content-inner {
             width: 100%;
-            max-width: 540px;
-            padding: 0.5rem;
+            max-width: 420px;
+            padding: 0;
         }
-
+        .auth-card {
+            background: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 2rem 1.5rem;
+        }
         @media (max-width: 991.98px) {
             .guest-auth-row {
-                display: block;
-            }
-
-            .guest-auth-hero {
-                display: none;
-            }
-
-            .guest-auth-content {
+                flex-direction: column;
                 min-height: 100vh;
-                width: 100%;
-                padding: 1rem;
             }
-
+            .guest-auth-hero {
+                min-height: unset;
+                padding: 2rem 1rem 1.5rem 1rem;
+                border-radius: 0 0 2rem 2rem;
+                flex: unset;
+            }
+            .guest-auth-content {
+                min-height: unset;
+                width: 100%;
+                padding: 1.5rem 0.5rem 2rem 0.5rem;
+                flex: unset;
+            }
             .guest-auth-content-inner {
-                max-width: 540px;
+                max-width: 100%;
+            }
+            .auth-card {
+                padding: 1.5rem 0.5rem;
+                border-radius: 1.25rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .auth-card {
+                padding: 1rem 0.25rem;
+                border-radius: 1rem;
+            }
+            .guest-auth-hero {
+                padding: 1.5rem 0.5rem 1rem 0.5rem;
             }
         }
     </style>
