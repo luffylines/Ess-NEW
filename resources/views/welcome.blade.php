@@ -8,8 +8,8 @@
             <div class="card shadow-lg border-0 rounded-lg">
                 <!-- Header Section -->
                 <div class="card-header text-center custom-header text-white rounded-top">
-                    <h1 class="display-4 font-weight-bold">Employee Self-Service Portal</h1>
-                    <p class="lead">Your Personal Hub for All Work-Related Information</p>
+                    <h1 class="display-4 font-weight-bold">Place Of Beauty Portal</h1>
+                    <p class="lead">Employee Self Service System</p>
                 </div>
 
                 <!-- Body Section -->
@@ -17,7 +17,7 @@
                     <div class="row justify-content-center mb-4">
                         <div class="col-md-6">
                             <p class="mt-3">
-                                Welcome to the Employee Self-Service System. <br> 
+                                Welcome to the Place Of Beauty ESS. <br> 
                                 Access your personal and work-related information with ease. <br> 
                                 Stay informed and connected to all the resources you need to thrive.
                             </p>

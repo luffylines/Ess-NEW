@@ -30,8 +30,8 @@
         <div class="col-12">
             <div class="card shadow-sm border-0" style="border-radius: 12px;">
                 <div class="card-header bg-white border-0" style="border-radius: 12px 12px 0 0;">
-                    <h5 class="mb-0 fw-semibold">
-                        <i class="fas fa-filter text-primary me-2"></i>Report Filters
+                    <h5 class="mb-0 fw-semibold text-primary">
+                        <i class="fas fa-filter me-2"></i>Report Filters
                     </h5>
                 </div>
                 <div class="card-body p-4">
@@ -80,7 +80,7 @@
                         <i class="fas fa-user-check fa-2x text-success"></i>
                     </div>
                     <h4 class="fw-bold text-success mb-1">{{ $report->sum('present') }}</h4>
-                    <p class="text-muted mb-0 small">Total Present Days</p>
+                    <p class=" mb-0 small">Total Present Days</p>
                 </div>
             </div>
         </div>
@@ -91,7 +91,7 @@
                         <i class="fas fa-user-times fa-2x text-danger"></i>
                     </div>
                     <h4 class="fw-bold text-danger mb-1">{{ $report->sum('absent') }}</h4>
-                    <p class="text-muted mb-0 small">Total Absent Days</p>
+                    <p class=" mb-0 small">Total Absent Days</p>
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@
                         <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
                     </div>
                     <h4 class="fw-bold text-warning mb-1">{{ $report->sum('in_only') }}</h4>
-                    <p class="text-muted mb-0 small">Incomplete Records</p>
+                    <p class=" mb-0 small">Incomplete Records</p>
                 </div>
             </div>
         </div>
@@ -113,7 +113,7 @@
                         <i class="fas fa-users fa-2x text-info"></i>
                     </div>
                     <h4 class="fw-bold text-info mb-1">{{ $report->count() }}</h4>
-                    <p class="text-muted mb-0 small">Total Employees</p>
+                    <p class=" mb-0 small">Total Employees</p>
                 </div>
             </div>
         </div>
@@ -124,7 +124,7 @@
         <div class="col-12">
             <div class="card shadow-sm border-0" style="border-radius: 12px;">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
-                    <h5 class="mb-0 fw-semibold">
+                    <h5 class="mb-0 fw-semibold text-primary">
                         <i class="fas fa-table text-primary me-2"></i>Detailed Attendance Report
                     </h5>
                     <span class="badge bg-primary">{{ $report->count() }} employees</span>
@@ -151,7 +151,7 @@
                                         $statusText = $attendanceRate >= 95 ? 'Excellent' : ($attendanceRate >= 80 ? 'Good' : 'Poor');
                                     @endphp
                                     <tr>
-                                        <td class="px-4 py-3 text-center fw-semibold text-muted">{{ $index + 1 }}</td>
+                                        <td class="px-4 py-3 text-center fw-semibold ">{{ $index + 1 }}</td>
                                         <td class="px-4 py-3">
                                             <div class="d-flex align-items-center">
                                                 <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
@@ -159,7 +159,7 @@
                                                 </div>
                                                 <div>
                                                     <h6 class="mb-0 fw-semibold">{{ $row['name'] }}</h6>
-                                                    <small class="text-muted">ID: {{ $row['user_id'] }}</small>
+                                                    <small class="">ID: {{ $row['user_id'] }}</small>
                                                 </div>
                                             </div>
                                         </td>

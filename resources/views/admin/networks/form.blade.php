@@ -20,7 +20,7 @@
     <div class="mb-3">
       <label class="form-label">IP Ranges (one per line)</label>
       <textarea name="ip_ranges_text" rows="8" class="form-control" placeholder="203.0.113.5&#10;198.51.100.0/24&#10;192.168.1.0/24" required>{{ old('ip_ranges_text', is_array($network->ip_ranges) ? implode("\n", $network->ip_ranges) : '') }}</textarea>
-      <div class="form-text">
+      <div class="">
         Enter public IPs or CIDR ranges that should allow attendance without GPS:<br>
         • <code>203.0.113.5</code> - single IP address<br>
         • <code>192.168.1.0/24</code> - CIDR range (192.168.1.1 to 192.168.1.254)<br>

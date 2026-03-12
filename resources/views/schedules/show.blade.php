@@ -63,10 +63,10 @@
                                     @endif
                                     <div>
                                         <h5 class="mb-1">{{ $schedule->employee->name }}</h5>
-                                        <p class="text-muted mb-0">
+                                        <p class=" mb-0">
                                             <i class="fas fa-id-badge me-1"></i>{{ $schedule->employee->employee_id }}
                                         </p>
-                                        <p class="text-muted mb-0">
+                                        <p class=" mb-0">
                                             <i class="fas fa-envelope me-1"></i>{{ $schedule->employee->email }}
                                         </p>
                                     </div>
@@ -84,12 +84,12 @@
                                 </h6>
                                 <div class="row g-2">
                                     <div class="col-6">
-                                        <strong class="text-muted">Date:</strong>
+                                        <strong class="">Date:</strong>
                                         <div class="fw-bold">{{ $schedule->schedule_date->format('M d, Y') }}</div>
-                                        <small class="text-muted">{{ $schedule->schedule_date->format('l') }}</small>
+                                        <small class="">{{ $schedule->schedule_date->format('l') }}</small>
                                     </div>
                                     <div class="col-6">
-                                        <strong class="text-muted">Shift Time:</strong>
+                                        <strong class="">Shift Time:</strong>
                                         <div class="fw-bold">
                                             {{ \Carbon\Carbon::parse($schedule->shift_start)->format('h:i A') }} - 
                                             {{ \Carbon\Carbon::parse($schedule->shift_end)->format('h:i A') }}
@@ -109,13 +109,13 @@
                                     <i class="fas fa-map-marker-alt me-2"></i>Location & Type
                                 </h6>
                                 <div class="mb-3">
-                                    <strong class="text-muted">Store Location:</strong>
+                                    <strong class="">Store Location:</strong>
                                     <div class="fw-bold">
                                         <i class="fas fa-building me-1"></i>{{ $schedule->store ? $schedule->store->name : 'No store assigned' }}
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <strong class="text-muted">Shift Type:</strong>
+                                    <strong class="">Shift Type:</strong>
                                     <div>
                                         <span class="badge {{ $schedule->shift_type_badge }} fs-6">
                                             {{ ucfirst($schedule->shift_type) }}
@@ -134,17 +134,17 @@
                                     <i class="fas fa-user-tie me-2"></i>Assignment Information
                                 </h6>
                                 <div class="mb-2">
-                                    <strong class="text-muted">Assigned By:</strong>
+                                    <strong class="">Assigned By:</strong>
                                     <div class="fw-bold">{{ $schedule->assignedBy->name }}</div>
-                                    <small class="text-muted">{{ $schedule->assignedBy->role }}</small>
+                                    <small class="">{{ $schedule->assignedBy->role }}</small>
                                 </div>
                                 <div class="mb-2">
-                                    <strong class="text-muted">Created:</strong>
+                                    <strong class="">Created:</strong>
                                     <div class="fw-bold">{{ $schedule->created_at->format('M d, Y \a\t h:i A') }}</div>
                                 </div>
                                 @if($schedule->acknowledged_at)
                                     <div class="mb-2">
-                                        <strong class="text-muted">Acknowledged:</strong>
+                                        <strong class="">Acknowledged:</strong>
                                         <div class="fw-bold text-success">
                                             <i class="fas fa-check me-1"></i>{{ $schedule->acknowledged_at->format('M d, Y \a\t h:i A') }}
                                         </div>
@@ -183,7 +183,7 @@
                             <i class="fas fa-calendar text-info me-1"></i>
                             <span>Upcoming schedule</span>
                         @else
-                            <i class="fas fa-calendar-check text-muted me-1"></i>
+                            <i class="fas fa-calendar-check  me-1"></i>
                             <span>Past schedule</span>
                         @endif
                     </div>

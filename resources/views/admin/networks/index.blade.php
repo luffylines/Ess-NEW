@@ -23,8 +23,8 @@
       <tbody>
         @forelse($networks as $network)
         <tr>
-          <td>{{ $network->id }}</td>
-          <td>{{ $network->name }}</td>
+          <td class="id-text">{{ $network->id }}</td>
+          <td class="name-text">{{ $network->name }}</td>
           <td>
             @if(is_array($network->ip_ranges))
               <code>{{ implode(', ', $network->ip_ranges) }}</code>
@@ -53,7 +53,7 @@
           </td>
         </tr>
         @empty
-          <tr><td colspan="5" class="text-center text-muted">No networks yet.</td></tr>
+          <tr><td colspan="5" class="text-center ">No networks yet.</td></tr>
         @endforelse
       </tbody>
     </table>
@@ -63,6 +63,17 @@
 </div>
 
 <style>
+  /* default for light mode */
+.id-text,
+.name-text {
+    color: #212529;
+}
+
+/* kapag dark mode */
+body.dark .id-text,
+body.dark .name-text {
+    color: #e9ecef;
+}
 .form-switch .form-check-input {
   width: 3em;
   height: 1.5em;

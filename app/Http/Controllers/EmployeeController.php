@@ -191,29 +191,34 @@ public function completeStore(Request $request, $token)
     $user = User::findOrFail($id);
 
     if (!$user->remember_token) {
-        // Regenerate token so invitation can be resent
         $user->remember_token = Str::random(60);
         $user->save();
     }
 
     try {
-        Mail::to($user->email)->queue(new InviteEmployee($user));
-        return response()->json(['message' => 'Invitation email queued successfully.']);
+        Mail::to($user->email)->send(new InviteEmployee($user));
+        return response()->json(['message' => 'Invitation email sent successfully.']);
     } catch (\Exception $e) {
         Log::error("Failed to resend invitation: " . $e->getMessage());
-        return response()->json(['error' => 'Failed to resend invitation.'], 500);
+        return response()->json(['error' => 'Failed to resend invitation: ' . $e->getMessage()], 500);
     }
 }
     public function destroy($id)
 {
     $employee = User::findOrFail($id);
 
-    // Optional: Prevent deleting self or admin?
-    // if (auth()->id() === $employee->id) {
-    //     return back()->with('error', 'You cannot delete your own account.');
-    // }
+    if (auth()->id() === $employee->id) {
+        if (request()->expectsJson()) {
+            return response()->json(['error' => 'You cannot delete your own account.'], 403);
+        }
+        return back()->with('error', 'You cannot delete your own account.');
+    }
 
     $employee->delete();
+
+    if (request()->expectsJson()) {
+        return response()->json(['message' => 'Employee deleted successfully.']);
+    }
 
     return redirect()->route('admin.employees.index')->with('success', 'Employee deleted successfully.');
 }

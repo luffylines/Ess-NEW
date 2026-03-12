@@ -321,7 +321,7 @@
                     
                     @if($recentRecords->count() > 0)
                         @foreach($recentRecords as $record)
-                            <div class="recent-item mb-2 p-2 border rounded">
+                            <div class="recent-item mb-2 p-2 border rounded text-muted">
                                 <div class="d-flex justify-content-between">
                                     <strong>{{ $record->user->name }}</strong>
                                     <small class="text-muted">{{ $record->date->format('M d') }}</small>
@@ -391,6 +391,13 @@
 </div>
 
 <style>
+.form-text {
+    color: #6c757d;
+}
+
+.dark-mode .form-text {
+    color: #cbd5e1;
+}
 .bg-gradient-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }

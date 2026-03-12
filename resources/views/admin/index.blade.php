@@ -101,41 +101,16 @@
                                             <i class="bi bi-pencil-square"></i> Edit
                                         </a>
                                         <button type="button" class="btn btn-outline-danger btn-sm"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal{{ $employee->id }}">
+                                                onclick="confirmDelete({{ $employee->id }}, '{{ addslashes($employee->name) }}', '{{ addslashes($employee->email) }}')">
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
-                                        @if($employee->remember_token)
-                                            <button type="button" class="btn btn-outline-secondary btn-sm"
-                                                    onclick="resendInvitation({{ $employee->id }}, '{{ $employee->name }}')">
-                                                <i class="bi bi-envelope-fill"></i> Resend
-                                            </button>
-                                        @endif
+                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                onclick="resendInvitation({{ $employee->id }}, '{{ addslashes($employee->name) }}')">
+                                            <i class="bi bi-envelope-fill"></i> Resend
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
-                            <!-- Delete Confirmation Modal -->
-                            <div class="modal fade" id="deleteModal{{ $employee->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-danger text-white">
-                                            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete <strong>{{ $employee->name }}</strong> ({{ $employee->email }})?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <form action="{{ route('admin.employees.destroy', $employee->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                         @empty
                             <tr>
@@ -154,10 +129,71 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal (shared, outside table) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong id="deleteEmployeeName"></strong> (<span id="deleteEmployeeEmail"></span>)?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JS -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <script>
+let deleteEmployeeId = null;
+
+function confirmDelete(id, name, email) {
+    deleteEmployeeId = id;
+    document.getElementById('deleteEmployeeName').textContent = name;
+    document.getElementById('deleteEmployeeEmail').textContent = email;
+    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+function executeDelete() {
+    if (!deleteEmployeeId) return;
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+
+    fetch(`/admin/employees/${deleteEmployeeId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => {
+        if (response.ok || response.redirected) {
+            window.location.reload();
+        } else {
+            return response.json().then(data => {
+                alert(data.error || 'Failed to delete employee.');
+                btn.disabled = false;
+                btn.textContent = 'Delete';
+            });
+        }
+    })
+    .catch(() => {
+        alert('Something went wrong while deleting.');
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+    });
+}
+
 function resendInvitation(employeeId, employeeName) {
     if (!confirm(`Resend invitation to ${employeeName}?`)) return;
 
@@ -171,17 +207,23 @@ function resendInvitation(employeeId, employeeName) {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message || 'Error occurred.');
+        if (data.message) {
+            alert(data.message);
+        } else if (data.error) {
+            alert(data.error);
+        } else {
+            alert('Error occurred.');
+        }
     })
     .catch(() => alert('Something went wrong while resending the invitation.'));
 }
+
 // Auto-dismiss alerts after 3 seconds
 document.addEventListener('DOMContentLoaded', () => {
-    const alert = document.querySelector('.alert-dismissible');
-    if (alert) {
-        // Automatically dismiss after 3 seconds (3000ms)
+    const alertEl = document.querySelector('.alert-dismissible');
+    if (alertEl) {
         setTimeout(() => {
-            const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
             bsAlert.close();
         }, 3000);
     }

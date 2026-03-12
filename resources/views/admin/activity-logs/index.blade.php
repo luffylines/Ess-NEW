@@ -32,7 +32,7 @@
                     <label for="search" class="form-label fw-medium text-secondary">Search</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}"
                            placeholder="Type to filter..." 
-                           class="form-control form-control-sm rounded-pill">
+                           class=" form-control-sm rounded-pill">
                 </div>
 
                 {{-- Hidden Filters --}}
@@ -106,7 +106,7 @@
                             <td>{!! $log->getActionTypeBadge() !!}</td>
                             <td class="small">{{ $log->description }}</td>
                             <td class="small">{{ $log->formatted_date }}</td>
-                            <td class="small text-muted">{{ $log->time_elapsed }}</td>
+                            <td class="small ">{{ $log->time_elapsed }}</td>
                             <td class="small ip-address-cell" title="{{ $log->ip_address }}">
                                 <span class="ip-address-display" data-original-display="{{ \App\Services\IpAddressService::formatIpForDisplay($log->ip_address) }}">
                                     {{ \App\Services\IpAddressService::formatIpForDisplay($log->ip_address) }}
@@ -118,7 +118,7 @@
                             <td class="small">
                                 @if($log->user)
                                     {{ $log->user->name }} <br>
-                                    <span class="text-muted small">{{ $log->user->email }}</span>
+                                    <span class=" small">{{ $log->user->email }}</span>
                                 @else
                                     <span class="text-muted">Unknown User</span>
                                 @endif
@@ -215,6 +215,10 @@ document.addEventListener('DOMContentLoaded', function() {
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
+
+.dark-mode .form-control::placeholder {
+    color: #e0e0e0;
+}
 .card-shadow {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     transition: all 0.3s ease;

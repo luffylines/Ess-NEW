@@ -33,7 +33,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('hr.pending-approvals') }}" class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="employee_name" class="form-label">Employee Name</label>
                     <input type="text" class="form-control" id="employee_name" name="employee_name" 
                            value="{{ request('employee_name') }}" placeholder="Search by name...">
@@ -76,7 +76,7 @@
 
     <!-- Pending Attendance Table -->
     <div class="card shadow-sm">
-        <div class="card-header bg-light">
+        <div class="card-header">
             <h5 class="card-title mb-0">
                 <i class="fas fa-list me-2"></i>Pending Attendance Records
             </h5>
@@ -85,7 +85,7 @@
             @if($pendingAttendances->count() > 0)
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                        <thead class="table">
                             <tr>
                                 <th>Employee</th>
                                 <th>Date</th>
@@ -117,13 +117,13 @@
                                             @endif
                                             <div>
                                                 <span class="fw-medium">{{ $attendance->user->name }}</span>
-                                                <br><small class="text-muted">ID: {{ $attendance->user->employee_id ?? 'N/A' }}</small>
+                                                <br><small class="">ID: {{ $attendance->user->employee_id ?? 'N/A' }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         <span class="fw-medium">{{ $attendance->date->format('M d, Y') }}</span>
-                                        <br><small class="text-muted">{{ $attendance->date->format('l') }}</small>
+                                        <br><small class="">{{ $attendance->date->format('l') }}</small>
                                     </td>
                                     <td>
                                         <span class="badge bg-info">{{ ucfirst($attendance->day_type ?? 'Regular') }}</span>
