@@ -24,37 +24,37 @@
         <div class="row">
             <!-- Request Details -->
             <div class="mb-3">
-                <div class="bg-light rounded p-3">
-                    <h3 class="h4 fw-semibold text-dark mb-3">Request Details</h3>
+                <div class="rounded p-3">
+                    <h3 class="h4 fw-semibold  mb-3">Request Details</h3>
                     
                     <div class="mb-2">
                         <div class="d-flex justify-content-between">
-                            <span class="fw-medium text-muted">Employee:</span>
+                            <span class="fw-medium ">Employee:</span>
                             <span class="">{{ $leaveRequest->user->name }}</span>
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <span class="fw-medium text-muted">Leave Type:</span>
+                            <span class="fw-medium ">Leave Type:</span>
                             <span class="">{{ ucfirst($leaveRequest->leave_type) }}</span>
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <span class="fw-medium text-muted">Start Date:</span>
+                            <span class="fw-medium ">Start Date:</span>
                             <span class="">{{ \Carbon\Carbon::parse($leaveRequest->start_date)->format('M d, Y (l)') }}</span>
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <span class="fw-medium text-muted">End Date:</span>
+                            <span class="fw-medium ">End Date:</span>
                             <span class="">{{ \Carbon\Carbon::parse($leaveRequest->end_date)->format('M d, Y (l)') }}</span>
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <span class="fw-medium text-muted">Total Days:</span>
+                            <span class="fw-medium ">Total Days:</span>
                             <span class="fw-semibold">{{ $leaveRequest->total_days ?? $leaveRequest->calculateTotalDays() }} days</span>
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <span class="fw-medium text-muted">Submitted:</span>
+                            <span class="fw-medium">Submitted:</span>
                             <span class="">{{ $leaveRequest->created_at->format('M d, Y h:i A') }}</span>
                         </div>
                     </div>
@@ -62,8 +62,8 @@
 
                 <!-- Reason -->
                 <div class="bg-light rounded p-3">
-                    <h3 class="h4 fw-semibold text-dark mb-3">Reason for Leave</h3>
-                    <p class="text-secondary">{{ $leaveRequest->reason }}</p>
+                    <h3 class="h4 fw-semibold  mb-3">Reason for Leave</h3>
+                    <p class="">{{ $leaveRequest->reason }}</p>
                 </div>
 
                 <!-- Supporting Document -->
@@ -78,7 +78,7 @@
                                    class="text-primary fw-medium">
                                     View Document
                                 </a>
-                                <p class="small text-muted">Click to open in new tab</p>
+                                <p class="small ">Click to open in new tab</p>
                             </div>
                         </div>
                     </div>
@@ -88,34 +88,34 @@
             <!-- Approval Status -->
             <div class="mb-3">
                 @if($leaveRequest->status !== 'pending')
-                    <div class="bg-light rounded p-3">
+                    <div class=" rounded p-3">
                         <h3 class="h4 fw-semibold text-dark mb-3">Approval Information</h3>
                         
                         <div class="mb-2">
                             @if($leaveRequest->approved_by)
                                 <div class="d-flex justify-content-between">
-                                    <span class="fw-medium text-muted">Reviewed By:</span>
+                                    <span class="fw-medium ">Reviewed By:</span>
                                     <span class="">{{ $leaveRequest->approver->name ?? 'HR Department' }}</span>
                                 </div>
                             @endif
                             
                             @if($leaveRequest->approved_at)
                                 <div class="d-flex justify-content-between">
-                                    <span class="fw-medium text-muted">Review Date:</span>
+                                    <span class="fw-medium ">Review Date:</span>
                                     <span class="">{{ \Carbon\Carbon::parse($leaveRequest->approved_at)->format('M d, Y h:i A') }}</span>
                                 </div>
                             @endif
                             
                             <div class="d-flex justify-content-between">
-                                <span class="fw-medium text-muted">Status:</span>
+                                <span class="fw-medium ">Status:</span>
                                 {!! $leaveRequest->getStatusBadge() !!}
                             </div>
                         </div>
                     </div>
 
                     @if($leaveRequest->manager_remarks)
-                        <div class="bg-light rounded p-3">
-                            <h3 class="h4 fw-semibold text-dark mb-3">Manager Remarks</h3>
+                        <div class=" rounded p-3">
+                            <h3 class="h4 fw-semibold  mb-3">Manager Remarks</h3>
                             <p class="text-secondary">{{ $leaveRequest->manager_remarks }}</p>
                         </div>
                     @endif
@@ -132,15 +132,15 @@
                 @endif
 
                 <!-- Timeline -->
-                <div class="bg-light rounded p-3">
+                <div class=" rounded p-3">
                     <h3 class="h4 fw-semibold text-dark mb-3">Request Timeline</h3>
                     
                     <div class="mb-3">
                         <div class="d-flex align-items-start">
-                            <div class="bg-primary rounded-circle mt-1"></div>
+                            <div class=" rounded-circle mt-1"></div>
                             <div>
                                 <p class="small fw-medium">Request Submitted</p>
-                                <p class="small text-muted">{{ $leaveRequest->created_at->format('M d, Y h:i A') }}</p>
+                                <p class="small ">{{ $leaveRequest->created_at->format('M d, Y h:i A') }}</p>
                             </div>
                         </div>
                         
@@ -152,7 +152,7 @@
                                         Request {{ ucfirst($leaveRequest->status) }}
                                     </p>
                                     @if($leaveRequest->approved_at)
-                                        <p class="small text-muted">{{ \Carbon\Carbon::parse($leaveRequest->approved_at)->format('M d, Y h:i A') }}</p>
+                                        <p class="small ">{{ \Carbon\Carbon::parse($leaveRequest->approved_at)->format('M d, Y h:i A') }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -160,8 +160,8 @@
                             <div class="d-flex align-items-start">
                                 <div class="bg-secondary rounded-circle mt-1"></div>
                                 <div>
-                                    <p class="small fw-medium text-muted">Awaiting Approval</p>
-                                    <p class="small text-muted">Pending manager review</p>
+                                    <p class="small fw-medium ">Awaiting Approval</p>
+                                    <p class="small d">Pending manager review</p>
                                 </div>
                             </div>
                         @endif

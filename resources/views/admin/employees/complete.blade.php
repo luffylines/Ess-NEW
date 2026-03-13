@@ -1,465 +1,428 @@
-<!-- Bootstrap CSS -->
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Complete Profile</title>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Bootstrap Icons -->
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="d-flex justify-content-center align-items-center min-vh-100" style="background: linear-gradient(90deg, #f8cdda 0%, #f88fa6 100%);">
-    <form method="POST" action="{{ route('employees.complete.store', $user->remember_token) }}" class="card shadow p-4 mx-auto" style="max-width: 400px; border-radius: 1.5rem; min-width: 320px;">
-        @csrf
-        <div class="text-center mb-3">
-            <i class="bi bi-person-circle display-4 text-primary mb-2"></i>
-            <div class="fw-semibold mb-1" style="font-size:1.1em;">{{ $user->name }}</div>
-            <div class="text-muted small mb-1" style="font-size:0.98em;">{{ $user->email }}</div>
-            @if($user->employee_id)
-                <div class="alert alert-info py-2 px-3 mb-2" style="display:inline-block; font-size:1em; border-radius:1em; background:#e6f7fb; color:#0a4d6b;">
-                    <i class="bi bi-badge-check"></i> <span class="fw-semibold">Your Employee ID:</span> <span class="fw-bold">{{ $user->employee_id }}</span>
-                </div>
-            @endif
-            <div class="text-muted mb-0" style="font-size:0.97em;">Welcome! Please complete your profile to get started.</div>
-        </div>
-
-                        
-                        @include('partials.flash-messages')
-
-
-                        <div class="text-center mb-4">
-                            <i class="bi bi-person-circle display-4 text-primary mb-2"></i>
-                            <h2 class="h4 fw-bold text-primary mobile-text-lg">Complete Your Profile</h2>
-                            <div class="mb-2">
-                                <span class="fw-semibold">Username:</span>
-                                <span class="d-block h5 mb-0">{{ $user->name }}</span>
-                            </div>
-                            <div class="mb-2">
-                                <span class="fw-semibold">Email:</span>
-                                <span class="d-block h6 mb-0">{{ $user->email }}</span>
-                            </div>
-                            <p class="text-muted mobile-text-md mb-0">
-                                Welcome! Please complete your profile to get started.
-                            </p>
-                            @if($user->employee_id)
-                                <div class="alert alert-info mt-3">
-                                    <i class="bi bi-badge-check"></i> Your Employee ID: <strong>{{ $user->employee_id }}</strong>
-                                </div>
-                            @endif
-                        </div>
-        <!-- Password -->
-
-
-        <div class="mb-3 position-relative">
-            <label for="password" class="form-label fw-semibold">Password</label>
-            <div class="position-relative">
-                <input id="password" name="password" type="password"
-                       class="form-control form-control-lg pe-5 @error('password') is-invalid @enderror"
-                       autocomplete="new-password" minlength="6" maxlength="32" pattern="(?=.*[A-Z]).{6,}">
-                <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
-                      style="cursor: pointer;" data-target="password">
-                    <i class="bi bi-eye-slash fs-5"></i>
-                </span>
-            </div>
-            <div id="passwordHelp" class="form-text mt-1">
-                Password must be at least 6 characters and contain at least one uppercase letter.
-            </div>
-            @error('password')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="mb-3 position-relative">
-            <label for="password_confirmation" class="form-label fw-semibold">Confirm Password</label>
-            <div class="position-relative">
-                <input id="password_confirmation" name="password_confirmation" type="password"
-                       class="form-control form-control-lg pe-5 @error('password_confirmation') is-invalid @enderror"
-                       autocomplete="new-password">
-                <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
-                      style="cursor: pointer;" data-target="password_confirmation">
-                    <i class="bi bi-eye-slash fs-5"></i>
-                </span>
-            </div>
-            <div id="confirmPasswordFeedback" class="form-text mt-1"></div>
-            @error('password_confirmation')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <!-- Phone -->
-        <div class="mb-3">
-            <label for="phone" class="form-label fw-semibold">Phone Number</label>
-            <div class="input-group">
-                <span class="input-group-text">+63</span>
-                <input id="phone" name="phone" type="tel"
-                       class="form-control form-control-lg @error('phone') is-invalid @enderror"
-                       value="{{ old('phone', $user->phone ? substr($user->phone, 3) : '') }}"
-                       placeholder="9XXXXXXXXX"
-                       inputmode="numeric"
-                       autocomplete="tel"
-                       maxlength="10">
-            </div>
-            <div class="form-text">Enter 10-digit number starting with 9. (e.g. 9171234567)</div>
-            @error('phone')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <!-- Gender -->
-        <div class="mb-3">
-            <label for="gender" class="form-label fw-semibold">Gender</label>
-            <select id="gender" name="gender" class="form-select form-select-lg @error('gender') is-invalid @enderror">
-                <option value="">-- Select --</option>
-                <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-            </select>
-            @error('gender')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <!-- Address -->
-        <div class="mb-4">
-            <label for="address" class="form-label fw-semibold">Address</label>
-            <textarea id="address" name="address" rows="3"
-                      class="form-control form-control-lg @error('address') is-invalid @enderror"
-                      placeholder="Enter your complete address">{{ old('address') }}</textarea>
-            @error('address')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <!-- Submit -->
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg rounded-pill" id="submitBtn">
-                <i class="bi bi-check-circle"></i> Complete Profile
-            </button>
-        </div>
-    </form>
-<script>
-// Password match and rules feedback
-document.addEventListener('DOMContentLoaded', function() {
-    const password = document.getElementById('password');
-    const confirm = document.getElementById('password_confirmation');
-    const feedback = document.getElementById('confirmPasswordFeedback');
-    const submitBtn = document.getElementById('submitBtn');
-    function checkPasswordMatch() {
-        if (!password.value || !confirm.value) {
-            feedback.textContent = '';
-            submitBtn.disabled = true;
-            return;
-        }
-        if (password.value !== confirm.value) {
-            feedback.textContent = 'Passwords do not match.';
-            feedback.classList.remove('text-success');
-            feedback.classList.add('text-danger');
-            submitBtn.disabled = true;
-        } else if (!/(?=.*[A-Z]).{6,}/.test(password.value)) {
-            feedback.textContent = 'Password must be at least 6 characters and contain an uppercase letter.';
-            feedback.classList.remove('text-success');
-            feedback.classList.add('text-danger');
-            submitBtn.disabled = true;
-        } else {
-            feedback.textContent = 'Passwords match!';
-            feedback.classList.remove('text-danger');
-            feedback.classList.add('text-success');
-            submitBtn.disabled = false;
-        }
-    }
-    password.addEventListener('input', checkPasswordMatch);
-    confirm.addEventListener('input', checkPasswordMatch);
-    checkPasswordMatch();
-});
-</script>
-
-                        <div class="mt-4 alert alert-info small">
-                            <i class="bi bi-info-circle me-2"></i>
-                            After completing your profile, you'll be redirected to the login page to sign in.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Bootstrap JS and dependencies (Popper.js) -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-
 <style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', sans-serif;
-    }
 
-    .custom-bg {
-        background: linear-gradient(to right, #fbd3e9, #fcb69f);
-        background-size: cover;
-        background-attachment: fixed;
-    }
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:linear-gradient(90deg,#f8cdda,#f88fa6);
+}
 
-    .glass-card {
-        width: 100%;
-        max-width: 100%;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        margin: 0 auto;
-    }
+/* wrapper */
 
-    .toggle-password {
-        z-index: 5;
-    }
+.profile-wrapper{
+display:flex;
+justify-content:center;
+padding:20px;
+}
 
-    /* Mobile-first responsive design */
-    @media (max-width: 576px) {
-        .glass-card {
-            padding: 1rem;
-            max-width: 95%;
-            margin: 1rem auto;
-        }
+/* card */
 
-        .card-body {
-            padding: 1.5rem !important;
-        }
+.profile-card{
+width:100%;
+max-width:440px;
+border-radius:18px;
+border:none;
+}
 
-        input[type="text"],
-        input[type="password"],
-        input[type="tel"],
-        select,
-        textarea {
-            font-size: 16px !important;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            border-radius: 8px;
-        }
+/* labels */
 
-        /* Prevent zoom on iOS when input is focused */
-        input[type="tel"]:focus,
-        input[type="password"]:focus,
-        input[type="text"]:focus,
-        select:focus,
-        textarea:focus {
-            font-size: 16px !important;
-            outline: none;
-        }
+.form-label{
+font-weight:600;
+font-size:14px;
+}
 
-        /* Mobile button improvements */
-        .btn-lg {
-            padding: 1rem 1.5rem;
-            font-size: 1.1rem;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
+/* inputs */
 
-        /* iOS Safari specific fixes */
-        .form-control:focus {
-            -webkit-box-shadow: none;
-            box-shadow: none;
-        }
+.form-control,
+.form-select{
+border-radius:8px;
+font-size:16px; /* prevents mobile zoom */
+}
 
-        /* Better touch targets */
-        .toggle-password {
-            padding: 0.5rem;
-            min-width: 44px;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    }
+/* textarea */
 
-    @media (min-width: 577px) and (max-width: 991.98px) {
-        .glass-card {
-            max-width: 720px;
-            padding: 2rem;
-        }
+textarea{
+resize:none;
+}
 
-        .card-body {
-            padding: 2.5rem !important;
-        }
-    }
+/* button */
 
-    @media (min-width: 992px) {
-        .glass-card {
-            max-width: 600px;
-            padding: 2.5rem;
-        }
+#submitBtn{
+border-radius:30px;
+font-weight:600;
+}
 
-        .card-body {
-            padding: 3rem !important;
-        }
-    }
+/* password rules */
+
+.password-rules{
+font-size:13px;
+margin-top:6px;
+}
+
+.password-rules span{
+display:block;
+}
+
+.valid{
+color:#198754;
+}
+
+.invalid{
+color:#dc3545;
+}
+
+/* toggle */
+
+.toggle-password{
+cursor:pointer;
+}
+
+/* MOBILE UI */
+
+@media(max-width:576px){
+
+.profile-wrapper{
+padding:10px;
+}
+
+.profile-card{
+max-width:100%;
+}
+
+.card-body{
+padding:18px !important;
+}
+
+h3{
+font-size:20px;
+}
+
+.form-label{
+font-size:13px;
+}
+
+}
+
 </style>
 
+</head>
+
+<body>
+
+<div class="profile-wrapper">
+
+<div class="card profile-card shadow">
+
+<div class="card-body p-4">
+
+<form method="POST" action="{{ route('employees.complete.store', $user->remember_token) }}">
+
+@csrf
+@include('partials.flash-messages')
+
+<div class="text-center mb-3">
+
+<i class="bi bi-person-circle display-6 text-primary"></i>
+
+<h3 class="fw-bold text-primary mt-2 mb-1">
+Complete Your Profile
+</h3>
+
+<p class="text-muted small">
+Welcome! Please complete your profile.
+</p>
+
+@if($user->employee_id)
+
+<div class="alert alert-info py-2 small">
+<i class="bi bi-badge-check"></i>
+Your Employee ID:
+<strong>{{ $user->employee_id }}</strong>
+</div>
+
+@endif
+
+</div>
+
+<!-- PASSWORD -->
+
+<div class="mb-3">
+
+<label class="form-label">Password</label>
+
+<div class="position-relative">
+
+<input
+id="password"
+name="password"
+type="password"
+class="form-control pe-5"
+autocomplete="new-password">
+
+<span
+class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
+data-target="password">
+
+<i class="bi bi-eye-slash"></i>
+
+</span>
+
+</div>
+
+<div class="password-rules">
+
+<span id="rule-length" class="invalid">
+❌ At least 6 characters
+</span>
+
+<span id="rule-upper" class="invalid">
+❌ Must contain uppercase
+</span>
+
+<span id="rule-lower" class="invalid">
+❌ Must contain lowercase
+</span>
+
+<span id="rule-number" class="invalid">
+❌ Must contain number
+</span>
+
+</div>
+
+</div>
+
+<!-- CONFIRM PASSWORD -->
+
+<div class="mb-3">
+
+<label class="form-label">Confirm Password</label>
+
+<input
+id="password_confirmation"
+name="password_confirmation"
+type="password"
+class="form-control">
+
+<small id="confirmPasswordFeedback"></small>
+
+</div>
+
+<!-- PHONE -->
+
+<div class="mb-3">
+
+<label class="form-label">Phone Number</label>
+
+<div class="input-group">
+
+<span class="input-group-text">+63</span>
+
+<input
+id="phone"
+name="phone"
+type="tel"
+class="form-control"
+value="{{ old('phone', $user->phone ? substr($user->phone,3) : '') }}"
+placeholder="9XXXXXXXXX"
+maxlength="10">
+
+</div>
+
+<small class="text-muted">
+Enter 10 digit number starting with 9
+</small>
+
+</div>
+
+<!-- GENDER -->
+
+<div class="mb-3">
+
+<label class="form-label">Gender</label>
+
+<select name="gender" class="form-select">
+
+<option value="">Select Gender</option>
+<option value="male">Male</option>
+<option value="female">Female</option>
+
+</select>
+
+</div>
+
+<!-- ADDRESS -->
+
+<div class="mb-3">
+
+<label class="form-label">Address</label>
+
+<textarea
+name="address"
+rows="2"
+class="form-control"
+placeholder="Enter your complete address"></textarea>
+
+</div>
+
+<div class="d-grid mb-3">
+
+<button type="submit" class="btn btn-primary" id="submitBtn">
+
+<i class="bi bi-check-circle"></i>
+Complete Profile
+
+</button>
+
+</div>
+
+<div class="alert alert-info small py-2 mb-0">
+
+<i class="bi bi-info-circle"></i>
+
+After completing your profile, you'll be redirected to login.
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const passwordInput = document.getElementById('password');
-    const passwordConfirmationInput = document.getElementById('password_confirmation');
-    const strengthMessage = document.getElementById('passwordHelp');
-    const confirmPasswordFeedback = document.getElementById('confirmPasswordFeedback');
-    const phoneInput = document.getElementById('phone');
-    const submitBtn = document.getElementById('submitBtn');
-    const form = document.querySelector('form');
 
-    // Simplified form submission for better mobile compatibility
-    let isSubmitting = false;
-    
-    form.addEventListener('submit', function(e) {
-        // Prevent double submission
-        if (isSubmitting) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Simple validation - let server handle detailed validation
-        const password = passwordInput.value.trim();
-        const confirmPassword = passwordConfirmationInput.value.trim();
-        const phone = phoneInput.value.trim();
-        const gender = document.getElementById('gender').value;
-        const address = document.getElementById('address').value.trim();
+document.addEventListener("DOMContentLoaded",function(){
 
-        // Basic required field check only
-        if (!password) {
-            alert('Please enter a password.');
-            passwordInput.focus();
-            e.preventDefault();
-            return false;
-        }
+const password=document.getElementById("password")
+const confirm=document.getElementById("password_confirmation")
+const feedback=document.getElementById("confirmPasswordFeedback")
 
-        if (!confirmPassword) {
-            alert('Please confirm your password.');
-            passwordConfirmationInput.focus();
-            e.preventDefault();
-            return false;
-        }
+const lengthRule=document.getElementById("rule-length")
+const upperRule=document.getElementById("rule-upper")
+const lowerRule=document.getElementById("rule-lower")
+const numberRule=document.getElementById("rule-number")
 
-        if (password !== confirmPassword) {
-            alert('Passwords do not match.');
-            passwordConfirmationInput.focus();
-            e.preventDefault();
-            return false;
-        }
+password.addEventListener("input",function(){
 
-        if (!phone) {
-            alert('Please enter your phone number.');
-            phoneInput.focus();
-            e.preventDefault();
-            return false;
-        }
+const val=password.value
 
-        if (!gender) {
-            alert('Please select your gender.');
-            document.getElementById('gender').focus();
-            e.preventDefault();
-            return false;
-        }
+// length
+if(val.length>=6){
+lengthRule.className="valid"
+lengthRule.innerHTML="✔ At least 6 characters"
+}else{
+lengthRule.className="invalid"
+lengthRule.innerHTML="❌ At least 6 characters"
+}
 
-        if (!address) {
-            alert('Please enter your address.');
-            document.getElementById('address').focus();
-            e.preventDefault();
-            return false;
-        }
+// uppercase
+if(/[A-Z]/.test(val)){
+upperRule.className="valid"
+upperRule.innerHTML="✔ Has uppercase"
+}else{
+upperRule.className="invalid"
+upperRule.innerHTML="❌ Must contain uppercase"
+}
 
-        // If we reach here, allow form to submit
-        isSubmitting = true;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
-        
-        // Don't prevent default - let form submit normally
-        return true;
-    });
+// lowercase
+if(/[a-z]/.test(val)){
+lowerRule.className="valid"
+lowerRule.innerHTML="✔ Has lowercase"
+}else{
+lowerRule.className="invalid"
+lowerRule.innerHTML="❌ Must contain lowercase"
+}
 
-    // Phone input - simplified for mobile
-    phoneInput.addEventListener('input', function(e) {
-        // Only allow numbers
-        let value = e.target.value.replace(/\D/g, '');
-        
-        // Limit to 10 digits and auto-add 9 if needed
-        if (value.length > 0 && value[0] !== '9') {
-            value = '9' + value.substring(1);
-        }
-        if (value.length > 10) {
-            value = value.substring(0, 10);
-        }
-        
-        e.target.value = value;
-    });
+// number
+if(/[0-9]/.test(val)){
+numberRule.className="valid"
+numberRule.innerHTML="✔ Has number"
+}else{
+numberRule.className="invalid"
+numberRule.innerHTML="❌ Must contain number"
+}
 
-    // Password strength - simplified
-    passwordInput.addEventListener('input', function () {
-        const password = passwordInput.value;
-        const hasUpper = /[A-Z]/.test(password);
-        const hasLower = /[a-z]/.test(password);
-        const hasNumber = /\d/.test(password);
-        const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+})
 
-        if (password.length >= 8 && hasUpper && hasLower && hasNumber && hasSymbol) {
-            strengthMessage.classList.remove('text-danger');
-            strengthMessage.classList.add('text-success');
-            strengthMessage.textContent = 'Password is strong.';
-        } else {
-            strengthMessage.classList.remove('text-success');
-            strengthMessage.classList.add('text-danger');
-            strengthMessage.textContent = 'Password must be at least 8 characters with uppercase, lowercase, number, and symbol.';
-        }
-    });
+// confirm password
 
-    // Confirm password - simplified
-    passwordConfirmationInput.addEventListener('input', function () {
-        if (passwordConfirmationInput.value === passwordInput.value && passwordInput.value.length > 0) {
-            confirmPasswordFeedback.textContent = 'Passwords match.';
-            confirmPasswordFeedback.classList.remove('text-danger');
-            confirmPasswordFeedback.classList.add('text-success');
-        } else if (passwordConfirmationInput.value.length > 0) {
-            confirmPasswordFeedback.textContent = 'Passwords do not match.';
-            confirmPasswordFeedback.classList.remove('text-success');
-            confirmPasswordFeedback.classList.add('text-danger');
-        }
-    });
+confirm.addEventListener("input",function(){
 
-    // Toggle password visibility - simplified
-    document.querySelectorAll('.toggle-password').forEach(span => {
-        span.addEventListener('click', function (e) {
-            e.preventDefault();
-            const inputId = this.getAttribute('data-target');
-            const input = document.getElementById(inputId);
-            const icon = this.querySelector('i');
+if(confirm.value.length===0){
+feedback.innerHTML=""
+return
+}
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            }
-        });
-    });
+if(confirm.value===password.value){
+feedback.innerHTML="✔ Passwords match"
+feedback.className="text-success small"
+}else{
+feedback.innerHTML="❌ Passwords do not match"
+feedback.className="text-danger small"
+}
 
-    // Safari/iOS specific fixes
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    
-    if (isSafari || isIOS) {
-        // Disable autocomplete that might interfere
-        form.setAttribute('autocomplete', 'off');
-        
-        // Add viewport meta for iOS if not exists
-        let viewport = document.querySelector('meta[name="viewport"]');
-        if (!viewport) {
-            viewport = document.createElement('meta');
-            viewport.name = 'viewport';
-            viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no';
-            document.head.appendChild(viewport);
-        }
-        
-        // Prevent iOS keyboard issues
-        document.addEventListener('touchend', function(e) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                setTimeout(() => {
-                    window.scrollTo(0, 0);
-                }, 100);
-            }
-        });
-    }
-});
+})
+
+// phone cleaner
+
+const phone=document.getElementById("phone")
+
+phone.addEventListener("input",function(e){
+
+let value=e.target.value.replace(/\D/g,'')
+
+if(value.length>0 && value[0]!=='9'){
+value='9'+value.substring(1)
+}
+
+if(value.length>10){
+value=value.substring(0,10)
+}
+
+e.target.value=value
+
+})
+
+// toggle password
+
+document.querySelectorAll(".toggle-password").forEach(btn=>{
+
+btn.addEventListener("click",function(){
+
+const input=document.getElementById(this.dataset.target)
+const icon=this.querySelector("i")
+
+if(input.type==="password"){
+input.type="text"
+icon.classList.replace("bi-eye-slash","bi-eye")
+}else{
+input.type="password"
+icon.classList.replace("bi-eye","bi-eye-slash")
+}
+
+})
+
+})
+
+})
+
 </script>
+
+</body>
+</html>
