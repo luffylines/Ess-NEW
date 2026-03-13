@@ -13,8 +13,8 @@
     <table class="table table-striped align-middle">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>
+          <th class="id-text">ID</th>
+          <th class="name-text">Name</th>
           <th>Lat</th>
           <th>Lng</th>
           <th>Radius (m)</th>
@@ -25,11 +25,16 @@
       <tbody>
         @forelse($stores as $store)
         <tr>
-          <td>{{ $store->id }}</td>
-          <td>{{ $store->name }}</td>
-          <td>{{ $store->lat }}</td>
-          <td>{{ $store->lng }}</td>
-          <td>{{ $store->radius_meters }}</td>
+          <td class="id-text">{{ $store->id }}</td>
+          <td class="name-text">
+            <span class="fw-bold" style="font-size:1.1em;">{{ $store->name }}</span>
+            @if($store->address)
+              <br><span class="text-muted" style="font-size:0.95em;">{{ $store->address }}</span>
+            @endif
+          </td>
+          <td class="lat-text">{{ $store->lat }}</td>
+          <td class="lng-text">{{ $store->lng }}</td>
+          <td class="radius-text">{{ $store->radius_meters }}</td>
           <td>
             <div class="form-check form-switch">
               <input class="form-check-input status-toggle" 
@@ -63,6 +68,22 @@
 </div>
 
 <style>
+  .id-text,
+.name-text
+.lat-text,
+.lng-text,
+.radius-text {
+    color: #212529;
+}
+
+/* kapag dark mode */
+body.dark .id-text,
+body.dark .name-text,
+body.dark .lat-text,
+body.dark .lng-text,
+body.dark .radius-text {
+    color: #e9ecef;
+}
 .form-switch .form-check-input {
   width: 3em;
   height: 1.5em;

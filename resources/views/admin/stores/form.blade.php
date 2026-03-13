@@ -17,16 +17,108 @@
       <input type="text" name="name" class="form-control" value="{{ old('name', $store->name) }}" required>
     </div>
 
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label">Latitude</label>
-        <input type="number" step="0.0000001" name="lat" class="form-control" value="{{ old('lat', $store->lat) }}" required>
+
+    <div class="mb-3">
+      <label class="form-label">Location</label>
+      <div id="map" style="height: 320px; border-radius: 8px; margin-bottom: 10px;"></div>
+      <div class="d-flex gap-2 mb-2">
+        <input type="text" id="address-search" class="form-control" placeholder="Search address..." style="max-width: 350px;">
+        <button type="button" id="detect-location" class="btn btn-outline-secondary">Detect My Location</button>
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Longitude</label>
-        <input type="number" step="0.0000001" name="lng" class="form-control" value="{{ old('lng', $store->lng) }}" required>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Latitude</label>
+          <input type="number" step="0.0000001" name="lat" id="lat-input" class="form-control" value="{{ old('lat', $store->lat) }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Longitude</label>
+          <input type="number" step="0.0000001" name="lng" id="lng-input" class="form-control" value="{{ old('lng', $store->lng) }}" required>
+        </div>
       </div>
     </div>
+</style>
+
+<!-- Leaflet & Geocoder Scripts -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var defaultLat = parseFloat(document.getElementById('lat-input').value) || 14.6532;
+  var defaultLng = parseFloat(document.getElementById('lng-input').value) || 121.0458;
+  var map = L.map('map').setView([defaultLat, defaultLng], 13);
+  var marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+  var geocoder = L.Control.geocoder({ defaultMarkGeocode: false }).addTo(map);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // Update lat/lng inputs when marker moves
+  marker.on('move', function(e) {
+    document.getElementById('lat-input').value = e.latlng.lat.toFixed(7);
+    document.getElementById('lng-input').value = e.latlng.lng.toFixed(7);
+  });
+
+  // Move marker when lat/lng inputs change
+  document.getElementById('lat-input').addEventListener('change', function() {
+    var lat = parseFloat(this.value);
+    var lng = parseFloat(document.getElementById('lng-input').value);
+    if (!isNaN(lat) && !isNaN(lng)) marker.setLatLng([lat, lng]);
+    map.panTo([lat, lng]);
+  });
+  document.getElementById('lng-input').addEventListener('change', function() {
+    var lat = parseFloat(document.getElementById('lat-input').value);
+    var lng = parseFloat(this.value);
+    if (!isNaN(lat) && !isNaN(lng)) marker.setLatLng([lat, lng]);
+    map.panTo([lat, lng]);
+  });
+
+  // Geocoder search
+  geocoder.on('markgeocode', function(e) {
+    var latlng = e.geocode.center;
+    marker.setLatLng(latlng);
+    map.setView(latlng, 16);
+    document.getElementById('lat-input').value = latlng.lat.toFixed(7);
+    document.getElementById('lng-input').value = latlng.lng.toFixed(7);
+    document.getElementById('address-search').value = e.geocode.name;
+  });
+
+  // Address search box
+  document.getElementById('address-search').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      geocoder.options.geocoder.geocode(this.value, function(results) {
+        if (results.length > 0) {
+          geocoder.fire('markgeocode', { geocode: results[0] });
+        } else {
+          alert('Address not found.');
+        }
+      });
+    }
+  });
+
+  // Detect location button
+  document.getElementById('detect-location').addEventListener('click', function() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        marker.setLatLng([lat, lng]);
+        map.setView([lat, lng], 16);
+        document.getElementById('lat-input').value = lat.toFixed(7);
+        document.getElementById('lng-input').value = lng.toFixed(7);
+      }, function(error) {
+        alert('Could not get your location: ' + error.message);
+      });
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  });
+});
+</script>
 
     <div class="row g-3 mt-1">
       <div class="col-md-6">
