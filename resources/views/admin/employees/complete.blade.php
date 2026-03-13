@@ -3,12 +3,20 @@
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="custom-bg d-flex justify-content-center align-items-center min-vh-100">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-sm-10 col-md-10 col-lg-6">
-                <div class="card glass-card shadow-lg border-0">
-                    <div class="card-body p-4 p-sm-5">
+<div class="d-flex justify-content-center align-items-center min-vh-100" style="background: linear-gradient(90deg, #f8cdda 0%, #f88fa6 100%);">
+    <form method="POST" action="{{ route('employees.complete.store', $user->remember_token) }}" class="card shadow p-4 mx-auto" style="max-width: 400px; border-radius: 1.5rem; min-width: 320px;">
+        @csrf
+        <div class="text-center mb-3">
+            <i class="bi bi-person-circle display-4 text-primary mb-2"></i>
+            <div class="fw-semibold mb-1" style="font-size:1.1em;">{{ $user->name }}</div>
+            <div class="text-muted small mb-1" style="font-size:0.98em;">{{ $user->email }}</div>
+            @if($user->employee_id)
+                <div class="alert alert-info py-2 px-3 mb-2" style="display:inline-block; font-size:1em; border-radius:1em; background:#e6f7fb; color:#0a4d6b;">
+                    <i class="bi bi-badge-check"></i> <span class="fw-semibold">Your Employee ID:</span> <span class="fw-bold">{{ $user->employee_id }}</span>
+                </div>
+            @endif
+            <div class="text-muted mb-0" style="font-size:0.97em;">Welcome! Please complete your profile to get started.</div>
+        </div>
 
                         
                         @include('partials.flash-messages')
@@ -34,98 +42,94 @@
                                 </div>
                             @endif
                         </div>
-                        <form method="POST" action="{{ route('employees.complete.store', $user->remember_token) }}" novalidate>
-                            @csrf
+        <!-- Password -->
 
 
-                            <!-- Password -->
-                            <div class="mb-3 position-relative">
-                                <label for="password" class="form-label fw-semibold">Password</label>
-                                <div class="position-relative">
-                                <input id="password" name="password" type="password"
-                                       class="form-control form-control-lg pe-5 @error('password') is-invalid @enderror"
-                                       autocomplete="new-password" minlength="6" maxlength="32" pattern="(?=.*[A-Z]).{6,}">
-                                    <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
-                                          style="cursor: pointer;" data-target="password">
-                                        <i class="bi bi-eye-slash fs-5"></i>
-                                    </span>
-                                </div>
-                                <div id="passwordHelp" class="form-text mt-1">
-                                    Password must be at least 6 characters and contain at least one uppercase letter.
-                                </div>
-                                @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+        <div class="mb-3 position-relative">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <div class="position-relative">
+                <input id="password" name="password" type="password"
+                       class="form-control form-control-lg pe-5 @error('password') is-invalid @enderror"
+                       autocomplete="new-password" minlength="6" maxlength="32" pattern="(?=.*[A-Z]).{6,}">
+                <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
+                      style="cursor: pointer;" data-target="password">
+                    <i class="bi bi-eye-slash fs-5"></i>
+                </span>
+            </div>
+            <div id="passwordHelp" class="form-text mt-1">
+                Password must be at least 6 characters and contain at least one uppercase letter.
+            </div>
+            @error('password')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+        <div class="mb-3 position-relative">
+            <label for="password_confirmation" class="form-label fw-semibold">Confirm Password</label>
+            <div class="position-relative">
+                <input id="password_confirmation" name="password_confirmation" type="password"
+                       class="form-control form-control-lg pe-5 @error('password_confirmation') is-invalid @enderror"
+                       autocomplete="new-password">
+                <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
+                      style="cursor: pointer;" data-target="password_confirmation">
+                    <i class="bi bi-eye-slash fs-5"></i>
+                </span>
+            </div>
+            <div id="confirmPasswordFeedback" class="form-text mt-1"></div>
+            @error('password_confirmation')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-                            <!-- Confirm Password -->
-                            <div class="mb-3 position-relative">
-                                <label for="password_confirmation" class="form-label fw-semibold">Confirm Password</label>
-                                <div class="position-relative">
-                                <input id="password_confirmation" name="password_confirmation" type="password"
-                                       class="form-control form-control-lg pe-5 @error('password_confirmation') is-invalid @enderror"
-                                       autocomplete="new-password">
-                                    <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
-                                          style="cursor: pointer;" data-target="password_confirmation">
-                                        <i class="bi bi-eye-slash fs-5"></i>
-                                    </span>
-                                </div>
-                                <div id="confirmPasswordFeedback" class="form-text mt-1"></div>
-                                @error('password_confirmation')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+        <!-- Phone -->
+        <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold">Phone Number</label>
+            <div class="input-group">
+                <span class="input-group-text">+63</span>
+                <input id="phone" name="phone" type="tel"
+                       class="form-control form-control-lg @error('phone') is-invalid @enderror"
+                       value="{{ old('phone', $user->phone ? substr($user->phone, 3) : '') }}"
+                       placeholder="9XXXXXXXXX"
+                       inputmode="numeric"
+                       autocomplete="tel"
+                       maxlength="10">
+            </div>
+            <div class="form-text">Enter 10-digit number starting with 9. (e.g. 9171234567)</div>
+            @error('phone')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-                            <!-- Phone -->
-                            <div class="mb-3">
-                                <label for="phone" class="form-label fw-semibold">Phone Number</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">+63</span>
-                                    <input id="phone" name="phone" type="tel"
-                                           class="form-control form-control-lg @error('phone') is-invalid @enderror"
-                                           value="{{ old('phone', $user->phone ? substr($user->phone, 3) : '') }}"
-                                           placeholder="9XXXXXXXXX"
-                                           inputmode="numeric"
-                                           autocomplete="tel"
-                                           maxlength="10">
-                                </div>
-                                <div class="form-text">Enter 10-digit number starting with 9. (e.g. 9171234567)</div>
-                                @error('phone')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+        <!-- Gender -->
+        <div class="mb-3">
+            <label for="gender" class="form-label fw-semibold">Gender</label>
+            <select id="gender" name="gender" class="form-select form-select-lg @error('gender') is-invalid @enderror">
+                <option value="">-- Select --</option>
+                <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+            </select>
+            @error('gender')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-                            <!-- Gender -->
-                            <div class="mb-3">
-                                <label for="gender" class="form-label fw-semibold">Gender</label>
-                                <select id="gender" name="gender" class="form-select form-select-lg @error('gender') is-invalid @enderror">
-                                    <option value="">-- Select --</option>
-                                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                                </select>
-                                @error('gender')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+        <!-- Address -->
+        <div class="mb-4">
+            <label for="address" class="form-label fw-semibold">Address</label>
+            <textarea id="address" name="address" rows="3"
+                      class="form-control form-control-lg @error('address') is-invalid @enderror"
+                      placeholder="Enter your complete address">{{ old('address') }}</textarea>
+            @error('address')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-                            <!-- Address -->
-                            <div class="mb-4">
-                                <label for="address" class="form-label fw-semibold">Address</label>
-                                <textarea id="address" name="address" rows="3"
-                                          class="form-control form-control-lg @error('address') is-invalid @enderror"
-                                          placeholder="Enter your complete address">{{ old('address') }}</textarea>
-                                @error('address')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Submit -->
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg rounded-pill" id="submitBtn">
-                                    <i class="bi bi-check-circle"></i> Complete Profile
-                                </button>
-                            </div>
-                        </form>
+        <!-- Submit -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill" id="submitBtn">
+                <i class="bi bi-check-circle"></i> Complete Profile
+            </button>
+        </div>
+    </form>
 <script>
 // Password match and rules feedback
 document.addEventListener('DOMContentLoaded', function() {
