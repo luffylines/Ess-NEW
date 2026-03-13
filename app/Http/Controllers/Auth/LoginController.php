@@ -65,7 +65,7 @@ class LoginController extends Controller
             }
         } catch (\Exception $e) {
             // If reCAPTCHA service is down, log error but allow login for mobile users
-            \Log::error('reCAPTCHA verification failed: ' . $e->getMessage());
+            Log::error('reCAPTCHA verification failed: ' . $e->getMessage());
             
             // For mobile devices, we can be more lenient
             $userAgent = $request->header('User-Agent', '');

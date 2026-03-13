@@ -207,7 +207,7 @@ public function completeStore(Request $request, $token)
 {
     $employee = User::findOrFail($id);
 
-    if (auth()->id() === $employee->id) {
+    if (auth()->id() === $employee->getKey()) {
         if (request()->expectsJson()) {
             return response()->json(['error' => 'You cannot delete your own account.'], 403);
         }

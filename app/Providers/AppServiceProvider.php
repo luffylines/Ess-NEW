@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Services\HolidaySyncService;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,18 +31,6 @@ class AppServiceProvider extends ServiceProvider
             \URL::forceScheme('https');
         }
 
-        // Fix SMTP mail scheme at runtime for cloud deployments
-        // Port 465 requires 'smtps', port 587 auto-negotiates STARTTLS (scheme=null)
-        $smtpConfig = config('mail.mailers.smtp');
-        if (!empty($smtpConfig)) {
-            $port = (int) ($smtpConfig['port'] ?? 0);
-            $currentScheme = $smtpConfig['scheme'] ?? null;
-            if ($port === 465 && $currentScheme !== 'smtps') {
-                config(['mail.mailers.smtp.scheme' => 'smtps']);
-            } elseif ($port === 587 && $currentScheme !== null && $currentScheme !== 'smtps') {
-                // Port 587 uses STARTTLS which is auto-negotiated when scheme is null
-                config(['mail.mailers.smtp.scheme' => null]);
-            }
-        }
+        // ...existing code...
     }
 }

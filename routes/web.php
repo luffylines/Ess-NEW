@@ -24,7 +24,7 @@ Route::get('/profile-photos/{filename}', function ($filename) {
         abort(404);
     }
     return response(Storage::disk('public')->get($path))
-        ->header('Content-Type', Storage::disk('public')->mimeType($path))
+        ->header('Content-Type', \Illuminate\Support\Facades\Storage::mimeType($path))
         ->header('Cache-Control', 'public, max-age=86400');
 })->name('profile.photo')->where('filename', '[^/]+');
 
@@ -227,11 +227,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ];
 
         try {
+            // Email test route now uses Resend via Laravel Mail config
             \Illuminate\Support\Facades\Mail::raw('Test email from Railway - ' . now(), function ($message) {
                 $message->to(config('mail.from.address'))
                         ->subject('Railway Email Test ' . now());
             });
-            return response()->json(['status' => 'SUCCESS', 'config' => $config, 'message' => 'Email sent!']);
+            return response()->json(['status' => 'SUCCESS', 'config' => $config, 'message' => 'Email sent using Resend!']);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'FAILED',
