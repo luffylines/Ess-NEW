@@ -12,9 +12,16 @@
       @method('PUT')
     @endif
 
-    <div class="mb-3">
-      <label class="form-label">Name</label>
-      <input type="text" name="name" class="form-control" value="{{ old('name', $store->name) }}" required>
+
+    <div class="mb-3 row align-items-end">
+      <div class="col-md-7">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" value="{{ old('name', $store->name) }}" required>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label">Location Name</label>
+        <input type="text" id="location-name" name="location_name" class="form-control" value="{{ old('location_name', $store->location_name ?? '') }}" readonly>
+      </div>
     </div>
 
 
@@ -56,23 +63,44 @@ document.addEventListener('DOMContentLoaded', function () {
     attribution: '© OpenStreetMap'
   }).addTo(map);
 
-  // Update lat/lng inputs when marker moves
+
+  // Helper: reverse geocode and fill location name
+  function updateLocationName(lat, lng) {
+    if (window.L && window.L.Control && window.L.Control.Geocoder) {
+      L.Control.Geocoder.nominatim().reverse({lat: lat, lng: lng}, map.options.crs.scale(map.getZoom()), function(results) {
+        if (results && results.length > 0) {
+          document.getElementById('location-name').value = results[0].name;
+        } else {
+          document.getElementById('location-name').value = '';
+        }
+      });
+    }
+  }
+
+  // Update lat/lng inputs and location name when marker moves
   marker.on('move', function(e) {
     document.getElementById('lat-input').value = e.latlng.lat.toFixed(7);
     document.getElementById('lng-input').value = e.latlng.lng.toFixed(7);
+    updateLocationName(e.latlng.lat, e.latlng.lng);
   });
 
   // Move marker when lat/lng inputs change
   document.getElementById('lat-input').addEventListener('change', function() {
     var lat = parseFloat(this.value);
     var lng = parseFloat(document.getElementById('lng-input').value);
-    if (!isNaN(lat) && !isNaN(lng)) marker.setLatLng([lat, lng]);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      marker.setLatLng([lat, lng]);
+      updateLocationName(lat, lng);
+    }
     map.panTo([lat, lng]);
   });
   document.getElementById('lng-input').addEventListener('change', function() {
     var lat = parseFloat(document.getElementById('lat-input').value);
     var lng = parseFloat(this.value);
-    if (!isNaN(lat) && !isNaN(lng)) marker.setLatLng([lat, lng]);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      marker.setLatLng([lat, lng]);
+      updateLocationName(lat, lng);
+    }
     map.panTo([lat, lng]);
   });
 
@@ -84,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('lat-input').value = latlng.lat.toFixed(7);
     document.getElementById('lng-input').value = latlng.lng.toFixed(7);
     document.getElementById('address-search').value = e.geocode.name;
+    updateLocationName(latlng.lat, latlng.lng);
   });
 
   // Address search box
@@ -110,6 +139,9 @@ document.addEventListener('DOMContentLoaded', function () {
         map.setView([lat, lng], 16);
         document.getElementById('lat-input').value = lat.toFixed(7);
         document.getElementById('lng-input').value = lng.toFixed(7);
+        updateLocationName(lat, lng);
+        // On page load, fill location name if lat/lng present
+        updateLocationName(defaultLat, defaultLng);
       }, function(error) {
         alert('Could not get your location: ' + error.message);
       });

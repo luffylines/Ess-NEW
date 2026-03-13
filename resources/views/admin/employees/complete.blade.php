@@ -17,17 +17,26 @@
                         <div class="text-center mb-4">
                             <i class="bi bi-person-circle display-4 text-primary mb-2"></i>
                             <h2 class="h4 fw-bold text-primary mobile-text-lg">Complete Your Profile</h2>
-                            <p class="text-muted mobile-text-md">
-                                Welcome <strong>{{ $user->name }}</strong>! Please complete your profile to get started.
-                            </p>
-
-                        @if($user->employee_id)
-                            <div class="alert alert-info mt-3">
-                                <i class="bi bi-badge-check"></i> Your Employee ID: <strong>{{ $user->employee_id }}</strong>
+                            <div class="mb-2">
+                                <span class="fw-semibold">Username:</span>
+                                <span class="d-block h5 mb-0">{{ $user->name }}</span>
                             </div>
-                        @endif
-                    </div>                        <form method="POST" action="{{ route('employees.complete.store', $user->remember_token) }}" novalidate>
+                            <div class="mb-2">
+                                <span class="fw-semibold">Email:</span>
+                                <span class="d-block h6 mb-0">{{ $user->email }}</span>
+                            </div>
+                            <p class="text-muted mobile-text-md mb-0">
+                                Welcome! Please complete your profile to get started.
+                            </p>
+                            @if($user->employee_id)
+                                <div class="alert alert-info mt-3">
+                                    <i class="bi bi-badge-check"></i> Your Employee ID: <strong>{{ $user->employee_id }}</strong>
+                                </div>
+                            @endif
+                        </div>
+                        <form method="POST" action="{{ route('employees.complete.store', $user->remember_token) }}" novalidate>
                             @csrf
+
 
                             <!-- Password -->
                             <div class="mb-3 position-relative">
@@ -35,14 +44,14 @@
                                 <div class="position-relative">
                                 <input id="password" name="password" type="password"
                                        class="form-control form-control-lg pe-5 @error('password') is-invalid @enderror"
-                                       autocomplete="new-password">
+                                       autocomplete="new-password" minlength="6" maxlength="32" pattern="(?=.*[A-Z]).{6,}">
                                     <span class="position-absolute top-50 end-0 translate-middle-y me-3 toggle-password"
                                           style="cursor: pointer;" data-target="password">
                                         <i class="bi bi-eye-slash fs-5"></i>
                                     </span>
                                 </div>
                                 <div id="passwordHelp" class="form-text mt-1">
-                                    Password must include uppercase, lowercase, number, and symbol.
+                                    Password must be at least 6 characters and contain at least one uppercase letter.
                                 </div>
                                 @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -117,6 +126,41 @@
                                 </button>
                             </div>
                         </form>
+<script>
+// Password match and rules feedback
+document.addEventListener('DOMContentLoaded', function() {
+    const password = document.getElementById('password');
+    const confirm = document.getElementById('password_confirmation');
+    const feedback = document.getElementById('confirmPasswordFeedback');
+    const submitBtn = document.getElementById('submitBtn');
+    function checkPasswordMatch() {
+        if (!password.value || !confirm.value) {
+            feedback.textContent = '';
+            submitBtn.disabled = true;
+            return;
+        }
+        if (password.value !== confirm.value) {
+            feedback.textContent = 'Passwords do not match.';
+            feedback.classList.remove('text-success');
+            feedback.classList.add('text-danger');
+            submitBtn.disabled = true;
+        } else if (!/(?=.*[A-Z]).{6,}/.test(password.value)) {
+            feedback.textContent = 'Password must be at least 6 characters and contain an uppercase letter.';
+            feedback.classList.remove('text-success');
+            feedback.classList.add('text-danger');
+            submitBtn.disabled = true;
+        } else {
+            feedback.textContent = 'Passwords match!';
+            feedback.classList.remove('text-danger');
+            feedback.classList.add('text-success');
+            submitBtn.disabled = false;
+        }
+    }
+    password.addEventListener('input', checkPasswordMatch);
+    confirm.addEventListener('input', checkPasswordMatch);
+    checkPasswordMatch();
+});
+</script>
 
                         <div class="mt-4 alert alert-info small">
                             <i class="bi bi-info-circle me-2"></i>

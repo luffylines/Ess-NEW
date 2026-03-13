@@ -116,7 +116,11 @@ public function store(Request $request)
 
 public function completeForm($token)
 {
-    $user = User::where('remember_token', $token)->firstOrFail();
+    $user = User::where('remember_token', $token)->first();
+    if (!$user) {
+        // Check if the token was already used (profile completed)
+        return view('admin.employees.complete-already');
+    }
     return view('admin.employees.complete', compact('user'));
 }
 
