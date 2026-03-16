@@ -146,6 +146,15 @@ public function completeStore(Request $request, $token)
         'address' => $request->address,
     ]);
 
+    // Mark email as verified if not already
+    if (!$user->hasVerifiedEmail()) {
+        $user->email_verified_at = now();
+        $user->save();
+    }
+
+    // Log in the user
+    \Auth::login($user);
+
     // Log profile completion activity
     $user->logActivity(
         'profile_completed',
@@ -156,7 +165,16 @@ public function completeStore(Request $request, $token)
         ]
     );
 
-    return redirect()->route('login')->with('success', 'Account setup complete. You may now log in.');
+    // Redirect based on role
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->role === 'hr') {
+        return redirect()->route('hr.dashboard');
+    } elseif ($user->role === 'manager') {
+        return redirect()->route('manager.dashboard');
+    } else {
+        return redirect()->route('dashboard');
+    }
 }
 
 
