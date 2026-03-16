@@ -19,22 +19,10 @@ class EnsureProfileIsComplete
     {
         $user = Auth::user();
         if ($user) {
-            $profileIncomplete = empty($user->phone) || empty($user->gender) || empty($user->address);
-            $emailNotVerified = !$user->hasVerifiedEmail();
-
-            // Only force for users who are not verified or have incomplete profile
-            if (($profileIncomplete || $emailNotVerified)
-                && !$request->routeIs('employees.complete')
-                && !$request->routeIs('employees.complete.store')
-                && !$request->routeIs('verification.notice')
-                && !$request->routeIs('verification.send')
-                && !$request->routeIs('verification.verify')) {
-                // If email not verified, redirect to verification notice
-                if ($emailNotVerified) {
-                    return redirect()->route('verification.notice');
-                }
-                // If profile incomplete, redirect to complete profile
-                if ($profileIncomplete) {
+            // Check if profile is incomplete (customize fields as needed)
+            if (empty($user->phone) || empty($user->gender) || empty($user->address)) {
+                // Prevent redirect loop
+                if (!$request->routeIs('employees.complete') && !$request->routeIs('employees.complete.store')) {
                     return redirect()->route('employees.complete', ['token' => $user->remember_token ?? '']);
                 }
             }
