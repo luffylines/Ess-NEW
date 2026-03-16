@@ -165,16 +165,8 @@ public function completeStore(Request $request, $token)
         ]
     );
 
-    // Redirect based on role
-    if ($user->role === 'admin') {
-        return redirect()->route('admin.dashboard');
-    } elseif ($user->role === 'hr') {
-        return redirect()->route('hr.dashboard');
-    } elseif ($user->role === 'manager') {
-        return redirect()->route('manager.dashboard');
-    } else {
-        return redirect()->route('dashboard');
-    }
+    // Redirect all roles to login after profile completion
+    return redirect()->route('login')->with('status', 'Profile completed! You can now log in.');
 }
 
 
