@@ -88,7 +88,7 @@ Route::get('/', function () {
 
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'profile.complete'])
     ->name('dashboard');
 
 Route::patch('/profile/update-email', [ProfileController::class, 'updateEmail'])
@@ -112,14 +112,14 @@ Route::middleware('guest')->group(function () {
     Route::get('/system-info', [GuestPageController::class, 'systemInfo'])->name('system-info');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'profile.complete'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'profile.complete'])->group(function () {
     // My Attendance page for employee
     Route::get('/attendance/my', [AttendanceController::class, 'myAttendance'])->name('attendance.my');
     Route::get('/attendance', [AttendanceController::class, 'attendanceForm'])->name('attendance.form');
@@ -200,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // HR/Manager Payroll Routes
-Route::middleware(['auth', 'role:hr,manager,admin'])->group(function () {
+Route::middleware(['auth', 'profile.complete', 'role:hr,manager,admin'])->group(function () {
     Route::get('/hr/payroll', [PayslipController::class, 'payrollIndex'])->name('hr.payroll.index');
     Route::post('/hr/payroll/generate', [PayslipController::class, 'generatePayroll'])->name('hr.payroll.generate');
     Route::post('/hr/payroll/generate-all', [PayslipController::class, 'generateAllPayrolls'])->name('hr.payroll.generate-all');
@@ -214,7 +214,7 @@ Route::middleware(['auth', 'role:hr,manager,admin'])->group(function () {
     Route::get('/hr/payslips', [PayslipController::class, 'payslipManagement'])->name('hr.payslips.index');
 });
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'profile.complete', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin', [EmployeeController::class, 'index'])->name('admin.index');
 
@@ -270,7 +270,7 @@ Route::get('/employee/complete/{token}', [EmployeeController::class, 'completeFo
 Route::post('/employee/complete/{token}', [EmployeeController::class, 'completeStore'])->name('employees.complete.store');
 
 
-Route::middleware(['web', 'auth', 'hr'])->group(function () {
+Route::middleware(['web', 'auth', 'profile.complete', 'hr'])->group(function () {
     Route::get('/hr/pending', [HrAttendanceController::class, 'pendingAttendance'])->name('hr.pending');
     Route::get('/hr/approve', function () {
         return redirect()->route('hr.pending');
