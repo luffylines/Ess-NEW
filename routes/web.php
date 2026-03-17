@@ -211,6 +211,8 @@ Route::middleware(['auth', 'role:hr,manager,admin'])->group(function () {
     Route::get('/hr/payroll/{payroll}/edit', [PayslipController::class, 'editPayroll'])->name('hr.payroll.edit');
     Route::put('/hr/payroll/{payroll}', [PayslipController::class, 'updatePayroll'])->name('hr.payroll.update');
     Route::delete('/hr/payroll/{payroll}', [PayslipController::class, 'deletePayroll'])->name('hr.payroll.delete');
+   <?php
+Route::post('/hr/bulk-approve', [AttendanceController::class, 'bulkApprove'])->name('hr.bulk-approve');
     Route::get('/hr/payslips', [PayslipController::class, 'payslipManagement'])->name('hr.payslips.index');
 });
 
