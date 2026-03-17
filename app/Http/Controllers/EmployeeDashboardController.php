@@ -65,7 +65,7 @@ class EmployeeDashboardController extends Controller
             
 
         // Calculate leave balance (assuming 21 days annual leave)
-        $annualLeaveEntitlement = 21;
+        $annualLeaveEntitlement = 15;
         $yearStart = Carbon::create($currentYear, 1, 1);
         $totalLeaveTakenThisYear = LeaveRequest::where('user_id', $user->id)
             ->where('status', 'approved')

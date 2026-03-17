@@ -12,7 +12,7 @@
                     <p class="lead">Employee Self Service System</p>
                 </div>
 
-                <!-- Body Section -->
+                    <div class="container">
                 <div class="card-body text-center">
                     <div class="row justify-content-center mb-4">
                         <div class="col-md-6">
@@ -79,6 +79,15 @@
             background: linear-gradient(135deg, #ff69b4, #ff85c2) !important;
             color: white;
         }
+                            /* Large logo for desktop/laptop */
+                            .welcome-large-logo {
+                                max-width: 350px;
+                                width: 100%;
+                                height: auto;
+                                display: block;
+                                margin: 40px auto;
+                                filter: drop-shadow(0 4px 24px rgba(255,105,180,0.2));
+                            }
 
         /* Pink Login Button */
         .btn-primary {

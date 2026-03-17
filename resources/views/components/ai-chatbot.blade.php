@@ -67,26 +67,12 @@
         </div>
 
         <div class="chatbot-input">
-            <input type="file" id="chatbot-file-input" style="display: none;" accept="image/*,.pdf,.doc,.docx" onchange="handleFileSelect(event)">
-            <button onclick="document.getElementById('chatbot-file-input').click()" class="btn-attach" title="Attach file">
-                <i class="fas fa-paperclip"></i>
-            </button>
-            <input type="text" id="chatbot-input-field" placeholder="Type or speak..." onkeypress="handleKeyPress(event)">
-            <button onclick="toggleVoiceInput()" class="btn-voice" id="btn-voice" title="Voice input">
-                <i class="fas fa-microphone"></i>
-            </button>
+            <input type="text" id="chatbot-input-field" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()" class="btn-send" title="Send message">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
-        <div id="file-preview" class="file-preview" style="display: none;">
-            <div class="file-preview-content">
-                <span class="file-name" id="file-name"></span>
-                <button class="btn-remove-file" onclick="removeFile()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
+        <!-- File preview and voice input removed -->
     </div>
 </div>
 
