@@ -1009,4 +1009,17 @@ public function showGenerateShiftScheduleForm()
         return view('hr.edit-times-form', compact('attendance'));
     }
 
+    // Bulk approve all pending attendance records
+    public function bulkApprove(Request $request)
+    {
+        $ids = $request->input('attendance_ids');
+        if (!$ids) {
+            return back()->with('error', 'No attendance records selected.');
+        }
+        $idsArray = explode(',', $ids);
+        $updated = Attendance::whereIn('id', $idsArray)
+            ->where('status', 'pending')
+            ->update(['status' => 'approved']);
+        return back()->with('success', $updated . ' attendance records approved.');
+    }
 }

@@ -52,30 +52,35 @@ class EmployeeDashboardController extends Controller
             ->where('status', 'approved')
             ->whereBetween('created_at', [$thirtyDaysAgo, $today])
             ->sum('total_hours');
-        // Total leave taken in current year
+
+        // Total leave taken in the last 30 days (regardless of year)
+        $thirtyDaysAgo = Carbon::now()->subDays(30)->startOfDay();
+        $today = Carbon::now()->endOfDay();
         $totalLeaveTaken = LeaveRequest::where('user_id', $user->id)
             ->where('status', 'approved')
-            ->whereYear('start_date', $currentYear)
+            ->where(function($query) use ($thirtyDaysAgo, $today) {
+                $query->whereBetween('start_date', [$thirtyDaysAgo, $today])
+                      ->orWhereBetween('end_date', [$thirtyDaysAgo, $today])
+                      ->orWhere(function($q) use ($thirtyDaysAgo, $today) {
+                          $q->where('start_date', '<', $thirtyDaysAgo)
+                            ->where('end_date', '>', $today);
+                      });
+            })
             ->get()
             ->sum(function($leave) {
                 return Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
             });
 
-
-            
-
-        // Calculate leave balance (assuming 21 days annual leave)
+        // Calculate leave balance (subtract all approved leaves, regardless of year)
         $annualLeaveEntitlement = 15;
-        $yearStart = Carbon::create($currentYear, 1, 1);
-        $totalLeaveTakenThisYear = LeaveRequest::where('user_id', $user->id)
+        $totalLeaveTakenAllTime = LeaveRequest::where('user_id', $user->id)
             ->where('status', 'approved')
-            ->whereBetween('start_date', [$yearStart, $today])
             ->get()
             ->sum(function($leave) {
                 return Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
             });
 
-        $leaveBalance = max(0, $annualLeaveEntitlement - $totalLeaveTakenThisYear);
+        $leaveBalance = max(0, $annualLeaveEntitlement - $totalLeaveTakenAllTime);
 
         // Upcoming leave
         $upcomingLeave = LeaveRequest::where('user_id', $user->id)
