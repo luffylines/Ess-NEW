@@ -19,7 +19,19 @@
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Profile Photo</label>
                         <div class="d-flex align-items-center gap-3">
-                            <x-user-avatar :user="$user" size="lg" />
+                            @if($user->profile_photo_url)
+                                <img src="{{ $user->profile_photo_url }}" 
+                                     alt="Profile Photo"
+                                     id="profile-photo-preview"
+                                     class="rounded-circle border"
+                                     style="width: 64px; height: 64px; object-fit: cover;">
+                            @else
+                                <div id="profile-photo-placeholder"
+                                     class="rounded-circle border d-flex align-items-center justify-content-center"
+                                     style="width: 64px; height: 64px; font-weight: 600; font-size: 1.25rem;">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </div>
+                            @endif
                             <div class="flex-grow-1">
                                 <input type="file" id="profile_photo" name="profile_photo" accept="image/*" class="form-control form-control-sm">
                                 <small>JPG, PNG, GIF up to 2MB</small>

@@ -12,7 +12,15 @@
 
     <!-- User Profile Section -->
     <div class="user-panel text-center mt-3 mb-3" id="userPanel">
-        <x-user-avatar :user="auth()->user()" size="sm" />
+       @if(auth()->user()->profile_photo_url)
+            <img src="{{ auth()->user()->profile_photo_url }}" 
+                class="img-circle profile-pic" 
+                alt="User Image">
+        @else
+            <img src="{{ asset('img/default-profile.png') }}" 
+                class="img-circle profile-pic" 
+                alt="Default Profile">
+        @endif
         <div class="info mt-2">
             <span class="fw-semibold d-block">{{ auth()->user()->name }}</span>
             <small class="">Employee ID: {{ auth()->user()->employee_id }}</small>

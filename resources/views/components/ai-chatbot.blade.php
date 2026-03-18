@@ -1046,8 +1046,8 @@
         
         if (type === 'user') {
             // User messages show their profile photo
-            @if(auth()->check())
-                avatar.innerHTML = '@php echo str_replace("'", "\'", str_replace("\n", '', view('components.user-avatar', ['user' => auth()->user(), 'size' => 'sm'])->render())) @endphp';
+            @if(auth()->check() && auth()->user()->profile_photo_url)
+                avatar.innerHTML = '<img src="{{ auth()->user()->profile_photo_url }}" alt="You" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
             @else
                 avatar.innerHTML = '<i class="fas fa-user"></i>';
             @endif

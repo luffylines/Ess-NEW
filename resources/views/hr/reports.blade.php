@@ -154,7 +154,9 @@
                                         <td class="px-4 py-3 text-center fw-semibold ">{{ $index + 1 }}</td>
                                         <td class="px-4 py-3">
                                             <div class="d-flex align-items-center">
-                                                <x-user-avatar :user="$row['user_model'] ?? null" size="sm" />
+                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                    <span class="text-white fw-bold">{{ strtoupper(substr($row['name'], 0, 2)) }}</span>
+                                                </div>
                                                 <div>
                                                     <h6 class="mb-0 fw-semibold">{{ $row['name'] }}</h6>
                                                     <small class="">ID: {{ $row['user_id'] }}</small>
