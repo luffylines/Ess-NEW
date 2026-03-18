@@ -71,19 +71,12 @@
                                 <td class="fw-semibold">{{ $employee->employee_id ?? $employee->id }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
+                                        @if($employee->profile_photo_url)
                                             <img src="{{ $employee->profile_photo_url }}"
                                                  alt="Profile" class="rounded-circle me-2 shadow-sm" width="40" height="40">
                                         @else
                                             <img src="{{ asset('img/default-avatar.png') }}"
                                                  alt="Default" class="rounded-circle me-2 shadow-sm" width="40" height="40">
-                                        @endif
-                                        <div>
-                                        @if($employee->profile_photo_url)
-                                            <img src="{{ $employee->profile_photo_url }}"
-                                                alt="Profile" class="rounded-circle me-2 shadow-sm" width="40" height="40">
-                                        @else
-                                            <img src="{{ asset('img/avatar.png') }}"
-                                                alt="Default" class="rounded-circle me-2 shadow-sm" width="40" height="40">
                                         @endif
                                         <div>
                                             <span class="fw-semibold">{{ $employee->name }}</span><br>

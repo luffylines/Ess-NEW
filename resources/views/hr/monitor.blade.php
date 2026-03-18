@@ -99,6 +99,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
+                                                @if($att->user->profile_photo_url)
                                                     <img src="{{ $att->user->profile_photo_url }}" 
                                                          class="rounded-circle me-2" 
                                                          style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
@@ -108,17 +109,6 @@
                                                          style="width: 32px; height: 32px; font-size: 14px; border: 2px solid #0d6efd;">
                                                         {{ substr($att->user->name, 0, 1) }}
                                                     </div>
-                                                @if($att->user->profile_photo_url)
-                                                    <img src="{{ $att->user->profile_photo_url }}" 
-                                                         class="rounded-circle me-2" 
-                                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
-                                                         alt="{{ $att->user->name }}">
-                                                @else
-                                                    <img src="{{ asset('img/avatar.png') }}" 
-                                                         class="rounded-circle me-2" 
-                                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
-                                                         alt="Default">
-                                                @endif
                                                 @endif
                                                 <div>
                                                     <span class="fw-medium">{{ $att->user->name }}</span>

@@ -91,19 +91,11 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
+                                                @if($schedule->employee->profile_photo_url)
                                                     <img src="{{ $schedule->employee->profile_photo_url }}" 
                                                          class="rounded-circle me-2" 
                                                          width="32" height="32" style="object-fit: cover;">
                                                 @else
-                                                   @if($schedule->employee->profile_photo_url)
-                                                      <img src="{{ $schedule->employee->profile_photo_url }}" 
-                                                          class="rounded-circle me-2" 
-                                                          width="32" height="32" style="object-fit: cover;">
-                                                   @else
-                                                      <img src="{{ asset('img/avatar.png') }}" 
-                                                          class="rounded-circle me-2" 
-                                                          width="32" height="32" style="object-fit: cover;" alt="Default">
-                                                   @endif
                                                     <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
                                                          style="width: 32px; height: 32px; font-size: 14px; color: white;">
                                                         {{ substr($schedule->employee->name, 0, 1) }}

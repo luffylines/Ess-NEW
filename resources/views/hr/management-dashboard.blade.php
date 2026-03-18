@@ -173,6 +173,7 @@
                                         <tr class=" align-middle">
                                             <td>
                                                        <div class="d-flex align-items-center">
+                                                    @if($employee->profile_photo_url)
                                                         <img src="{{ $employee->profile_photo_url }}" 
                                                              alt="Profile" class="rounded-circle me-3" width="45" height="45"
                                                              style="object-fit: cover; border: 3px solid #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
@@ -180,15 +181,6 @@
                                                         <div class="avatar-circle me-3">
                                                             <span class="avatar-initials">{{ substr($employee->name, 0, 1) }}</span>
                                                         </div>
-                                                    @endif
-                                                    @if($employee->profile_photo_url)
-                                                        <img src="{{ $employee->profile_photo_url }}" 
-                                                             alt="Profile" class="rounded-circle me-3" width="45" height="45"
-                                                             style="object-fit: cover; border: 3px solid #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
-                                                    @else
-                                                        <img src="{{ asset('img/avatar.png') }}" 
-                                                             alt="Default" class="rounded-circle me-3" width="45" height="45"
-                                                             style="object-fit: cover; border: 3px solid #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
                                                     @endif
                                                     <div>
                                                         <h6 class="mb-0 fw-bold">{{ $employee->name }}</h6>
@@ -336,6 +328,7 @@
                                 @foreach($missedAttendanceEmployees->take(4) as $employee)
                                     <div class="missed-item">
                                         <div class="missed-info">
+                                            @if($employee->profile_photo_url)
                                                 <img src="{{ $employee->profile_photo_url }}" 
                                                      alt="Profile" class="rounded-circle me-2" width="30" height="30"
                                                      style="object-fit: cover; border: 2px solid #ff9a9e;">
@@ -343,15 +336,6 @@
                                                 <div class="missed-avatar">
                                                     <span>{{ substr($employee->name, 0, 1) }}</span>
                                                 </div>
-                                            @endif
-                                            @if($employee->profile_photo_url)
-                                                <img src="{{ $employee->profile_photo_url }}" 
-                                                     alt="Profile" class="rounded-circle me-2" width="30" height="30"
-                                                     style="object-fit: cover; border: 2px solid #ff9a9e;">
-                                            @else
-                                                <img src="{{ asset('img/avatar.png') }}" 
-                                                     alt="Default" class="rounded-circle me-2" width="30" height="30"
-                                                     style="object-fit: cover; border: 2px solid #ff9a9e;">
                                             @endif
                                             <div class="missed-details">
                                                 <span class="missed-name">{{ $employee->name }}</span>
