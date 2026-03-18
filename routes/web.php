@@ -1,5 +1,5 @@
-<?php
 
+<?php
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\PayslipController;
@@ -37,7 +37,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('networks/{network}/toggle-status', [\App\Http\Controllers\Admin\AllowedNetworkController::class, 'toggleStatus'])->name('networks.toggle-status');
 });
 
-// Debug route to check IP detection
 Route::get('/debug-ip', function() {
     return response()->json([
         'detected_ip' => request()->ip(),
@@ -50,8 +49,8 @@ Route::get('/debug-ip', function() {
             'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'] ?? null,
         ],
         'database_allowed_ips' => \App\Models\AllowedNetwork::where('active', true)->pluck('ip_ranges')->flatten()->toArray()
-    ]);
-});
+        ]);
+    });
 
 // Mobile compatibility test route
 Route::get('/mobile-test', function() {
@@ -211,7 +210,6 @@ Route::middleware(['auth', 'role:hr,manager,admin'])->group(function () {
     Route::get('/hr/payroll/{payroll}/edit', [PayslipController::class, 'editPayroll'])->name('hr.payroll.edit');
     Route::put('/hr/payroll/{payroll}', [PayslipController::class, 'updatePayroll'])->name('hr.payroll.update');
     Route::delete('/hr/payroll/{payroll}', [PayslipController::class, 'deletePayroll'])->name('hr.payroll.delete');
-   <?php
 Route::post('/hr/bulk-approve', [AttendanceController::class, 'bulkApprove'])->name('hr.bulk-approve');
     Route::get('/hr/payslips', [PayslipController::class, 'payslipManagement'])->name('hr.payslips.index');
 });

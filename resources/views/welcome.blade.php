@@ -7,7 +7,9 @@
         <div class="col-md-100">
             <div class="card shadow-lg border-0 rounded-lg">
                 <!-- Header Section -->
+
                 <div class="card-header text-center custom-header text-white rounded-top">
+                    <img src="{{ asset('img/logo.png') }}" alt="Place Of Beauty Logo" style="max-width: 120px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
                     <h1 class="display-4 font-weight-bold">Place Of Beauty Portal</h1>
                     <p class="lead">Employee Self Service System</p>
                 </div>
