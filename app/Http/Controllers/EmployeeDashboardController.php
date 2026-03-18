@@ -50,7 +50,7 @@ class EmployeeDashboardController extends Controller
 
         $totalOvertime = OvertimeRequest::where('user_id', $user->id)
             ->where('status', 'approved')
-            ->whereBetween('created_at', [$thirtyDaysAgo, $today])
+            ->whereBetween('overtime_date', [$thirtyDaysAgo, $today])
             ->sum('total_hours');
 
         // Total leave taken in the last 30 days (regardless of year)

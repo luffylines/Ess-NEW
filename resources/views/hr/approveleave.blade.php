@@ -97,13 +97,22 @@
                                         <tr style="border-left: 4px solid transparent;" onmouseover="this.style.borderLeftColor='#007bff'" onmouseout="this.style.borderLeftColor='transparent'">
                                             <td class="px-4 py-4">
                                                 <div class="d-flex align-items-center">
-                                                    @if($request->user->profile_photo_url)
                                                         <img src="{{ $request->user->profile_photo_url }}" 
                                                              alt="{{ $request->user->name }}" 
                                                              class="rounded-circle me-3" 
                                                              style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #dee2e6;">
                                                     @else
                                                         <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                    @if($request->user->profile_photo_url)
+                                                        <img src="{{ $request->user->profile_photo_url }}" 
+                                                             alt="{{ $request->user->name }}" 
+                                                             class="rounded-circle me-3" 
+                                                             style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #dee2e6;">
+                                                    @else
+                                                        <img src="{{ asset('img/avatar.png') }}" 
+                                                             alt="Default" class="rounded-circle me-3" 
+                                                             style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #dee2e6;">
+                                                    @endif
                                                              style="width: 32px; height: 32px; font-size: 0.75rem;">
                                                             <span class="text-white fw-bold">{{ strtoupper(substr($request->user->name, 0, 2)) }}</span>
                                                         </div>

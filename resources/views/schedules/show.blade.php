@@ -51,11 +51,19 @@
                                     <i class="fas fa-user me-2"></i>Employee Information
                                 </h6>
                                 <div class="d-flex align-items-center mb-3">
-                                    @if($schedule->employee->profile_photo_url)
                                         <img src="{{ $schedule->employee->profile_photo_url }}" 
                                              class="rounded-circle me-3" 
                                              width="64" height="64" style="object-fit: cover;">
                                     @else
+                                     @if($schedule->employee->profile_photo_url)
+                                        <img src="{{ $schedule->employee->profile_photo_url }}" 
+                                            class="rounded-circle me-3" 
+                                            width="64" height="64" style="object-fit: cover;">
+                                     @else
+                                        <img src="{{ asset('img/avatar.png') }}" 
+                                            class="rounded-circle me-3" 
+                                            width="64" height="64" style="object-fit: cover;" alt="Default">
+                                     @endif
                                         <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
                                              style="width: 64px; height: 64px; font-size: 24px; color: white;">
                                             {{ substr($schedule->employee->name, 0, 1) }}
