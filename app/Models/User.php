@@ -67,12 +67,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getProfilePhotoUrlAttribute()
     {
         if ($this->profile_photo) {
-            // Always return the public route for the photo
+            // Use the Laravel storage symlink for public access
             $filename = basename($this->profile_photo);
-            return url('/profile-photos/' . $filename);
+            return asset('storage/profile_photos/' . $filename);
         }
-        // Fallback to a default avatar image in public/img/avatar.png
-        return asset('img/avatar.png');
+        // Fallback to a default avatar image in public/img/default-avatar.png
+        return asset('img/default-avatar.png');
     }
 
     /**
