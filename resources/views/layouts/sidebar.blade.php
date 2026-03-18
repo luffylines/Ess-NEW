@@ -17,7 +17,7 @@
                 class="img-circle profile-pic" 
                 alt="User Image">
         @else
-            <img src="{{ asset('img/avatar.png') }}" 
+            <img src="{{ asset('img/default-avatar.png') }}" 
                 class="img-circle profile-pic" 
                 alt="Default Profile">
         @endif

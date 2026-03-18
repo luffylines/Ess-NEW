@@ -18,7 +18,7 @@
              alt="{{ $user->name }}" 
              class="rounded-circle border">
     @else
-        <img src="{{ asset('img/avatar.png') }}" 
+        <img src="{{ asset('img/default-avatar.png') }}" 
              alt="Default Avatar" 
              class="rounded-circle border">
     @endif

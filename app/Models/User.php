@@ -73,7 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         }
         // Fallback to a default avatar image in public/img/avatar.png
-        return asset('img/avatar.png');
+        return asset('img/default-avatar.png');
     }
 
     /**

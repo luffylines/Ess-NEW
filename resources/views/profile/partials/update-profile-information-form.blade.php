@@ -26,11 +26,11 @@
                                      class="rounded-circle border"
                                      style="width: 64px; height: 64px; object-fit: cover;">
                             @else
-                                <div id="profile-photo-placeholder"
-                                     class="rounded-circle border d-flex align-items-center justify-content-center"
-                                     style="width: 64px; height: 64px; font-weight: 600; font-size: 1.25rem;">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                </div>
+                                  <img src="{{ asset('img/default-avatar.png') }}"
+                                      alt="Default Avatar"
+                                      id="profile-photo-preview"
+                                      class="rounded-circle border"
+                                      style="width: 64px; height: 64px; object-fit: cover;">
                             @endif
                             <div class="flex-grow-1">
                                 <input type="file" id="profile_photo" name="profile_photo" accept="image/*" class="form-control form-control-sm">
