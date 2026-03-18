@@ -65,6 +65,8 @@ return [
         ],
     ],
 
+    'cloud' => env('FILESYSTEM_CLOUD', 'cloudinary'),
+
     /*
     |--------------------------------------------------------------------------
     | Symbolic Links
