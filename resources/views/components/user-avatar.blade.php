@@ -18,9 +18,9 @@
              alt="{{ $user->name }}" 
              class="rounded-circle border">
     @else
-        <div class="rounded-circle d-flex align-items-center justify-content-center border">
-            <span class="fw-semibold text-white">{{ $user->initials }}</span>
-        </div>
+        <img src="{{ asset('img/avatar.png') }}" 
+             alt="Default Avatar" 
+             class="rounded-circle border">
     @endif
     
     @if($showName)

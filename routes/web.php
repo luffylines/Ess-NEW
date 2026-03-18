@@ -17,16 +17,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 // Serve profile photos directly from storage (reliable on Railway without symlink)
-Route::get('/profile-photos/{filename}', function ($filename) {
-    $filename = basename($filename);
-    $path = 'profile_photos/' . $filename;
-    if (!Storage::disk('public')->exists($path)) {
-        abort(404);
-    }
-    return response(Storage::disk('public')->get($path))
-        ->header('Content-Type', \Illuminate\Support\Facades\Storage::mimeType($path))
-        ->header('Cache-Control', 'public, max-age=86400');
-})->name('profile.photo')->where('filename', '[^/]+');
 
 // Admin: Store locations and allowed networks
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {

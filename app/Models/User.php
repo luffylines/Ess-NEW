@@ -67,9 +67,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getProfilePhotoUrlAttribute()
     {
         if ($this->profile_photo) {
-            // Always return the public route for the photo
-            $filename = basename($this->profile_photo);
-            return url('/profile-photos/' . $filename);
+            // If the profile_photo is a Cloudinary URL, return as is
+            if (str_starts_with($this->profile_photo, 'http')) {
+                return $this->profile_photo;
+            }
         }
         // Fallback to a default avatar image in public/img/avatar.png
         return asset('img/avatar.png');

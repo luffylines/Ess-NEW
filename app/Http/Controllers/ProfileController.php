@@ -75,21 +75,18 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // ✅ Handle profile photo upload
+        // ✅ Handle profile photo upload to Cloudinary
         if ($request->hasFile('profile_photo')) {
-            // Delete old photo safely if it exists
-            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
-                Storage::disk('public')->delete($user->profile_photo);
-            }
+            // Delete old photo from Cloudinary if it exists (optional, requires storing public_id)
+            // For now, just overwrite
 
-            $file = $request->file('profile_photo');
-            $filename = time() . '_' . $user->id . '.' . $file->getClientOriginalExtension();
+            $uploadedFileUrl = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload($request->file('profile_photo')->getRealPath(), [
+                'folder' => 'profile_photos',
+                'public_id' => 'user_' . $user->id . '_' . time(),
+            ])->getSecurePath();
 
-            // Store the new file in storage/app/public/profile_photos
-            $path = $file->storeAs('profile_photos', $filename, 'public');
-
-            // Save relative path in DB (e.g. "profile_photos/filename.jpg")
-            $validated['profile_photo'] = $path;
+            // Save Cloudinary URL in DB
+            $validated['profile_photo'] = $uploadedFileUrl;
         }
 
         // Format phone number to include +63 prefix
@@ -162,10 +159,7 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // Delete profile photo if exists
-        if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
-            Storage::disk('public')->delete($user->profile_photo);
-        }
+        // Optionally: Delete profile photo from Cloudinary if needed (not implemented)
 
         Auth::logout();
         $user->delete();

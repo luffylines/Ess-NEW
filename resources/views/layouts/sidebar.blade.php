@@ -12,12 +12,12 @@
 
     <!-- User Profile Section -->
     <div class="user-panel text-center mt-3 mb-3" id="userPanel">
-       @if(auth()->user()->profile_photo_url)
+        @if(auth()->user()->profile_photo_url)
             <img src="{{ auth()->user()->profile_photo_url }}" 
                 class="img-circle profile-pic" 
                 alt="User Image">
         @else
-            <img src="{{ asset('img/default-profile.png') }}" 
+            <img src="{{ asset('img/avatar.png') }}" 
                 class="img-circle profile-pic" 
                 alt="Default Profile">
         @endif
