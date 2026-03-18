@@ -91,16 +91,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                @if($schedule->employee->profile_photo_url)
-                                                    <img src="{{ $schedule->employee->profile_photo_url }}" 
-                                                         class="rounded-circle me-2" 
-                                                         width="32" height="32" style="object-fit: cover;">
-                                                @else
-                                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
-                                                         style="width: 32px; height: 32px; font-size: 14px; color: white;">
-                                                        {{ substr($schedule->employee->name, 0, 1) }}
-                                                    </div>
-                                                @endif
+                                                <x-user-avatar :user="$schedule->employee" size="sm" />
                                                 <div>
                                                     <div class="fw-semibold">{{ $schedule->employee->name }}</div>
                                                     <small class="text-muted">{{ $schedule->employee->employee_id }}</small>

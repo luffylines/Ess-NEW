@@ -1,43 +1,42 @@
 @extends('layouts.welcome')
 
 @section('content')
-<div class="container">
-    <!-- Main Welcome Section -->
-    <div class="row justify-content-center mb-2">
-        <div class="col-md-100">
-            <div class="card shadow-lg border-0 rounded-lg">
-                <!-- Header Section -->
-
+<div class="container-fluid">
+    <div class="row min-vh-100 align-items-center justify-content-center">
+        <!-- Left Logo Column (Desktop only) -->
+        <div class="d-none d-lg-flex col-lg-5 align-items-center justify-content-center" style="background: linear-gradient(135deg, #ff69b4, #ff85c2); min-height: 600px;">
+            <img src="{{ asset('img/logo.png') }}" alt="Place Of Beauty Logo" style="max-width: 350px; width: 80%; height: auto; display: block; margin: 0 auto;">
+        </div>
+        <!-- Main Card Column -->
+        <div class="col-12 col-lg-7 d-flex align-items-center justify-content-center">
+            <div class="card shadow-lg border-0 rounded-lg w-100" style="max-width: 600px;">
                 <div class="card-header text-center custom-header text-white rounded-top">
-                    <img src="{{ asset('img/logo.png') }}" alt="Place Of Beauty Logo" style="max-width: 120px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
                     <h1 class="display-4 font-weight-bold">Place Of Beauty Portal</h1>
                     <p class="lead">Employee Self Service System</p>
                 </div>
-
-                    <div class="container">
-                <div class="card-body text-center">
-                    <div class="row justify-content-center mb-4">
-                        <div class="col-md-6">
-                            <p class="mt-3">
-                                Welcome to the Place Of Beauty ESS. <br> 
-                                Access your personal and work-related information with ease. <br> 
-                                Stay informed and connected to all the resources you need to thrive.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Service Icons Section -->
-                    <div class="row justify-content-center mt-4 mb-2">
-                        <div class="col-md-3 mb-3">
-                            <div class="icon-box text-center">
-                                <i class="fas fa-users fa-3x pink-icon"></i>
-                                <h5 class="mt-2">Employee Directory</h5>
-                                <p>Find colleagues and more.</p>
+                <div class="container">
+                    <div class="card-body text-center">
+                        <div class="row justify-content-center mb-4">
+                            <div class="col-md-12">
+                                <p class="mt-3">
+                                    Welcome to the Place Of Beauty ESS. <br>
+                                    Access your personal and work-related information with ease. <br>
+                                    Stay informed and connected to all the resources you need to thrive.
+                                </p>
                             </div>
                         </div>
-                        <div class="col-md-3 mb-1">
-                            <div class="icon-box text-center">
-                                <i class="fas fa-calendar-alt fa-3x text-success"></i>
+                        <!-- Service Icons Section -->
+                        <div class="row justify-content-center mt-4 mb-2">
+                            <div class="col-md-4 mb-3">
+                                <div class="icon-box text-center">
+                                    <i class="fas fa-users fa-3x pink-icon"></i>
+                                    <h5 class="mt-2">Employee Directory</h5>
+                                    <p>Find colleagues and more.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-1">
+                                <div class="icon-box text-center">
+                                    <i class="fas fa-calendar-alt fa-3x text-success"></i>
                                 <h5 class="mt-100">Leave Management</h5>
                                 <p>Request and manage your time off.</p>
                             </div>

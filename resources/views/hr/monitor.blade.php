@@ -99,17 +99,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                @if($att->user->profile_photo_url)
-                                                    <img src="{{ $att->user->profile_photo_url }}" 
-                                                         class="rounded-circle me-2" 
-                                                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
-                                                         alt="{{ $att->user->name }}">
-                                                @else
-                                                    <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" 
-                                                         style="width: 32px; height: 32px; font-size: 14px; border: 2px solid #0d6efd;">
-                                                        {{ substr($att->user->name, 0, 1) }}
-                                                    </div>
-                                                @endif
+                                                <x-user-avatar :user="$att->user" size="sm" />
                                                 <div>
                                                     <span class="fw-medium">{{ $att->user->name }}</span>
                                                     <br><small class="text-muted">{{ $att->user->employee_id }}</small>

@@ -113,17 +113,7 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            @if($attendance->user->profile_photo_url)
-                                                <img src="{{ $attendance->user->profile_photo_url }}" 
-                                                     class="rounded-circle me-2" 
-                                                     style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #0d6efd;"
-                                                     alt="{{ $attendance->user->name }}">
-                                            @else
-                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                                                     style="width: 32px; height: 32px; border: 2px solid #0d6efd;">
-                                                    <span class="text-white fw-bold" style="font-size: 14px;">{{ substr($attendance->user->name, 0, 1) }}</span>
-                                                </div>
-                                            @endif
+                                            <x-user-avatar :user="$attendance->user" size="sm" />
                                             <div>
                                                 <span class="fw-medium">{{ $attendance->user->name }}</span>
                                                 <br><small class="">ID: {{ $attendance->user->employee_id ?? 'N/A' }}</small>

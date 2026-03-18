@@ -62,15 +62,17 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the user's profile photo URL
+     * Get the user's profile photo URL (always public, fallback to default)
      */
     public function getProfilePhotoUrlAttribute()
     {
-        if ($this->profile_photo && \Storage::disk('public')->exists($this->profile_photo)) {
+        if ($this->profile_photo) {
+            // Always return the public route for the photo
             $filename = basename($this->profile_photo);
             return url('/profile-photos/' . $filename);
         }
-        return null;
+        // Fallback to a default avatar image in public/img/avatar.png
+        return asset('img/avatar.png');
     }
 
     /**
