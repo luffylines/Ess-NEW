@@ -53,7 +53,7 @@
             <div class="mb-1 text-center recaptcha-container">
                 <!-- reCAPTCHA will be rendered here by the explicit API -->
                 <div id="recaptcha-widget" class="g-recaptcha d-inline-block" 
-                     data-sitekey="6Lfv5fArAAAAAPvO-IYEtHxiwPmU4YRYmYifrw8j"></div>
+                     data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
                 <div id="recaptcha-error" class="text-danger mt-2" style="display: none;"></div>
                 
             </div>
@@ -101,100 +101,85 @@
     function isMobileDevice() {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
-// Enhanced form submission with flash-message support
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.querySelector('form');
-    const submitButton = loginForm.querySelector('button[type="submit"]');
 
-    function showFlashMessage(message, type = 'danger') {
+    // Enhanced form submission with flash-message support
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.querySelector('form');
+        const submitButton = loginForm.querySelector('button[type="submit"]');
 
-        // Remove any existing temp flash messages
-        const oldFlash = document.querySelector(".temp-flash");
-        if (oldFlash) oldFlash.remove();
+        function showFlashMessage(message, type = 'danger') {
+            const oldFlash = document.querySelector(".temp-flash");
+            if (oldFlash) oldFlash.remove();
 
-        const alertBox = document.createElement('div');
-        alertBox.className = `alert alert-${type} alert-dismissible fade show auto-hide-alert temp-flash`;
-        alertBox.style.position = 'relative';
-        alertBox.style.marginTop = '10px';
-        alertBox.innerHTML = `
-            <i class="fas fa-robot me-2"></i>
-            <strong>reCAPTCHA Error:</strong> ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
+            const alertBox = document.createElement('div');
+            alertBox.className = `alert alert-${type} alert-dismissible fade show auto-hide-alert temp-flash`;
+            alertBox.style.position = 'relative';
+            alertBox.style.marginTop = '10px';
+            alertBox.innerHTML = `
+                <i class="fas fa-robot me-2"></i>
+                <strong>reCAPTCHA Error:</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
 
-        // Add progress bar
-        const progressBar = document.createElement('div');
-        progressBar.style.cssText = `
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: rgba(0, 0, 0, 0.2);
-            width: 100%;
-            animation: progressBar 5s linear forwards;
-        `;
-        alertBox.appendChild(progressBar);
+            const progressBar = document.createElement('div');
+            progressBar.style.cssText = `
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                height: 3px;
+                background: rgba(0, 0, 0, 0.2);
+                width: 100%;
+                animation: progressBar 5s linear forwards;
+            `;
+            alertBox.appendChild(progressBar);
+            loginForm.prepend(alertBox);
 
-        // Append to top of form (under logo)
-        loginForm.prepend(alertBox);
-
-        // Auto-hide
-        setTimeout(() => {
-            if (alertBox) {
-                const bsAlert = new bootstrap.Alert(alertBox);
-                bsAlert.close();
-            }
-        }, 5000);
-    }
-
-    loginForm.addEventListener('submit', function(e) {
-
-        // If reCAPTCHA exists
-        if (typeof grecaptcha !== 'undefined') {
-            const recaptchaResponse = grecaptcha.getResponse();
-
-            if (!recaptchaResponse) {
-                e.preventDefault();
-                showFlashMessage('Please complete the reCAPTCHA verification.');
-                return false;
-            }
-
-        } else {
-            // If reCAPTCHA fails to load
-            if (!isMobileDevice()) {
-                e.preventDefault();
-                showFlashMessage('reCAPTCHA service is not available. Please refresh the page.');
-                return false;
-            }
+            setTimeout(() => {
+                if (alertBox) {
+                    const bsAlert = new bootstrap.Alert(alertBox);
+                    bsAlert.close();
+                }
+            }, 5000);
         }
 
-        // Disable button during submission
-        submitButton.disabled = true;
-        submitButton.innerHTML = 'Logging in...';
+        loginForm.addEventListener('submit', function(e) {
+            if (typeof grecaptcha !== 'undefined') {
+                const recaptchaResponse = grecaptcha.getResponse();
 
-        // Re-enable after 5 seconds if form failed
-        setTimeout(() => {
-            submitButton.disabled = false;
-            submitButton.innerHTML = 'Login';
-        }, 5000);
+                if (!recaptchaResponse) {
+                    e.preventDefault();
+                    showFlashMessage('Please complete the reCAPTCHA verification.');
+                    return false;
+                }
+            } else {
+                if (!isMobileDevice()) {
+                    e.preventDefault();
+                    showFlashMessage('reCAPTCHA service is not available. Please refresh the page.');
+                    return false;
+                }
+            }
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Logging in...';
+
+            setTimeout(() => {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Login';
+            }, 5000);
+        });
     });
-});
 
-    
     // Handle Remember Me functionality
     document.addEventListener('DOMContentLoaded', function() {
         const rememberCheckbox = document.getElementById('remember_me');
         const loginInput = document.getElementById('login');
         const loginForm = document.querySelector('form');
-        
-        // Clear login field when unchecking remember me
+
         rememberCheckbox.addEventListener('change', function() {
             if (!this.checked) {
-                // If unchecking and there's a remembered login, clear the field
                 const hasRememberedLogin = '{{ !empty($rememberedLogin) }}' === '1';
                 if (hasRememberedLogin) {
                     loginInput.value = '';
-                    // Add a hidden field to signal that we want to clear the remembered login
                     let clearField = document.querySelector('input[name="clear_remembered"]');
                     if (!clearField) {
                         clearField = document.createElement('input');
@@ -205,11 +190,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } else {
-                // Remove the clear flag if re-checking
                 const clearField = document.querySelector('input[name="clear_remembered"]');
-                if (clearField) {
-                    clearField.remove();
-                }
+                if (clearField) clearField.remove();
             }
         });
     });
@@ -233,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-
     .bgcolor {
         background: linear-gradient(90deg, #ff79bc 0%, #dd1f7e 100%);
     }
@@ -241,17 +222,15 @@ document.addEventListener('DOMContentLoaded', function() {
     .text, .text-muted {
         color: #0f090c;
     }
-    
-    /* Logo styling */
+
     .logo-img {
         transition: transform 0.3s ease;
     }
-    
+
     .logo-img:hover {
         transform: scale(1.05);
     }
-    
-    /* Responsive logo and title */
+
     @media screen and (max-width: 576px) {
         .logo-img {
             width: 40px !important;
@@ -261,48 +240,46 @@ document.addEventListener('DOMContentLoaded', function() {
             font-size: 1.5rem !important;
         }
     }
-    
-    @media screen and (max-width: 400px) {
-    .g-recaptcha {
-      transform: scale(0.77);
-      transform-origin: 0 0;
-      margin: 0 auto;
-    }
-    
-    .recaptcha-container {
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    /* Ensure form doesn't break on very small screens */
-    .card-body {
-      padding: 1.5rem !important;
-    }
-  }
 
-  /* Additional mobile optimizations */
-  @media screen and (max-width: 576px) {
-    .g-recaptcha {
-      transform: scale(0.85);
-      transform-origin: center center;
+    @media screen and (max-width: 400px) {
+        .g-recaptcha {
+            transform: scale(0.77);
+            transform-origin: 0 0;
+            margin: 0 auto;
+        }
+
+        .recaptcha-container {
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
     }
-    
-    .recaptcha-container {
-      margin: 0.5rem 0;
+
+    @media screen and (max-width: 576px) {
+        .g-recaptcha {
+            transform: scale(0.85);
+            transform-origin: center center;
+        }
+
+        .recaptcha-container {
+            margin: 0.5rem 0;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        .card {
+            margin: 1rem;
+            max-width: calc(100vw - 2rem);
+        }
     }
-    
-    /* Prevent horizontal scroll on mobile */
-    body {
-      overflow-x: hidden;
-    }
-    
-    .card {
-      margin: 1rem;
-      max-width: calc(100vw - 2rem);
-    }
-  }
+
     .btn-gradient-primary {
         background: linear-gradient(90deg, #0f090c 0%, #0f090c 100%);
         border: none;
@@ -332,7 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
         background-color: rgba(0, 0, 0, 0.05);
     }
 
-    /* Ensure password toggle is properly positioned inside the input */
     .password-toggle img {
         width: 22px;
         height: 22px;
@@ -340,12 +316,10 @@ document.addEventListener('DOMContentLoaded', function() {
         display: block;
     }
 
-    /* Ensure input has enough padding for the toggle button */
     .form-control.pe-5 {
         padding-right: 3rem !important;
     }
 
-    /* Auto-hide alert styling */
     .alert-danger {
         transition: opacity 0.5s ease;
     }
