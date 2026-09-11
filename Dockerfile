@@ -74,10 +74,13 @@ COPY . .
 # Copy the Vite production build generated in the Node stage.
 COPY --from=frontend /app/public/build ./public/build
 
-# Use Laravel's public directory as Apache's document root.
+# Use Laravel's public directory as Apache's document root and allow
+# public/.htaccess to handle Laravel's front-controller routing.
 RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/public!g' \
         /etc/apache2/sites-available/000-default.conf \
     && sed -ri 's!<Directory /var/www/>!<Directory /var/www/html/public>!g' \
+        /etc/apache2/apache2.conf \
+    && sed -ri 's!AllowOverride None!AllowOverride All!g' \
         /etc/apache2/apache2.conf
 
 # Generate Laravel's package discovery manifest after the application is present.
