@@ -19,9 +19,12 @@ RUN npm run build
 # -----------------------------
 # PHP dependencies (Composer)
 # -----------------------------
-# Do not use the floating composer:2 image here: its current PHP can move
-# ahead of the versions supported by the locked dependencies.
-FROM composer:2-php8.4 AS vendor
+# Run Composer under PHP 8.4 because the locked dependencies support
+# PHP through 8.4, but not PHP 8.5. The Composer binary itself is copied
+# from the official Composer image.
+FROM php:8.4-cli AS vendor
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
