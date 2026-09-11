@@ -26,6 +26,13 @@ FROM php:8.4-cli AS vendor
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        libzip-dev \
+    && docker-php-ext-install -j"$(nproc)" zip \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY composer.json composer.lock ./
@@ -70,17 +77,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /var/www/html
 
-# Install Composer dependencies.
 COPY --from=vendor /app/vendor ./vendor
-
-# Copy application source.
 COPY . .
-
-# Copy the Vite production build generated in the Node stage.
 COPY --from=frontend /app/public/build ./public/build
 
-# Use Laravel's public directory as Apache's document root and allow
-# public/.htaccess to handle Laravel's front-controller routing.
 RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/public!g' \
         /etc/apache2/sites-available/000-default.conf \
     && sed -ri 's!<Directory /var/www/>!<Directory /var/www/html/public>!g' \
@@ -88,10 +88,8 @@ RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/public!g' \
     && sed -ri 's!AllowOverride None!AllowOverride All!g' \
         /etc/apache2/apache2.conf
 
-# Generate Laravel's package discovery manifest after the application is present.
 RUN php artisan package:discover --ansi
 
-# Ensure Laravel can write runtime files.
 RUN mkdir -p \
         storage/framework/cache \
         storage/framework/sessions \
