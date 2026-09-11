@@ -19,7 +19,9 @@ RUN npm run build
 # -----------------------------
 # PHP dependencies (Composer)
 # -----------------------------
-FROM composer:2 AS vendor
+# Do not use the floating composer:2 image here: its current PHP can move
+# ahead of the versions supported by the locked dependencies.
+FROM composer:2-php8.4 AS vendor
 
 WORKDIR /app
 
