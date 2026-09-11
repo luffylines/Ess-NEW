@@ -40,8 +40,8 @@ FROM php:8.3-apache
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-# System packages + PHP extensions required by Laravel, PostgreSQL,
-# Google API client, DOMPDF, and image processing.
+# Laravel 12 requires PHP 8.2+. This image uses PHP 8.3.
+# PostgreSQL support is provided by pdo_pgsql/pgsql for Supabase.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
         libzip-dev \
@@ -80,6 +80,9 @@ RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot /var/www/html/public!g' \
     && sed -ri 's!<Directory /var/www/>!<Directory /var/www/html/public>!g' \
         /etc/apache2/apache2.conf
 
+# Generate Laravel's package discovery manifest after the application is present.
+RUN php artisan package:discover --ansi
+
 # Ensure Laravel can write runtime files.
 RUN mkdir -p \
         storage/framework/cache \
@@ -90,7 +93,6 @@ RUN mkdir -p \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
-# Render routes HTTP traffic to the container's port 80.
 EXPOSE 80
 
 CMD ["apache2-foreground"]
