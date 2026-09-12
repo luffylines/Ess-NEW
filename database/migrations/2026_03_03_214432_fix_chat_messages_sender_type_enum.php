@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -12,8 +10,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Use raw SQL to modify enum values
-        DB::statement("ALTER TABLE chat_messages MODIFY COLUMN sender_type ENUM('user', 'bot', 'employee', 'system') NOT NULL");
+        // PostgreSQL: use VARCHAR with a CHECK constraint instead of MySQL ENUM syntax.
+        DB::statement("\n            ALTER TABLE chat_messages\n            DROP CONSTRAINT IF EXISTS chat_messages_sender_type_check\n        ");
+
+        DB::statement("\n            ALTER TABLE chat_messages\n            ALTER COLUMN sender_type TYPE VARCHAR(20)\n            USING sender_type::text\n        ");
+
+        DB::statement("\n            ALTER TABLE chat_messages\n            ADD CONSTRAINT chat_messages_sender_type_check\n            CHECK (sender_type IN ('user', 'bot', 'employee', 'system'))\n        ");
+
+        DB::statement("\n            ALTER TABLE chat_messages\n            ALTER COLUMN sender_type SET NOT NULL\n        ");
     }
 
     /**
@@ -21,7 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert to original enum values if needed
-        DB::statement("ALTER TABLE chat_messages MODIFY COLUMN sender_type ENUM('employee', 'system') NOT NULL");
+        DB::statement("\n            ALTER TABLE chat_messages\n            DROP CONSTRAINT IF EXISTS chat_messages_sender_type_check\n        ");
+
+        // Remove values that are not supported by the original migration.
+        DB::statement("\n            DELETE FROM chat_messages\n            WHERE sender_type NOT IN ('employee', 'system')\n        ");
+
+        DB::statement("\n            ALTER TABLE chat_messages\n            ADD CONSTRAINT chat_messages_sender_type_check\n            CHECK (sender_type IN ('employee', 'system'))\n        ");
     }
 };
