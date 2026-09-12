@@ -18,30 +18,37 @@ Route::get('debug-session', function () {
     $cookieName = config('session.cookie');
     $rawCookieHeader = (string) request()->header('Cookie');
 
-    return response()
-        ->json([
-            'status' => 'ok',
-            'app_url' => config('app.url'),
-            'request_scheme' => request()->getScheme(),
-            'is_secure' => request()->isSecure(),
-            'session_driver' => config('session.driver'),
-            'session_cookie_name' => $cookieName,
-            'session_cookie_present' => request()->cookies->has($cookieName),
-            'raw_session_cookie_present' => str_contains($rawCookieHeader, $cookieName . '='),
-            'debug_secure_cookie_present' => request()->cookies->has('debug-secure-cookie'),
-            'debug_plain_cookie_present' => request()->cookies->has('debug-plain-cookie'),
-            'session_id_present' => (bool) $session->getId(),
-            'csrf_token_present' => (bool) $session->token(),
-            'session_has_token' => $session->has('_token'),
-            'cookie_secure' => config('session.secure'),
-            'cookie_domain' => config('session.domain'),
-            'cookie_path' => config('session.path'),
-            'same_site' => config('session.same_site'),
-            'forwarded_proto' => request()->header('X-Forwarded-Proto'),
-            'forwarded_host' => request()->header('X-Forwarded-Host'),
-        ])
-        // Two diagnostic cookies: one Secure and one intentionally non-Secure.
-        // This isolates browser/proxy handling of the Secure attribute.
+    $response = response()->json([
+        'status' => 'ok',
+        'app_url' => config('app.url'),
+        'request_scheme' => request()->getScheme(),
+        'is_secure' => request()->isSecure(),
+        'session_driver' => config('session.driver'),
+        'session_cookie_name' => $cookieName,
+        'session_cookie_present' => request()->cookies->has($cookieName),
+        'raw_session_cookie_present' => str_contains($rawCookieHeader, $cookieName . '='),
+        'debug_secure_cookie_present' => request()->cookies->has('debug-secure-cookie'),
+        'debug_plain_cookie_present' => request()->cookies->has('debug-plain-cookie'),
+        'debug_raw_cookie_present' => request()->cookies->has('debug-raw-cookie'),
+        'session_id_present' => (bool) $session->getId(),
+        'csrf_token_present' => (bool) $session->token(),
+        'session_has_token' => $session->has('_token'),
+        'cookie_secure' => config('session.secure'),
+        'cookie_domain' => config('session.domain'),
+        'cookie_path' => config('session.path'),
+        'same_site' => config('session.same_site'),
+        'forwarded_proto' => request()->header('X-Forwarded-Proto'),
+        'forwarded_host' => request()->header('X-Forwarded-Host'),
+    ]);
+
+    // Raw Set-Cookie headers bypass Laravel's cookie encryption/queueing so we
+    // can determine whether Render/browser accepts cookies at all.
+    $response->headers->set('Set-Cookie', [
+        'debug-raw-cookie=1; Path=/; Secure; HttpOnly; SameSite=Lax',
+        'debug-raw-plain-cookie=1; Path=/; HttpOnly; SameSite=Lax',
+    ]);
+
+    return $response
         ->cookie('debug-secure-cookie', '1', 10, '/', null, true, true, false, 'lax')
         ->cookie('debug-plain-cookie', '1', 10, '/', null, false, true, false, 'lax');
 });
