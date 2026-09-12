@@ -4,7 +4,10 @@ use Illuminate\Support\Str;
 
 return [
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    // Render needs persistent database-backed sessions. Keep this independent of
+    // any stale/overriding SESSION_DRIVER environment value so CSRF sessions
+    // survive between requests and across container instances.
+    'driver' => 'database',
 
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
 
