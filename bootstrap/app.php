@@ -11,6 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Render terminates TLS at its reverse proxy. Trust the forwarded
+        // proxy headers so Laravel correctly detects HTTPS and generates
+        // consistent secure session/CSRF cookies behind the proxy.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'hr' => \App\Http\Middleware\HrMiddleware::class,
