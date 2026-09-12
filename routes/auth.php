@@ -16,25 +16,30 @@ use Illuminate\Support\Facades\Route;
 Route::get('debug-session', function () {
     $session = request()->session();
     $cookieName = config('session.cookie');
+    $rawCookieHeader = (string) request()->header('Cookie');
 
-    return response()->json([
-        'status' => 'ok',
-        'app_url' => config('app.url'),
-        'request_scheme' => request()->getScheme(),
-        'is_secure' => request()->isSecure(),
-        'session_driver' => config('session.driver'),
-        'session_cookie_name' => $cookieName,
-        'session_cookie_present' => request()->cookies->has($cookieName),
-        'session_id_present' => (bool) $session->getId(),
-        'csrf_token_present' => (bool) $session->token(),
-        'session_has_token' => $session->has('_token'),
-        'cookie_secure' => config('session.secure'),
-        'cookie_domain' => config('session.domain'),
-        'cookie_path' => config('session.path'),
-        'same_site' => config('session.same_site'),
-        'forwarded_proto' => request()->header('X-Forwarded-Proto'),
-        'forwarded_host' => request()->header('X-Forwarded-Host'),
-    ]);
+    return response()
+        ->json([
+            'status' => 'ok',
+            'app_url' => config('app.url'),
+            'request_scheme' => request()->getScheme(),
+            'is_secure' => request()->isSecure(),
+            'session_driver' => config('session.driver'),
+            'session_cookie_name' => $cookieName,
+            'session_cookie_present' => request()->cookies->has($cookieName),
+            'raw_session_cookie_present' => str_contains($rawCookieHeader, $cookieName . '='),
+            'debug_browser_cookie_present' => request()->cookies->has('debug-browser-cookie'),
+            'session_id_present' => (bool) $session->getId(),
+            'csrf_token_present' => (bool) $session->token(),
+            'session_has_token' => $session->has('_token'),
+            'cookie_secure' => config('session.secure'),
+            'cookie_domain' => config('session.domain'),
+            'cookie_path' => config('session.path'),
+            'same_site' => config('session.same_site'),
+            'forwarded_proto' => request()->header('X-Forwarded-Proto'),
+            'forwarded_host' => request()->header('X-Forwarded-Host'),
+        ])
+        ->cookie('debug-browser-cookie', '1', 10, '/', null, true, true, false, 'lax');
 });
 
 Route::middleware('guest')->group(function () {
