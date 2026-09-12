@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -10,14 +12,41 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // PostgreSQL: use VARCHAR with a CHECK constraint instead of MySQL ENUM syntax.
-        DB::statement("\n            ALTER TABLE chat_messages\n            DROP CONSTRAINT IF EXISTS chat_messages_sender_type_check\n        ");
+        // The existing chat_messages migration does not create the chat metadata
+        // columns used by the Chat model/controller. Create the missing chats table
+        // and add the required PostgreSQL-compatible columns here.
+        if (!Schema::hasTable('chats')) {
+            Schema::create('chats', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+                $table->foreignId('hr_user_id')->nullable()->constrained('users')->nullOnDelete();
+                $table->string('status')->default('active');
+                $table->timestamp('last_message_at')->nullable();
+                $table->timestamps();
+            });
+        }
 
-        DB::statement("\n            ALTER TABLE chat_messages\n            ALTER COLUMN sender_type TYPE VARCHAR(20)\n            USING sender_type::text\n        ");
+        if (!Schema::hasColumn('chat_messages', 'chat_id')) {
+            Schema::table('chat_messages', function (Blueprint $table) {
+                $table->foreignId('chat_id')->nullable()->after('id')->constrained('chats')->onDelete('cascade');
+            });
+        }
 
-        DB::statement("\n            ALTER TABLE chat_messages\n            ADD CONSTRAINT chat_messages_sender_type_check\n            CHECK (sender_type IN ('user', 'bot', 'employee', 'system'))\n        ");
+        if (!Schema::hasColumn('chat_messages', 'sender_type')) {
+            Schema::table('chat_messages', function (Blueprint $table) {
+                $table->string('sender_type', 20)->default('user')->after('message');
+            });
+        }
 
-        DB::statement("\n            ALTER TABLE chat_messages\n            ALTER COLUMN sender_type SET NOT NULL\n        ");
+        if (!Schema::hasColumn('chat_messages', 'is_read')) {
+            Schema::table('chat_messages', function (Blueprint $table) {
+                $table->boolean('is_read')->default(false)->after('sender_type');
+            });
+        }
+
+        // PostgreSQL: enforce the same allowed sender types that the application expects.
+        DB::statement('ALTER TABLE chat_messages DROP CONSTRAINT IF EXISTS chat_messages_sender_type_check');
+        DB::statement("ALTER TABLE chat_messages ADD CONSTRAINT chat_messages_sender_type_check CHECK (sender_type IN ('user', 'bot', 'employee', 'system'))");
     }
 
     /**
@@ -25,11 +54,28 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("\n            ALTER TABLE chat_messages\n            DROP CONSTRAINT IF EXISTS chat_messages_sender_type_check\n        ");
+        DB::statement('ALTER TABLE chat_messages DROP CONSTRAINT IF EXISTS chat_messages_sender_type_check');
 
-        // Remove values that are not supported by the original migration.
-        DB::statement("\n            DELETE FROM chat_messages\n            WHERE sender_type NOT IN ('employee', 'system')\n        ");
+        if (Schema::hasColumn('chat_messages', 'chat_id')) {
+            Schema::table('chat_messages', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('chat_id');
+            });
+        }
 
-        DB::statement("\n            ALTER TABLE chat_messages\n            ADD CONSTRAINT chat_messages_sender_type_check\n            CHECK (sender_type IN ('employee', 'system'))\n        ");
+        if (Schema::hasColumn('chat_messages', 'is_read')) {
+            Schema::table('chat_messages', function (Blueprint $table) {
+                $table->dropColumn('is_read');
+            });
+        }
+
+        if (Schema::hasColumn('chat_messages', 'sender_type')) {
+            Schema::table('chat_messages', function (Blueprint $table) {
+                $table->dropColumn('sender_type');
+            });
+        }
+
+        if (Schema::hasTable('chats')) {
+            Schema::drop('chats');
+        }
     }
 };
