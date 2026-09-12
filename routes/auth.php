@@ -28,7 +28,8 @@ Route::get('debug-session', function () {
             'session_cookie_name' => $cookieName,
             'session_cookie_present' => request()->cookies->has($cookieName),
             'raw_session_cookie_present' => str_contains($rawCookieHeader, $cookieName . '='),
-            'debug_browser_cookie_present' => request()->cookies->has('debug-browser-cookie'),
+            'debug_secure_cookie_present' => request()->cookies->has('debug-secure-cookie'),
+            'debug_plain_cookie_present' => request()->cookies->has('debug-plain-cookie'),
             'session_id_present' => (bool) $session->getId(),
             'csrf_token_present' => (bool) $session->token(),
             'session_has_token' => $session->has('_token'),
@@ -39,7 +40,10 @@ Route::get('debug-session', function () {
             'forwarded_proto' => request()->header('X-Forwarded-Proto'),
             'forwarded_host' => request()->header('X-Forwarded-Host'),
         ])
-        ->cookie('debug-browser-cookie', '1', 10, '/', null, true, true, false, 'lax');
+        // Two diagnostic cookies: one Secure and one intentionally non-Secure.
+        // This isolates browser/proxy handling of the Secure attribute.
+        ->cookie('debug-secure-cookie', '1', 10, '/', null, true, true, false, 'lax')
+        ->cookie('debug-plain-cookie', '1', 10, '/', null, false, true, false, 'lax');
 });
 
 Route::middleware('guest')->group(function () {
