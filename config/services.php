@@ -9,8 +9,8 @@ return [
     |
     | This file is for storing the credentials for third party services such
     | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
+    | location for this type of information, allowing packages to have a
+    | conventional file to locate the various service credentials.
     |
     */
 
@@ -19,7 +19,9 @@ return [
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        // Prefer Laravel's conventional RESEND_KEY, but keep compatibility
+        // with the older RESEND_API_KEY name used by previous deployments.
+        'key' => env('RESEND_KEY', env('RESEND_API_KEY')),
     ],
 
     'ses' => [
