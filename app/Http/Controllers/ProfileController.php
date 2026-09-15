@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Illuminate\Validation\Rules\Password;
@@ -15,44 +15,35 @@ use Illuminate\Validation\Rules\Password;
 class ProfileController extends Controller
 {
     /**
-     * Format phone number to ensure it has +63 prefix
+     * Format a Philippine mobile number to +63 format when one is provided.
      */
-    private function formatPhoneNumber($phone)
+    private function formatPhoneNumber(?string $phone): ?string
     {
-        if (empty($phone)) {
+        if (blank($phone)) {
             return null;
         }
 
-        // Remove all non-digit characters except +
         $phone = preg_replace('/[^\d+]/', '', $phone);
 
-        // If it starts with +63, keep it as is
         if (str_starts_with($phone, '+63')) {
             return $phone;
         }
 
-        // If it starts with 63, add +
         if (str_starts_with($phone, '63')) {
             return '+' . $phone;
         }
 
-        // If it starts with 09, replace with +639
         if (str_starts_with($phone, '09')) {
             return '+63' . substr($phone, 1);
         }
 
-        // If it starts with 9 and is 10 digits, add +63
-        if (str_starts_with($phone, '9') && strlen($phone) == 10) {
+        if (str_starts_with($phone, '9') && strlen($phone) === 10) {
             return '+63' . $phone;
         }
 
-        // Otherwise, assume it's a local number and add +639
         return '+639' . ltrim($phone, '0');
     }
 
-    /**
-     * Display the user's profile form.
-     */
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -61,52 +52,112 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information (name, phone, address, gender, profile_photo).
+     * Update profile details and profile photo.
+     *
+     * Cloudinary is preferred in production. When Cloudinary credentials are
+     * not configured, the app falls back to Laravel's public disk so uploads
+     * still work instead of failing with a 500 error.
      */
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-           'name' => ['required', 'string', 'max:255'],
-            'gender' => ['required', 'in:male,female,other'],
-            'phone' => ['required', 'regex:/^\+63[0-9]{10}$/'],
-            'address' => ['required', 'string', 'max:500'],
-            'profile_photo' => ['nullable', 'file', 'image', 'max:2048'],
+            'name' => ['required', 'string', 'max:255'],
+            'gender' => ['nullable', 'in:male,female,other'],
+            'phone' => ['nullable', 'regex:/^\+63[0-9]{10}$/'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'profile_photo' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+        ], [
+            'profile_photo.max' => 'Please choose an image smaller than 5 MB.',
+            'profile_photo.image' => 'The selected profile photo must be a valid image.',
+            'phone.regex' => 'Use the format +639XXXXXXXXX for the phone number.',
         ]);
 
         $user = $request->user();
+        $photoStatus = null;
 
-        // ✅ Handle profile photo upload to Cloudinary
         if ($request->hasFile('profile_photo')) {
-            // Delete old photo from Cloudinary if it exists (optional, requires storing public_id)
-            // For now, just overwrite
+            $file = $request->file('profile_photo');
+            $oldPhoto = $user->profile_photo;
+            $cloudinaryConfigured = filled(config('cloudinary.cloud_url'))
+                || (filled(config('cloudinary.cloud.cloud_name'))
+                    && filled(config('cloudinary.cloud.api_key'))
+                    && filled(config('cloudinary.cloud.api_secret')));
 
-            $uploadedFileUrl = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload($request->file('profile_photo')->getRealPath(), [
-                'folder' => 'profile_photos',
-                'public_id' => 'user_' . $user->id . '_' . time(),
-            ])->getSecurePath();
+            try {
+                if ($cloudinaryConfigured) {
+                    $uploadedFileUrl = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload(
+                        $file->getRealPath(),
+                        [
+                            'folder' => 'profile_photos',
+                            'public_id' => 'user_' . $user->id . '_' . time(),
+                            'overwrite' => true,
+                            'resource_type' => 'image',
+                            'transformation' => [
+                                'width' => 900,
+                                'height' => 900,
+                                'crop' => 'limit',
+                                'quality' => 'auto:good',
+                                'fetch_format' => 'auto',
+                            ],
+                        ]
+                    )->getSecurePath();
 
-            // Save Cloudinary URL in DB
-            $validated['profile_photo'] = $uploadedFileUrl;
+                    $validated['profile_photo'] = $uploadedFileUrl;
+                    $photoStatus = 'Profile photo uploaded successfully.';
+                } else {
+                    $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+                    $filename = 'user_' . $user->id . '_' . time() . '.' . $extension;
+                    $validated['profile_photo'] = $file->storeAs('profile_photos', $filename, 'public');
+                    $photoStatus = 'Profile photo uploaded successfully.';
+                }
+
+                // Remove a previous local photo after the new upload succeeds.
+                if ($oldPhoto && !str_starts_with($oldPhoto, 'http://') && !str_starts_with($oldPhoto, 'https://')) {
+                    $oldPath = ltrim(str_replace('storage/', '', $oldPhoto), '/');
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Cloud profile upload failed; attempting local fallback.', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                try {
+                    $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+                    $filename = 'user_' . $user->id . '_' . time() . '.' . $extension;
+                    $validated['profile_photo'] = $file->storeAs('profile_photos', $filename, 'public');
+                    $photoStatus = 'Profile photo uploaded successfully.';
+                } catch (\Throwable $fallbackError) {
+                    Log::error('Profile photo fallback upload failed.', [
+                        'user_id' => $user->id,
+                        'error' => $fallbackError->getMessage(),
+                    ]);
+
+                    return Redirect::route('profile.edit')
+                        ->withInput($request->except('profile_photo'))
+                        ->withErrors(['profile_photo' => 'The image could not be saved. Please try another JPG, PNG, or WebP image.']);
+                }
+            }
         }
 
-        // Format phone number to include +63 prefix
-        $formattedPhone = $this->formatPhoneNumber($validated['phone'] ?? null);
-
-        // Update user info
         $user->fill([
             'name' => $validated['name'],
-            'phone' => $formattedPhone,
-            'address' => $validated['address'] ?? null,
-            'gender' => $validated['gender'] ?? null,
+            'phone' => array_key_exists('phone', $validated)
+                ? $this->formatPhoneNumber($validated['phone'])
+                : $user->phone,
+            'address' => $validated['address'] ?? $user->address,
+            'gender' => $validated['gender'] ?? $user->gender,
             'profile_photo' => $validated['profile_photo'] ?? $user->profile_photo,
         ])->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('profile.edit')->with([
+            'status' => 'profile-updated',
+            'profile_message' => $photoStatus ?: 'Profile updated successfully.',
+        ]);
     }
 
-    /**
-     * Update the user's email address.
-     */
     public function updateEmail(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -130,9 +181,6 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'email-updated');
     }
 
-    /**
-     * Update the user's password.
-     */
     public function updatePassword(Request $request): RedirectResponse
     {
         $validated = $request->validateWithBag('updatePassword', [
@@ -140,17 +188,13 @@ class ProfileController extends Controller
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
-        $user = $request->user();
-        $user->update([
+        $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
 
         return Redirect::route('profile.edit')->with('status', 'password-updated');
     }
 
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
@@ -158,8 +202,6 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-
-        // Optionally: Delete profile photo from Cloudinary if needed (not implemented)
 
         Auth::logout();
         $user->delete();
