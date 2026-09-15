@@ -42,14 +42,16 @@
                             <span class="badge rounded-pill text-bg-success-subtle text-success-emphasis">Photo saved</span>
                         @endif
                     </div>
-                    <p class="text-secondary mb-3">Choose a clear square portrait. JPG, PNG, GIF and WebP are accepted up to 5 MB.</p>
+                    <p class="text-secondary mb-3">Choose a clear portrait. JPG, PNG, GIF and WebP are accepted up to 5 MB.</p>
 
-                    <label for="profile_photo" class="photo-upload-button">
-                        <i class="fas fa-camera"></i>
-                        <span>Choose new photo</span>
-                    </label>
-                    <input type="file" id="profile_photo" name="profile_photo" accept="image/jpeg,image/png,image/gif,image/webp" class="visually-hidden">
-                    <span id="profile-photo-name" class="small text-secondary ms-2">No new file selected</span>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <label for="profile_photo" class="photo-upload-button">
+                            <i class="fas fa-camera"></i>
+                            <span>Choose new photo</span>
+                        </label>
+                        <input type="file" id="profile_photo" name="profile_photo" accept="image/jpeg,image/png,image/gif,image/webp" class="visually-hidden">
+                        <span id="profile-photo-name" class="small text-secondary">No new file selected</span>
+                    </div>
 
                     @error('profile_photo')
                         <div class="text-danger small mt-2"><i class="fas fa-circle-exclamation me-1"></i>{{ $message }}</div>
@@ -157,6 +159,10 @@
                 <button type="submit" class="btn btn-outline-dark rounded-pill w-100">Save password</button>
             </form>
         </section>
+
+        <section class="profile-panel profile-danger-panel">
+            @include('profile.partials.delete-user-form')
+        </section>
     </aside>
 </div>
 
@@ -167,8 +173,9 @@
 <style>
 .profile-settings-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(280px, .85fr);
+    grid-template-columns: minmax(0, 1.65fr) minmax(300px, .85fr);
     gap: 1.25rem;
+    align-items:start;
 }
 .profile-side-stack { display: grid; gap: 1.25rem; align-content: start; }
 .profile-panel {
@@ -196,29 +203,38 @@
 .profile-panel-title { margin: 0; font-weight: 800; letter-spacing: -.025em; }
 .profile-panel-copy { color: var(--pob-muted); margin: .55rem 0 0; line-height: 1.65; }
 .profile-status-pill { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--pob-line); border-radius: 999px; padding: .45rem .7rem; font-size: .75rem; font-weight: 700; color: var(--pob-muted); background: rgba(255,255,255,.45); white-space: nowrap; }
-.photo-editor { display: flex; gap: 1.35rem; align-items: center; padding: 1.15rem; border-radius: 24px; background: linear-gradient(135deg, rgba(198,79,122,.08), rgba(127,103,179,.07)); border: 1px solid rgba(198,79,122,.12); }
-.photo-ring-wrap { position: relative; width: 112px; height: 112px; flex: 0 0 112px; padding: 4px; border-radius: 32px; background: linear-gradient(135deg, var(--pob-rose), var(--pob-violet), var(--pob-champagne)); box-shadow: 0 16px 36px rgba(127,67,102,.18); }
-.photo-preview { width: 100%; height: 100%; border-radius: 28px; object-fit: cover; display: block; background: #fff; border: 4px solid var(--pob-surface-solid); }
-.photo-online-dot { position: absolute; right: -2px; bottom: 8px; width: 22px; height: 22px; border-radius: 50%; background: #2fa56f; border: 4px solid var(--pob-surface-solid); }
-.photo-editor-copy { flex: 1; min-width: 0; }
-.photo-upload-button { display: inline-flex; align-items: center; gap: .55rem; border-radius: 999px; padding: .7rem 1rem; background: var(--pob-text); color: var(--pob-surface-solid); font-weight: 800; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
-.photo-upload-button:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(35,25,31,.16); }
-.profile-form-divider { height: 1px; background: var(--pob-line); margin: 1.5rem 0; }
-.profile-save-button { border: 0; border-radius: 999px; min-height: 46px; color: #fff; font-weight: 800; background: linear-gradient(135deg, var(--pob-rose-deep), var(--pob-rose), var(--pob-violet)); box-shadow: 0 12px 28px rgba(159,49,91,.22); }
-.profile-save-button:hover { color: #fff; transform: translateY(-1px); }
-.profile-inline-note { display: flex; gap: .75rem; align-items: flex-start; padding: .85rem; border-radius: 16px; background: rgba(216,183,122,.13); border: 1px solid rgba(216,183,122,.22); }
-.profile-inline-note i { color: var(--pob-warning); margin-top: .2rem; }
-body.dark .profile-panel { background: rgba(34,29,34,.84); }
-body.dark .profile-status-pill { background: rgba(255,255,255,.04); }
-body.dark .btn-outline-dark { color: var(--pob-text); border-color: var(--pob-line); }
-body.dark .btn-outline-dark:hover { background: rgba(255,255,255,.08); color: var(--pob-text); }
+.photo-editor { display: grid; grid-template-columns: 112px minmax(0,1fr); gap: 1.35rem; align-items:center; padding: 1.15rem; border-radius: 24px; background: linear-gradient(135deg, rgba(198,79,122,.08), rgba(127,103,179,.07)); border: 1px solid rgba(198,79,122,.12); }
+.photo-ring-wrap { position: relative; width:112px; height:112px; padding:4px; border-radius:32px; background:linear-gradient(135deg,var(--pob-rose),var(--pob-violet),var(--pob-champagne)); box-shadow:0 16px 36px rgba(127,67,102,.18); justify-self:center; }
+.photo-preview { width:100%; height:100%; border-radius:28px; object-fit:cover; object-position:center 18%; display:block; background:#fff; border:4px solid var(--pob-surface-solid); }
+.photo-online-dot { position:absolute; right:-2px; bottom:8px; width:22px; height:22px; border-radius:50%; background:#2fa56f; border:4px solid var(--pob-surface-solid); }
+.photo-editor-copy { min-width:0; align-self:center; }
+.photo-upload-button { display:inline-flex; align-items:center; gap:.55rem; border-radius:999px; padding:.7rem 1rem; background:var(--pob-text); color:var(--pob-surface-solid); font-weight:800; cursor:pointer; transition:transform .2s ease,box-shadow .2s ease; }
+.photo-upload-button:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(35,25,31,.16); }
+.profile-form-divider { height:1px; background:var(--pob-line); margin:1.5rem 0; }
+.profile-save-button { border:0; border-radius:999px; min-height:46px; color:#fff; font-weight:800; background:linear-gradient(135deg,var(--pob-rose-deep),var(--pob-rose),var(--pob-violet)); box-shadow:0 12px 28px rgba(159,49,91,.22); }
+.profile-save-button:hover { color:#fff; transform:translateY(-1px); }
+.profile-inline-note { display:flex; gap:.75rem; align-items:flex-start; padding:.85rem; border-radius:16px; background:rgba(216,183,122,.13); border:1px solid rgba(216,183,122,.22); }
+.profile-inline-note i { color:var(--pob-warning); margin-top:.2rem; }
+.profile-danger-panel { border-color:rgba(181,72,85,.16); background:linear-gradient(135deg,rgba(181,72,85,.055),rgba(198,79,122,.025)); }
+.profile-danger-panel section { margin:0!important; }
+body.dark .profile-panel { background:rgba(34,29,34,.84); }
+body.dark .profile-status-pill { background:rgba(255,255,255,.04); }
+body.dark .btn-outline-dark { color:var(--pob-text); border-color:var(--pob-line); }
+body.dark .btn-outline-dark:hover { background:rgba(255,255,255,.08); color:var(--pob-text); }
 @media (max-width: 992px) {
-    .profile-settings-grid { grid-template-columns: 1fr; }
+    .profile-settings-grid { grid-template-columns:1fr; }
+    .profile-side-stack { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .profile-danger-panel { grid-column:1 / -1; }
+}
+@media (max-width: 700px) {
+    .profile-side-stack { grid-template-columns:1fr; }
+    .profile-danger-panel { grid-column:auto; }
 }
 @media (max-width: 600px) {
-    .photo-editor { align-items: flex-start; flex-direction: column; }
-    .photo-ring-wrap { width: 96px; height: 96px; flex-basis: 96px; }
-    .profile-panel-heading { flex-direction: column; }
+    .photo-editor { grid-template-columns:1fr; text-align:center; }
+    .photo-ring-wrap { width:96px; height:96px; }
+    .photo-editor-copy .d-flex { justify-content:center; }
+    .profile-panel-heading { flex-direction:column; }
 }
 </style>
 
@@ -233,10 +249,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        filename.textContent = file.name;
+        if (filename) filename.textContent = file.name;
         const objectUrl = URL.createObjectURL(file);
-        preview.src = objectUrl;
-        preview.onload = () => URL.revokeObjectURL(objectUrl);
+        if (preview) {
+            preview.src = objectUrl;
+            preview.onload = () => URL.revokeObjectURL(objectUrl);
+        }
     });
 
     phone?.addEventListener('input', (event) => {
