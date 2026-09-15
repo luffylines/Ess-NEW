@@ -1,343 +1,67 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>{{ config('app.name', 'Laravel') }}</title>
+@extends('layouts.welcome')
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net" />
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet" />
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    
-    <!-- Custom Theme Styles -->
-    <style>
-        :root {
-            --bs-primary: #ff69b4;
-            --bs-dark-bg: #1a1a1a;
-            --bs-light-bg: #ffffff;
-        }
+@section('title', 'Contact & Feedback | Place Of Beauty ESS')
 
-        body.light {
-            background-color: var(--bs-light-bg);
-            color: #212529;
-        }
+@section('content')
+<section class="public-page-hero">
+    <div class="container">
+        <div class="eyebrow" data-reveal><i class="bi bi-chat-heart"></i> Contact & feedback</div>
+        <h1 class="hero-title mx-auto" style="max-width:850px;" data-reveal data-reveal-delay="1">Help us make ESS <span class="accent">better to use.</span></h1>
+        <p class="hero-copy" data-reveal data-reveal-delay="2">Report an issue, share a suggestion or tell us what could make your employee experience clearer and easier.</p>
+    </div>
+</section>
 
-        body.dark {
-            background-color: var(--bs-dark-bg);
-            color: #ffffff;
-        }
-
-        body.dark .navbar {
-            background-color: #2d2d2d !important;
-        }
-
-        body.dark .card, body.dark .dropdown-menu, body.dark .form-control, body.dark .form-select, body.dark .mb-3 {
-            background-color: #ff69b4;
-            color: #000000;
-            border-color: #444;
-        }
-        .card {
-            background-color: #ff69b4;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        /* Navbar PINK */
-        .navbar {
-            background-color: #ff69b4 !important;
-            border-bottom: 2px solid #ff69b4;
-        }
-
-        .navbar .navbar-brand,
-        .navbar .nav-link {
-            color: #000 !important;
-            font-weight: 500;
-        }
-
-        .navbar .nav-link:hover {
-            background-color: #f4a8c4 !important;
-            border-radius: 6px;
-        }
-
-        /* Navbar Darkmode */
-        body.dark .navbar {
-            background-color: #333 !important;
-            border-bottom: 2px solid #555 !important;
-        }
-
-        body.dark .navbar .navbar-brand,
-        body.dark .navbar .nav-link {
-            color: #fff !important;
-        }
-
-        body.dark .navbar .nav-link:hover {
-            background-color: #f4a8c4 !important;
-        }
-
-        /* Dark mode text colors */
-        body.dark h1,
-        body.dark h2,
-        body.dark h3,
-        body.dark h4,
-        body.dark h5,
-        body.dark p {
-            color: #000000 !important;
-        }
-        body.dark .contact-title,
-        body.dark .contact-description {
-            color: #ffffff !important;
-        }
-
-        body.dark .card-body {
-            background-color: #2d2d2d !important;
-            color: #ffffff !important;
-        }
-
-        body.dark .form-control {
-            background-color: #444 !important;
-            color: #ffffff !important;
-            border-color: #555 !important;
-        }
-
-        body.dark .form-control::placeholder {
-            color: #aaa !important;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        body.dark .dropdown-item:hover {
-            background-color: #444;
-        }
-
-        body {
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .card, .navbar, .form-control, .form-select {
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        main {
-            margin-top: 80px;
-        }
-
-        /* Custom Styles for Contact Us Page */
-        .contact-section {
-            margin-top: 75px;
-        }
-
-        .contact-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--bs-primary);
-        }
-
-        .contact-description {
-            font-size: 1.25rem;
-            line-height: 1;
-            margin-top: 0px;
-        }
-
-        /* Layout for Feedback Form and Location */
-        .contact-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            
-        }
-
-        .contact-form {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .location-info {
-            flex: 1;
-            min-width: 300px;
-            padding-left: 30px;
-            border-left: 2px solid #ccc;
-        }
-
-        .contact-chat-btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 15px;
-            background-color: #black;
-            color: black;
-            font-weight: bold;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-
-        .contact-chat-btn:hover {
-            background-color: #0b5ed7;
-        }
-
-        .form-control {
-            margin-bottom: 15px;
-        }
-        /* Dark Mode Adjustments */
-            .navbar {
-        background-color: #ff69b4 !important; /* Baby pink */
-        border-bottom: 2px solid #ff69b4; /* slightly deeper pink for definition */
-    }
-
-    .navbar .navbar-brand,
-    .navbar .nav-link {
-        color: #000 !important;
-        font-weight: 500;
-        transition: color 0.3s ease, background-color 0.3s ease;
-    }
-
-    .navbar .nav-link:hover,
-    .navbar .nav-link:focus,
-    .navbar .nav-item.active .nav-link {
-        color: #fff !important;
-        background-color: #f4a8c4 !important;
-        border-radius: 6px;
-    }
-
-    .dropdown-menu {
-        background-color: #FADADD !important;
-        border: 1px solid #f8c8dc !important;
-    }
-
-    .dropdown-item {
-        color: #000 !important;
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .dropdown-item:hover,
-    .dropdown-item:focus {
-        background-color: #f4a8c4 !important;
-        color: #fff !important;
-    }
-
-    .navbar-toggler {
-        border-color: #f4a8c4 !important;
-    }
-
-    .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='black' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
-    }
-
-    .navbar,
-    .dropdown-menu,
-    .navbar .nav-link {
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    </style>
-</head>
-<body class="{{ (Auth::check() && Auth::user()->display_mode === 'dark') ? 'dark' : 'light' }}">
-    <div id="app">
-        <!-- ✅ FIXED & RESPONSIVE NAVBAR -->
-        <nav class="navbar navbar-expand-lg {{ (Auth::check() && Auth::user()->display_mode === 'dark') ? 'navbar-dark bg-dark' : 'navbar-light bg-light' }} shadow-sm fixed-top">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Right Side -->
-                    <ul class="navbar-nav ms-auto">
-                        @guest
-                            <li class="nav-item"><a class="nav-link" href="{{ route('about') }}">About</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ route('contact') }}">Contact Us</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ route('terms') }}">Terms & Conditions</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ route('system-info') }}">System Info</a></li>
-                            @if(Route::has('login'))
-                                <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
-                            @endif
-                        @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    {{ Auth::user()->name }}
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Account Settings</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"> Logout </a>
-                                    </li>
-                                </ul>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
-                            </li>
-                        @endguest
-                    </ul>
+<section class="public-section pt-3">
+    <div class="container">
+        @include('partials.flash-messages')
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-7" data-reveal>
+                <div class="content-panel h-100">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="feature-icon"><i class="bi bi-send"></i></div>
+                        <div><h2 class="h4 fw-bold mb-1">Send feedback</h2><p class="small text-secondary mb-0">We read feedback to improve the system experience.</p></div>
+                    </div>
+                    <form action="{{ route('submitFeedback') }}" method="POST">
+                        @csrf
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Your name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Enter your name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="feedback" class="form-label">Message</label>
+                                <textarea class="form-control" id="feedback" name="feedback" rows="6" placeholder="Tell us what happened or what you would like to improve…" required>{{ old('feedback') }}</textarea>
+                            </div>
+                            <div class="col-12 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mt-4">
+                                <small class="text-secondary"><i class="bi bi-shield-check me-1"></i> Please avoid including passwords or sensitive credentials.</small>
+                                <button type="submit" class="btn-pob-primary border-0"><i class="bi bi-send"></i> Submit feedback</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </nav>
 
-        <div class="container contact-section">
-    <h1 class="contact-title text-center">Contact & Feedback</h1>
-    <p class="contact-description text-center mb-5">
-        We'd love to hear what you think about the Employee Self-Service System.
-    </p>
-
-    @include('partials.flash-messages')
-
-    <div class="row">
-        <!-- Feedback Form (Left Side) -->
-        <div class="col-md-6">
-            <div class="card shadow-sm p-4">
-                <h5 class="mb-4">Send Us Your Thoughts</h5>
-                <form action="{{ route('submitFeedback') }}" method="POST">
-                    @csrf
-                    <div class="form-group mb-3">
-                        <label for="name">Your Name</label>
-                        <input type="text" class="form-control rounded-3" id="name" name="name" required>
+            <div class="col-lg-5" data-reveal data-reveal-delay="1">
+                <div class="d-grid gap-3 h-100">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-geo-alt"></i></div>
+                        <h3 class="h5 fw-bold mt-3">Development contact</h3>
+                        <p class="section-copy mb-3">Christian Aring<br>Quezon City, Metro Manila, Philippines</p>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Quezon+City+Metro+Manila" target="_blank" rel="noopener noreferrer" class="btn-pob-secondary w-100"><i class="bi bi-map"></i> Open location in Maps</a>
                     </div>
-                    <div class="form-group mb-3">
-                        <label for="email">Your Email</label>
-                        <input type="email" class="form-control rounded-3" id="email" name="email" required>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-envelope-heart"></i></div>
+                        <h3 class="h5 fw-bold mt-3">Email support</h3>
+                        <p class="section-copy">For feedback and system-related concerns, you can also contact the development team by email.</p>
+                        <a href="mailto:chba.aring.sjc@phinmaed.com?subject=Feedback%20on%20ESS%20System" class="btn-pob-secondary w-100"><i class="bi bi-envelope"></i> Compose email</a>
                     </div>
-                    <div class="form-group mb-3">
-                        <label for="feedback">Your Feedback</label>
-                        <textarea class="form-control rounded-3" id="feedback" name="feedback" rows="5" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-2">Submit Feedback</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Location Map (Right Side) -->
-        <div class="col-md-6 mt-4 mt-md-0">
-            <div class="card shadow-sm p-4">
-                <h5 class="mb-3">Developer Location</h5>
-                <p><strong>Christian Aring</strong><br>Vasra, Manila, Philippines</p>
-                <iframe
-                    width="100%"
-                    height="300"
-                    frameborder="0"
-                    style="border:0; border-radius: 10px;"
-                    src="https://www.google.com/maps/embed/v1/place?q=Vasra,+Quezon+City,+Metro+Manila&key=AIzaSyDru-BMggS0xquefSQdAnBjSQ0KMH5Vzwk"
-                    allowfullscreen>
-                </iframe>
-
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=chba.aring.sjc@phinmaed.com&su=Feedback%20on%20ESS%20System" 
-                   target="_blank" 
-                   class="btn btn-outline-primary mt-3 w-100">
-                    <i class="fas fa-envelope"></i> Chat via Gmail
-                </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
+</section>
+@endsection
