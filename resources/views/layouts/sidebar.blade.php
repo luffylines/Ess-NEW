@@ -1,447 +1,83 @@
-<aside class="main-sidebar" id="sidebar">
-    <!-- Brand Logo and Toggle Button -->
-    <div class="brand-container d-flex justify-content-between align-items-center px-3 py-2">
-        <div class="d-flex align-items-center gap-2">
-            <img src="{{ asset('img/logo.png') }}" alt="Company Logo" class="sidebar-logo" style="width: 28px; height: 28px; object-fit: contain;">
-            <span class="brand-text fw-bold text-truncate" style="font-size: 0.95rem;">Place Of Beauty</span>
-        </div>
-        <button id="sidebarToggle" type="button" title="Toggle Sidebar">
-            <img src="{{ asset('img/menu.png') }}" alt="Toggle Sidebar" width="24" height="24" />
-        </button>
+<aside class="main-sidebar pob-sidebar" id="sidebar">
+    <div class="brand-container">
+        <a href="{{ route('dashboard') }}" class="sidebar-brand-link">
+            <img src="{{ asset('img/logo.png') }}" alt="Place Of Beauty" class="sidebar-logo">
+            <div class="brand-copy menu-text"><strong>Place Of Beauty</strong><small>Employee Self-Service</small></div>
+        </a>
+        <button id="sidebarToggle" type="button" class="sidebar-toggle" aria-label="Toggle sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
     </div>
 
-    <!-- User Profile Section -->
-    <div class="user-panel text-center mt-3 mb-3" id="userPanel">
+    <div class="user-panel" id="userPanel">
         @if(auth()->user()->profile_photo_url)
-            <img src="{{ auth()->user()->profile_photo_url }}" 
-                class="img-circle profile-pic" 
-                alt="User Image">
+            <img src="{{ auth()->user()->profile_photo_url }}" class="profile-pic" alt="{{ auth()->user()->name }}">
         @else
-            <img src="{{ asset('img/default-avatar.png') }}" 
-                class="img-circle profile-pic" 
-                alt="Default Profile">
+            <img src="{{ asset('img/default-avatar.png') }}" class="profile-pic" alt="Default profile">
         @endif
-        <div class="info mt-2">
-            <span class="fw-semibold d-block">{{ auth()->user()->name }}</span>
-            <small class="">Employee ID: {{ auth()->user()->employee_id }}</small>
+        <div class="menu-text user-copy">
+            <strong>{{ auth()->user()->name }}</strong>
+            <span>{{ ucfirst(auth()->user()->role) }} @if(auth()->user()->employee_id) · {{ auth()->user()->employee_id }} @endif</span>
         </div>
+        <span class="menu-text online-dot" title="Signed in"></span>
     </div>
 
-    <!-- Sidebar Menu -->
-    <div class="sidebar mt-2 flex-grow-1">
+    <div class="sidebar flex-grow-1">
         <nav>
-            <ul class="nav flex-column">
+            <ul class="nav flex-column pob-nav">
+                <li class="menu-text nav-section-label">Workspace</li>
+                <li class="nav-item"><a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid-1x2-fill nav-icon"></i><span class="menu-text">Dashboard</span></a></li>
 
-                {{-- ADMIN ONLY --}}
                 @if(auth()->user()->role === 'admin')
-                    <li class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> <span class="menu-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.index') }}" class="nav-link">
-                            <i class="fas fa-users nav-icon me-2"></i> <span class="menu-text">Employees</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.activity-logs.index') }}" class="nav-link">
-                            <i class="fas fa-history nav-icon me-2"></i> <span class="menu-text">Activity Logs</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.stores.index') }}" class="nav-link">
-                            <i class="fas fa-map-marker-alt nav-icon me-2"></i> <span class="menu-text">Store Locations</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.networks.index') }}" class="nav-link">
-                            <i class="fas fa-network-wired nav-icon me-2"></i> <span class="menu-text">Allowed Networks</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.sms.index') }}" class="nav-link">
-                            <i class="fas fa-sms nav-icon me-2"></i> <span class="menu-text">SMS Configuration</span>
-                        </a>
-                    </li>
+                    <li class="menu-text nav-section-label">Administration</li>
+                    <li class="nav-item"><a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.index') || request()->routeIs('admin.employees.*') ? 'active' : '' }}"><i class="bi bi-people-fill nav-icon"></i><span class="menu-text">Employees</span></a></li>
+                    <li class="nav-item"><a href="{{ route('admin.activity-logs.index') }}" class="nav-link {{ request()->routeIs('admin.activity-logs.*') ? 'active' : '' }}"><i class="bi bi-activity nav-icon"></i><span class="menu-text">Activity Logs</span></a></li>
+                    <li class="nav-item"><a href="{{ route('admin.stores.index') }}" class="nav-link {{ request()->routeIs('admin.stores.*') ? 'active' : '' }}"><i class="bi bi-geo-alt-fill nav-icon"></i><span class="menu-text">Store Locations</span></a></li>
+                    <li class="nav-item"><a href="{{ route('admin.networks.index') }}" class="nav-link {{ request()->routeIs('admin.networks.*') ? 'active' : '' }}"><i class="bi bi-hdd-network-fill nav-icon"></i><span class="menu-text">Allowed Networks</span></a></li>
+                    <li class="nav-item"><a href="{{ route('admin.sms.index') }}" class="nav-link {{ request()->routeIs('admin.sms.*') ? 'active' : '' }}"><i class="bi bi-chat-dots-fill nav-icon"></i><span class="menu-text">SMS Configuration</span></a></li>
                 @endif
 
-                {{-- HR AND MANAGER --}}
-                @if(auth()->user()->role === 'hr' || auth()->user()->role === 'manager')
+                @if(in_array(auth()->user()->role, ['hr','manager']))
+                    <li class="menu-text nav-section-label">People Operations</li>
                     <li class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> <span class="menu-text">Dashboard</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Attendance Management Dropdown -->
-                    <li class="nav-item">
-                        <a href="#" class="nav-link dropdown-toggle" id="attendanceToggle">
-                            <i class="fas fa-calendar-check nav-icon me-2"></i> <span class="menu-text">Attendance Management</span>
-                        </a>
-                        <ul class="nav flex-column ms-4" id="attendanceMenu" style="display: none;">
-                            <li class="nav-item">
-                                <a href="{{ route('hr.pending-approvals') }}" class="nav-link">
-                                    <i class="far fa-circle me-2"></i><span class="menu-text">Pending Approvals</span>
-                                    @php
-                                        $pendingCount = \App\Models\Attendance::where('status', 'pending')->count();
-                                    @endphp
-                                    @if($pendingCount > 0)
-                                        <span class="badge bg-warning text-dark ms-1">{{ $pendingCount }}</span>
-                                    @endif
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('hr.create-for-employee.form') }}" class="nav-link">
-                                    <i class="far fa-circle me-2"></i><span class="menu-text">Create Employee Attendance</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('hr.attendance') }}" class="nav-link">
-                                    <i class="far fa-circle me-2"></i><span class="menu-text">Monitor Attendance</span>
-                                </a>
-                            </li>
+                        <button class="nav-link w-100 border-0 text-start sidebar-submenu-toggle" type="button" data-submenu-target="attendanceMenu">
+                            <i class="bi bi-calendar2-check-fill nav-icon"></i><span class="menu-text flex-grow-1">Attendance</span><i class="bi bi-chevron-down menu-text submenu-chevron"></i>
+                        </button>
+                        <ul class="nav flex-column sidebar-submenu menu-text" id="attendanceMenu">
+                            <li><a href="{{ route('hr.pending-approvals') }}" class="nav-link {{ request()->routeIs('hr.pending-approvals') ? 'active' : '' }}">Pending Approvals @php $pendingCount = \App\Models\Attendance::where('status','pending')->count(); @endphp @if($pendingCount > 0)<span class="badge rounded-pill ms-auto" style="background:var(--pob-champagne);color:#3e2c16;">{{ $pendingCount }}</span>@endif</a></li>
+                            <li><a href="{{ route('hr.create-for-employee.form') }}" class="nav-link">Create Attendance</a></li>
+                            <li><a href="{{ route('hr.attendance') }}" class="nav-link">Monitor Attendance</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item"><a href="{{ route('schedules.index') }}" class="nav-link"><i class="fas fa-calendar-week me-2"></i><span class="menu-text">Manage Schedules</span></a></li>
-                    <!-- Payroll Management -->
-                    <li class="nav-item">
-                        <a href="{{ route('hr.payroll.index') }}" class="nav-link">
-                            <i class="fas fa-calculator nav-icon me-2"></i> <span class="menu-text">Payroll Management</span>
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="fas fa-plane-departure me-2"></i><span class="menu-text">Approve Leave</span></a></li>
-                    <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="fas fa-clock me-2"></i><span class="menu-text">Approve Overtime</span></a></li>
-                    <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="fas fa-file-alt me-2"></i><span class="menu-text">Generate Reports</span></a></li>
+                    <li class="nav-item"><a href="{{ route('schedules.index') }}" class="nav-link {{ request()->routeIs('schedules.*') ? 'active' : '' }}"><i class="bi bi-calendar-week-fill nav-icon"></i><span class="menu-text">Manage Schedules</span></a></li>
+                    <li class="nav-item"><a href="{{ route('hr.payroll.index') }}" class="nav-link {{ request()->routeIs('hr.payroll.*') ? 'active' : '' }}"><i class="bi bi-wallet2 nav-icon"></i><span class="menu-text">Payroll Management</span></a></li>
+                    <li class="nav-item"><a href="{{ route('hr.approveleave.show') }}" class="nav-link"><i class="bi bi-calendar2-heart-fill nav-icon"></i><span class="menu-text">Approve Leave</span></a></li>
+                    <li class="nav-item"><a href="{{ route('hr.approveOvertime.show') }}" class="nav-link"><i class="bi bi-clock-history nav-icon"></i><span class="menu-text">Approve Overtime</span></a></li>
+                    <li class="nav-item"><a href="{{ route('hr.reports') }}" class="nav-link"><i class="bi bi-file-earmark-bar-graph-fill nav-icon"></i><span class="menu-text">Reports</span></a></li>
                 @endif
 
-                {{-- EMPLOYEE ONLY --}}
                 @if(auth()->user()->role === 'employee')
-                    <li class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt nav-icon me-2"></i> <span class="menu-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item"><a href="{{ route('attendance.my') }}" class="nav-link"><i class="fas fa-calendar-check me-2"></i><span class="menu-text">My Attendance</span></a></li>
-                    <li class="nav-item"><a href="{{ route('profile.edit') }}" class="nav-link"><i class="fas fa-user me-2"></i><span class="menu-text">My Profile</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('schedules.my') }}"><i class="fas fa-calendar-alt me-2"></i><span class="menu-text">My Schedule</span></a></li>             
-                    <li class="nav-item"><a href="{{ route('overtime.index') }}" class="nav-link"><i class="fas fa-business-time me-2"></i><span class="menu-text">My Overtime</span></a></li>
-                    <li class="nav-item"><a href="{{ route('leave.index') }}" class="nav-link"><i class="fas fa-plane me-2"></i><span class="menu-text">My Leave Requests</span></a></li>
-                    <li class="nav-item"><a href="{{ route('payslip.index') }}" class="nav-link"><i class="fas fa-file-invoice-dollar me-2"></i><span class="menu-text">Payslips</span></a></li>
-                    
+                    <li class="menu-text nav-section-label">My Workday</li>
+                    <li class="nav-item"><a href="{{ route('attendance.my') }}" class="nav-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}"><i class="bi bi-fingerprint nav-icon"></i><span class="menu-text">My Attendance</span></a></li>
+                    <li class="nav-item"><a href="{{ route('schedules.my') }}" class="nav-link {{ request()->routeIs('schedules.my') ? 'active' : '' }}"><i class="bi bi-calendar-event-fill nav-icon"></i><span class="menu-text">My Schedule</span></a></li>
+                    <li class="nav-item"><a href="{{ route('leave.index') }}" class="nav-link {{ request()->routeIs('leave.*') ? 'active' : '' }}"><i class="bi bi-calendar2-heart nav-icon"></i><span class="menu-text">Leave Requests</span></a></li>
+                    <li class="nav-item"><a href="{{ route('overtime.index') }}" class="nav-link {{ request()->routeIs('overtime.*') ? 'active' : '' }}"><i class="bi bi-clock-fill nav-icon"></i><span class="menu-text">Overtime</span></a></li>
+                    <li class="nav-item"><a href="{{ route('payslip.index') }}" class="nav-link {{ request()->routeIs('payslip.*') || request()->routeIs('payslips.*') ? 'active' : '' }}"><i class="bi bi-receipt-cutoff nav-icon"></i><span class="menu-text">Payslips</span></a></li>
+                    <li class="nav-item"><a href="{{ route('profile.edit') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}"><i class="bi bi-person-circle nav-icon"></i><span class="menu-text">My Profile</span></a></li>
                 @endif
-
             </ul>
         </nav>
     </div>
 
-   <!-- Logout Button -->
-    <div class="logout-container mt-auto mb-3 text-center" id="logoutSection">
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-danger btn-sm px-4">
-                <i class="fas fa-sign-out-alt me-2"></i> <span class="menu-text">Logout</span>
-            </button>
+    <div class="sidebar-footer menu-text" id="logoutSection">
+        <form action="{{ route('logout') }}" method="POST">@csrf
+            <button type="submit" class="sidebar-logout"><i class="bi bi-box-arrow-right"></i><span>Sign out</span></button>
         </form>
     </div>
 </aside>
 
-{{-- ✅ Sidebar Styles --}}
 <style>
-.main-sidebar:not(.expanded) .menu-text {
-    display: none;
-}
-.main-sidebar {
-    width: 60px;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #ffffff;
-    color: #212529;
-    border-right: 1px solid #dee2e6;
-    transition: width 0.3s ease, left 0.3s ease;
-    overflow: hidden;
-    z-index: 1040;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Expanded on hover (desktop) */
-.main-sidebar.expanded {
-    width: 250px;
-}
-
-/* Hide all details when collapsed */
-.main-sidebar:not(.expanded) #userPanel,
-.main-sidebar:not(.expanded) .menu-text,
-.main-sidebar:not(.expanded) .brand-text,
-.main-sidebar:not(.expanded) #logoutSection {
-    display: none;
-}
-
-/* Keep icons and logos visible when collapsed */
-.nav-link i,
-.sidebar-logo {
-    width: 40px;
-    text-align: center;
-}
-
-/* Brand */
-.brand-container {
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-}
-
-.sidebar-logo {
-    transition: transform 0.3s ease;
-}
-
-.sidebar-logo:hover {
-    transform: scale(1.1);
-}
-
-.brand-text {
-    transition: opacity 0.3s ease;
-}
-
-.brand-logo {
-    width: 28px;
-    height: 28px;
-}
-
-/* Toggle button */
-#sidebarToggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-}
-
-/* Profile section */
-.user-panel {
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.profile-pic {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #0d6efd;
-}
-
-/* Menu links */
-.nav-link {
-    color: inherit !important;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    border-radius: 4px;
-    transition: background 0.2s ease;
-    font-size: 15px;
-    height: 50px;
-    
-    
-}
-
-.nav-link:hover {
-    background-color: rgba(13, 110, 253, 0.2);
-}
-
-/* Logout button */
-.logout-container button {
-    width: 80%;
-    border-radius: 20px;
-    font-size: 14px;
-}
-
-/* Dark mode support */
-body.dark .main-sidebar {
-    background-color: #1f1f1f;
-    color: #ffffff;
-    border-right: 1px solid #2c2c2c;
-}
-
-/* Mobile responsive styles */
-@media (max-width: 992px) {
-    .main-sidebar {
-        left: -280px;
-        width: 280px;
-        transition: left 0.3s ease;
-        z-index: 1045;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .main-sidebar.mobile-active {
-        left: 0;
-    }
-
-    /* Always show content on mobile */
-    .main-sidebar.mobile-active #userPanel,
-    .main-sidebar.mobile-active .menu-text,
-    .main-sidebar.mobile-active .brand-text,
-    .main-sidebar.mobile-active #logoutSection {
-        display: block !important;
-    }
-
-    /* Remove hover behavior on mobile */
-    .main-sidebar:not(.mobile-active):hover {
-        width: 60px;
-    }
-
-    /* Mobile navigation improvements */
-    .nav-link {
-        padding: 12px 20px;
-        font-size: 16px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .nav-link:last-child {
-        border-bottom: none;
-    }
-
-    /* Better mobile dropdown */
-    .nav .nav {
-        background-color: rgba(0, 0, 0, 0.05);
-        border-radius: 5px;
-        margin: 5px 0;
-    }
-
-    .nav .nav .nav-link {
-        padding: 10px 30px;
-        font-size: 15px;
-    }
-
-    /* Mobile profile section */
-    .user-panel {
-        padding: 20px 0;
-        text-align: center;
-    }
-
-    .profile-pic {
-        width: 80px;
-        height: 80px;
-    }
-
-    /* Mobile logout button */
-    .logout-container {
-        padding: 20px;
-    }
-
-    .logout-container button {
-        width: 100%;
-        font-size: 16px;
-        padding: 12px;
-    }
-}
-
-@media (max-width: 576px) {
-    .main-sidebar {
-        width: 100vw;
-        left: -100vw;
-    }
-
-    .main-sidebar.mobile-active {
-        left: 0;
-    }
-}
-
+.pob-sidebar{width:72px;height:100vh;position:fixed;inset:0 auto 0 0;z-index:1045;display:flex;flex-direction:column;background:rgba(255,255,255,.88)!important;border-right:1px solid var(--pob-line)!important;backdrop-filter:blur(20px) saturate(150%);box-shadow:8px 0 30px rgba(45,34,42,.04);overflow:hidden;transition:width .3s cubic-bezier(.2,.7,.2,1),left .3s ease}.pob-sidebar.expanded{width:270px}.pob-sidebar:not(.expanded) .menu-text{display:none!important}.brand-container{height:72px;padding:12px 14px;border-bottom:1px solid var(--pob-line);display:flex;align-items:center;justify-content:space-between}.sidebar-brand-link{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--pob-text)!important;min-width:0}.sidebar-logo{width:42px;height:42px;object-fit:contain;padding:5px;border-radius:15px;background:#fff;box-shadow:0 7px 20px rgba(60,40,50,.08);flex:none}.brand-copy{line-height:1.1;min-width:145px}.brand-copy strong{display:block;font-size:.9rem}.brand-copy small{display:block;color:var(--pob-muted);font-size:.68rem;margin-top:4px}.sidebar-toggle{width:36px;height:36px;border:1px solid var(--pob-line);background:transparent;color:var(--pob-text);border-radius:12px;display:grid;place-items:center}.user-panel{margin:14px 10px;padding:10px;display:flex;align-items:center;gap:10px;border:1px solid var(--pob-line);border-radius:18px;background:rgba(198,79,122,.045);position:relative}.profile-pic{width:40px;height:40px;border-radius:14px;object-fit:cover;border:2px solid rgba(198,79,122,.2);flex:none}.user-copy{min-width:0;line-height:1.15}.user-copy strong{display:block;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.user-copy span{display:block;font-size:.68rem;color:var(--pob-muted);margin-top:4px}.online-dot{width:8px;height:8px;border-radius:50%;background:#43a77f;margin-left:auto;box-shadow:0 0 0 4px rgba(67,167,127,.12)}.sidebar{overflow-y:auto;padding:0 8px 16px}.pob-nav{gap:3px}.nav-section-label{padding:14px 10px 5px;color:var(--pob-muted);font-size:.64rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase}.pob-sidebar .nav-link{height:auto;min-height:46px;padding:10px 12px;border-radius:14px;color:var(--pob-muted)!important;display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:700;transition:background .2s ease,color .2s ease,transform .2s ease}.pob-sidebar .nav-link:hover{background:rgba(198,79,122,.08);color:var(--pob-text)!important;transform:translateX(2px)}.pob-sidebar .nav-link.active{background:linear-gradient(135deg,rgba(198,79,122,.16),rgba(127,103,179,.11));color:var(--pob-rose-deep)!important}.nav-icon{width:28px;min-width:28px;text-align:center;font-size:1rem}.sidebar-submenu{margin:3px 0 6px 22px;padding-left:10px;border-left:1px solid var(--pob-line);display:none}.sidebar-submenu.open{display:flex}.sidebar-submenu .nav-link{min-height:36px;padding:7px 10px;font-size:.74rem}.submenu-chevron{transition:transform .2s ease}.sidebar-submenu-toggle.open .submenu-chevron{transform:rotate(180deg)}.sidebar-footer{padding:12px;border-top:1px solid var(--pob-line)}.sidebar-logout{width:100%;border:1px solid rgba(181,72,85,.16);border-radius:14px;padding:10px 12px;background:rgba(181,72,85,.07);color:var(--pob-danger);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800}.dark .pob-sidebar{background:rgba(29,24,29,.9)!important}.pob-sidebar::-webkit-scrollbar,.sidebar::-webkit-scrollbar{width:4px}.pob-sidebar::-webkit-scrollbar-thumb,.sidebar::-webkit-scrollbar-thumb{background:rgba(198,79,122,.25);border-radius:20px}@media(max-width:992px){.pob-sidebar{left:-290px;width:280px!important;box-shadow:18px 0 50px rgba(0,0,0,.18)}.pob-sidebar.mobile-active{left:0}.pob-sidebar.mobile-active .menu-text{display:block!important}.pob-sidebar.mobile-active .nav-link{font-size:.9rem}.pob-sidebar.mobile-active .sidebar-submenu{display:none}.pob-sidebar.mobile-active .sidebar-submenu.open{display:flex}}@media(min-width:993px){.pob-sidebar:hover{width:270px}.pob-sidebar:hover .menu-text{display:block!important}}
 </style>
 
-{{-- ✅ Sidebar Script --}}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('sidebarToggle');
-
-    // 🖥️ Desktop hover behavior
-    function enableHoverBehavior() {
-        sidebar.classList.remove('expanded', 'mobile-active');
-        
-        const handleMouseEnter = () => {
-            if (window.innerWidth > 992) {
-                sidebar.classList.add('expanded');
-            }
-        };
-        
-        const handleMouseLeave = () => {
-            if (window.innerWidth > 992) {
-                sidebar.classList.remove('expanded');
-            }
-        };
-        
-        sidebar.addEventListener('mouseenter', handleMouseEnter);
-        sidebar.addEventListener('mouseleave', handleMouseLeave);
-    }
-
-    // 📱 Mobile behavior (handled by main layout JS)
-    function enableMobileBehavior() {
-        sidebar.classList.remove('expanded');
-        // Mobile functionality is handled in the main layout
-    }
-
-    // Check screen width to set correct behavior
-    function checkViewport() {
-        if (window.innerWidth > 992) {
-            enableHoverBehavior();
-        } else {
-            enableMobileBehavior();
-        }
-    }
-
-    checkViewport();
-
-    // Re-check when resizing window
-    window.addEventListener('resize', () => {
-        sidebar.classList.remove('expanded', 'mobile-active');
-        checkViewport();
-    });
-
-    // Enhanced dropdown toggles
-    function setupDropdown(toggleId, menuId) {
-        const toggle = document.getElementById(toggleId);
-        const menu = document.getElementById(menuId);
-        
-        if (toggle && menu) {
-            toggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Close other dropdowns
-                document.querySelectorAll('.nav .nav').forEach(otherMenu => {
-                    if (otherMenu !== menu) {
-                        otherMenu.style.display = 'none';
-                        otherMenu.parentElement.querySelector('.dropdown-toggle').classList.remove('active');
-                    }
-                });
-                
-                // Toggle current dropdown
-                const isVisible = menu.style.display === 'block';
-                menu.style.display = isVisible ? 'none' : 'block';
-                toggle.classList.toggle('active', !isVisible);
-            });
-        }
-    }
-
-    // Setup all dropdowns
-    setupDropdown('attendanceToggle', 'attendanceMenu');
-    setupDropdown('deductionsToggle', 'deductionsMenu');
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.nav-item')) {
-            document.querySelectorAll('.nav .nav').forEach(menu => {
-                menu.style.display = 'none';
-                const toggle = menu.parentElement.querySelector('.dropdown-toggle');
-                if (toggle) toggle.classList.remove('active');
-            });
-        }
-    });
-});
+document.addEventListener('DOMContentLoaded',function(){const sidebar=document.getElementById('sidebar');const toggle=document.getElementById('sidebarToggle');toggle?.addEventListener('click',function(){if(window.innerWidth<=992){sidebar.classList.toggle('mobile-active')}else{sidebar.classList.toggle('expanded')}});document.querySelectorAll('.sidebar-submenu-toggle').forEach(function(button){button.addEventListener('click',function(){const menu=document.getElementById(this.dataset.submenuTarget);this.classList.toggle('open');menu?.classList.toggle('open')})});document.addEventListener('click',function(event){if(window.innerWidth<=992&&sidebar.classList.contains('mobile-active')&&!sidebar.contains(event.target)&&!event.target.closest('.mobile-menu-toggle'))sidebar.classList.remove('mobile-active')});});
 </script>
