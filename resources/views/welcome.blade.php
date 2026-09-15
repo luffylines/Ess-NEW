@@ -1,125 +1,117 @@
 @extends('layouts.welcome')
 
-@section('content')
-<div class="container-fluid">
-    <div class="row min-vh-100 align-items-center justify-content-center">
-        <!-- Left Logo Column (Desktop only) -->
-        <div class="d-none d-lg-flex col-lg-5 align-items-center justify-content-center" style="background: linear-gradient(135deg, #ff69b4, #ff85c2); min-height: 600px;">
-            <img src="{{ asset('img/logo.png') }}" alt="Place Of Beauty Logo" style="max-width: 350px; width: 80%; height: auto; display: block; margin: 0 auto;">
-        </div>
-        <!-- Main Card Column -->
-        <div class="col-12 col-lg-7 d-flex align-items-center justify-content-center">
-            <div class="card shadow-lg border-0 rounded-lg w-100" style="max-width: 600px;">
-                <div class="card-header text-center custom-header text-white rounded-top">
-                    <h1 class="display-4 font-weight-bold">Place Of Beauty Portal</h1>
-                    <p class="lead">Employee Self Service System</p>
-                </div>
-                <div class="container">
-                    <div class="card-body text-center">
-                        <div class="row justify-content-center mb-4">
-                            <div class="col-md-12">
-                                <p class="mt-3">
-                                    Welcome to the Place Of Beauty ESS. <br>
-                                    Access your personal and work-related information with ease. <br>
-                                    Stay informed and connected to all the resources you need to thrive.
-                                </p>
-                            </div>
-                        </div>
-                        <!-- Service Icons Section -->
-                        <div class="row justify-content-center mt-4 mb-2">
-                            <div class="col-md-4 mb-3">
-                                <div class="icon-box text-center">
-                                    <i class="fas fa-users fa-3x pink-icon"></i>
-                                    <h5 class="mt-2">Employee Directory</h5>
-                                    <p>Find colleagues and more.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-1">
-                                <div class="icon-box text-center">
-                                    <i class="fas fa-calendar-alt fa-3x text-success"></i>
-                                <h5 class="mt-100">Leave Management</h5>
-                                <p>Request and manage your time off.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-1">
-                            <div class="icon-box text-center">
-                                <i class="fas fa-briefcase fa-3x text-warning"></i>
-                                <h5 class="mt-2">Payroll & Benefits</h5>
-                                <p>Access payslip and more.</p>
-                            </div>
-                        </div>
-                    </div>
+@section('title', 'Place Of Beauty ESS | Employee Self-Service')
 
-                    <!-- Call to Action Section -->
-                    <div class="d-grid gap-0 d-md-flex justify-content-center mt-2">
-                        <a href="{{ route('login') }}" class="btn btn-primary btn-lg px-5">Login to Your Account</a>
+@section('content')
+<section class="public-hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="eyebrow" data-reveal><i class="bi bi-stars"></i> Employee experience, simplified</div>
+                <h1 class="hero-title" data-reveal data-reveal-delay="1">Your workday, <span class="accent">beautifully organized.</span></h1>
+                <p class="hero-copy" data-reveal data-reveal-delay="2">Place Of Beauty ESS brings attendance, schedules, leave, overtime, payroll and employee tools into one secure workspace—designed to feel clear, fast and effortless on desktop or mobile.</p>
+                <div class="hero-actions" data-reveal data-reveal-delay="3">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="btn-pob-primary"><i class="bi bi-grid-1x2"></i> Open Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn-pob-primary"><i class="bi bi-arrow-right-circle"></i> Enter Employee Portal</a>
+                    @endauth
+                    <a href="#discover" class="btn-pob-secondary"><i class="bi bi-play-circle"></i> Explore ESS</a>
+                </div>
+                <div class="d-flex flex-wrap gap-4 mt-4 text-secondary small" data-reveal data-reveal-delay="3">
+                    <span><i class="bi bi-shield-check me-1"></i> Secure access</span>
+                    <span><i class="bi bi-phone me-1"></i> Mobile friendly</span>
+                    <span><i class="bi bi-lightning-charge me-1"></i> Real-time workflow</span>
+                </div>
+            </div>
+
+            <div class="col-lg-5" data-reveal data-reveal-delay="2">
+                <div class="hero-orbit">
+                    <div class="hero-dashboard" data-parallax-card>
+                        <div class="mini-top">
+                            <div class="mini-user">
+                                <div class="mini-avatar"><i class="bi bi-person-heart"></i></div>
+                                <div><strong>My Workday</strong><div class="small text-secondary">Today · <span data-live-clock>--:--</span></div></div>
+                            </div>
+                            <span class="badge rounded-pill" style="background:rgba(40,122,93,.12);color:var(--pob-success);">Live</span>
+                        </div>
+                        <div class="mini-grid">
+                            <div class="mini-card large">
+                                <div class="small text-secondary">Attendance this month</div>
+                                <div class="pulse-ring"><strong>92%</strong></div>
+                                <div class="text-center"><strong>22 / 24 days</strong><div class="small text-secondary mt-1">Consistent attendance</div></div>
+                            </div>
+                            <div class="mini-card">
+                                <div class="feature-icon mb-2"><i class="bi bi-calendar2-week"></i></div>
+                                <div class="small text-secondary">Next shift</div><strong>9:00 AM</strong>
+                            </div>
+                            <div class="mini-card">
+                                <div class="feature-icon mb-2"><i class="bi bi-wallet2"></i></div>
+                                <div class="small text-secondary">Payslip</div><strong>Ready</strong>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-3 rounded-4" style="background:rgba(198,79,122,.07);border:1px solid var(--pob-line);">
+                            <div class="d-flex justify-content-between small"><span><i class="bi bi-check-circle-fill me-1" style="color:var(--pob-success);"></i> Time in · 9:02 AM</span><span class="text-secondary">Working</span></div>
+                            <div class="progress mt-2" style="height:5px;background:rgba(198,79,122,.10);"><div class="progress-bar" style="width:58%;background:linear-gradient(90deg,var(--pob-rose),var(--pob-violet));"></div></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-@endsection
+</section>
 
-@section('styles')
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <style>
+<section class="public-section" id="discover">
+    <div class="container">
+        <div class="row align-items-end mb-4 g-3">
+            <div class="col-lg-7" data-reveal>
+                <div class="section-kicker">One connected workspace</div>
+                <h2 class="section-title">Everything employees need, without the clutter.</h2>
+            </div>
+            <div class="col-lg-5" data-reveal data-reveal-delay="1"><p class="section-copy mb-0">The interface is built around daily actions—not complicated menus—so employees and HR teams can get things done faster.</p></div>
+        </div>
+        <div class="row g-3">
+            @php
+                $features = [
+                    ['bi-fingerprint','Attendance','Time in/out, attendance history and workday visibility in one flow.'],
+                    ['bi-calendar2-heart','Leave & Overtime','Submit requests and track every step from review to approval.'],
+                    ['bi-calendar-week','Schedules','See assigned shifts, upcoming workdays and schedule updates quickly.'],
+                    ['bi-receipt','Payslips','Access payroll information and downloadable payslips securely.'],
+                    ['bi-graph-up-arrow','Insights','Useful attendance and work trends presented in easy-to-read visuals.'],
+                    ['bi-shield-lock','Secure Access','Role-aware access keeps employee, HR, manager and admin tools separated.'],
+                ];
+            @endphp
+            @foreach($features as $index => $feature)
+                <div class="col-md-6 col-xl-4" data-reveal data-reveal-delay="{{ ($index % 3) + 1 }}">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi {{ $feature[0] }}"></i></div>
+                        <h5 class="fw-bold mt-3 mb-2">{{ $feature[1] }}</h5>
+                        <p class="section-copy mb-0">{{ $feature[2] }}</p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
 
-        .icon-box h5,
-        .icon-box p {
-            color: #333 !important; /* dark gray, always visible */
-        }
-
-        body.dark-mode .icon-box h5,
-        body.dark-mode .icon-box p {
-            color: #fff !important; /* OR white if your dark mode turns cards dark */
-        }
-                /* Header Background */
-        .custom-header {
-            background: linear-gradient(135deg, #ff69b4, #ff85c2) !important;
-            color: white;
-        }
-                            /* Large logo for desktop/laptop */
-                            .welcome-large-logo {
-                                max-width: 350px;
-                                width: 100%;
-                                height: auto;
-                                display: block;
-                                margin: 40px auto;
-                                filter: drop-shadow(0 4px 24px rgba(255,105,180,0.2));
-                            }
-
-        /* Pink Login Button */
-        .btn-primary {
-            background-color: #ff69b4 !important;
-            border-color: #ff69b4 !important;
-            color: white !important;
-        }
-
-        .btn-primary:hover {
-            background-color: #ff4fa3 !important;
-            border-color: #ff4fa3 !important;
-        }
-
-        /* Icon Boxes */
-        .icon-box {
-            border: 2px solid #f4f4f4;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            background-color: #fff;
-            transition: transform 0.3s ease;
-        }
-
-        .icon-box:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        /* Optional: Make default icons pink too */
-        .pink-icon {
-            color: #ff69b4 !important;
-        }
-    </style>
+<section class="public-section pt-2">
+    <div class="container">
+        <div class="content-panel" data-reveal>
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <div class="section-kicker">Know the system</div>
+                    <h2 class="section-title mb-3">Transparent, approachable and easy to understand.</h2>
+                    <p class="section-copy mb-0">Learn what ESS does, how to reach the team, and the conditions that keep company and employee data used responsibly.</p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="row g-2">
+                        <div class="col-12"><a href="{{ route('about') }}" class="btn-pob-secondary w-100 justify-content-between">About ESS <i class="bi bi-arrow-up-right"></i></a></div>
+                        <div class="col-6"><a href="{{ route('contact') }}" class="btn-pob-secondary w-100">Contact</a></div>
+                        <div class="col-6"><a href="{{ route('terms') }}" class="btn-pob-secondary w-100">Terms</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 @endsection
