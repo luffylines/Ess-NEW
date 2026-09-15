@@ -43,11 +43,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -62,8 +57,8 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Resolve the user's profile photo whether it is stored in Cloudinary,
-     * as an absolute URL, or on Laravel's public disk.
+     * Resolve the user's profile photo from Cloudinary, durable DB storage,
+     * or older local-storage records.
      */
     public function getProfilePhotoUrlAttribute(): string
     {
@@ -72,6 +67,11 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         $photo = trim((string) $this->profile_photo);
+
+        if ($photo === 'database') {
+            $version = $this->updated_at?->timestamp ?? 1;
+            return route('profile.photo', ['userId' => $this->id, 'v' => $version]);
+        }
 
         if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://') || str_starts_with($photo, 'data:')) {
             return $photo;
@@ -82,13 +82,10 @@ class User extends Authenticatable implements MustVerifyEmail
             return asset(ltrim($photo, '/'));
         }
 
-        // Local fallback path saved by ProfileController, e.g. profile_photos/user_1_xxx.jpg.
+        // Legacy local fallback path from earlier releases.
         return asset('storage/' . ltrim($photo, '/'));
     }
 
-    /**
-     * Get the user's initials for avatar fallback.
-     */
     public function getInitialsAttribute(): string
     {
         $words = preg_split('/\s+/', trim((string) $this->name)) ?: [];
@@ -103,9 +100,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return substr($initials ?: 'U', 0, 2);
     }
 
-    /**
-     * Generate unique employee ID based on role.
-     */
     public static function generateEmployeeId($role)
     {
         $prefix = match($role) {
