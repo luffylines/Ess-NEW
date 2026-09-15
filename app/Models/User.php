@@ -8,7 +8,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Attendance;
 use App\Traits\LogsActivity;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -56,41 +55,56 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
     }
 
     /**
-     * Get the user's profile photo URL (always public, fallback to default)
+     * Resolve the user's profile photo whether it is stored in Cloudinary,
+     * as an absolute URL, or on Laravel's public disk.
      */
-    public function getProfilePhotoUrlAttribute()
+    public function getProfilePhotoUrlAttribute(): string
     {
-        if ($this->profile_photo) {
-            // If the profile_photo is a Cloudinary URL, return as is
-            if (str_starts_with($this->profile_photo, 'http')) {
-                return $this->profile_photo;
+        if (!$this->profile_photo) {
+            return asset('img/default-avatar.png');
+        }
+
+        $photo = trim((string) $this->profile_photo);
+
+        if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://') || str_starts_with($photo, 'data:')) {
+            return $photo;
+        }
+
+        // Older/local records may already include the public storage prefix.
+        if (str_starts_with($photo, '/storage/') || str_starts_with($photo, 'storage/')) {
+            return asset(ltrim($photo, '/'));
+        }
+
+        // Local fallback path saved by ProfileController, e.g. profile_photos/user_1_xxx.jpg.
+        return asset('storage/' . ltrim($photo, '/'));
+    }
+
+    /**
+     * Get the user's initials for avatar fallback.
+     */
+    public function getInitialsAttribute(): string
+    {
+        $words = preg_split('/\s+/', trim((string) $this->name)) ?: [];
+        $initials = '';
+
+        foreach ($words as $word) {
+            if ($word !== '') {
+                $initials .= strtoupper(substr($word, 0, 1));
             }
         }
-        // Fallback to a default avatar image in public/img/avatar.png
-        return asset('img/default-avatar.png');
+
+        return substr($initials ?: 'U', 0, 2);
     }
 
     /**
-     * Get the user's initials for avatar fallback
-     */
-    public function getInitialsAttribute()
-    {
-        $words = explode(' ', $this->name);
-        $initials = '';
-        foreach ($words as $word) {
-            $initials .= strtoupper(substr($word, 0, 1));
-        }
-        return substr($initials, 0, 2);
-    }
-
-    /**
-     * Generate unique employee ID based on role
+     * Generate unique employee ID based on role.
      */
     public static function generateEmployeeId($role)
     {
@@ -102,20 +116,17 @@ class User extends Authenticatable implements MustVerifyEmail
             default => 'emp'
         };
 
-        // Get the highest existing number for this role
         $lastEmployee = static::where('employee_id', 'like', $prefix . '%')
             ->orderByRaw('CAST(SUBSTRING(employee_id, ' . (strlen($prefix) + 1) . ') AS UNSIGNED) DESC')
             ->first();
 
         if ($lastEmployee) {
-            // Extract number from existing ID and increment
             $lastNumber = (int) substr($lastEmployee->employee_id, strlen($prefix));
             $nextNumber = $lastNumber + 1;
         } else {
             $nextNumber = 1;
         }
 
-        // Format with leading zeros (2 digits)
         return $prefix . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
     }
 }
