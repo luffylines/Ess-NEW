@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserProfilePhoto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +45,100 @@ class ProfileController extends Controller
         return '+639' . ltrim($phone, '0');
     }
 
+    /**
+     * Resize and compress a profile photo before saving it in the database.
+     * This keeps the persistent DB fallback small and fast to serve.
+     *
+     * @return array{0:string,1:string}
+     */
+    private function optimizeProfilePhoto($file): array
+    {
+        $raw = file_get_contents($file->getRealPath());
+
+        if ($raw === false) {
+            throw new \RuntimeException('Unable to read the uploaded image.');
+        }
+
+        if (!function_exists('imagecreatefromstring')) {
+            return [$raw, $file->getMimeType() ?: 'image/jpeg'];
+        }
+
+        $source = @imagecreatefromstring($raw);
+
+        if (!$source) {
+            return [$raw, $file->getMimeType() ?: 'image/jpeg'];
+        }
+
+        // Respect EXIF orientation for phone-camera JPEGs when available.
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+        if (function_exists('exif_read_data') && in_array($extension, ['jpg', 'jpeg'], true)) {
+            $exif = @exif_read_data($file->getRealPath());
+            $orientation = (int) ($exif['Orientation'] ?? 1);
+
+            if ($orientation === 3) {
+                $source = imagerotate($source, 180, 0) ?: $source;
+            } elseif ($orientation === 6) {
+                $source = imagerotate($source, -90, 0) ?: $source;
+            } elseif ($orientation === 8) {
+                $source = imagerotate($source, 90, 0) ?: $source;
+            }
+        }
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+        $maxDimension = 512;
+        $scale = min(1, $maxDimension / max($width, $height));
+        $targetWidth = max(1, (int) round($width * $scale));
+        $targetHeight = max(1, (int) round($height * $scale));
+
+        $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $white);
+        imagecopyresampled(
+            $canvas,
+            $source,
+            0,
+            0,
+            0,
+            0,
+            $targetWidth,
+            $targetHeight,
+            $width,
+            $height
+        );
+
+        ob_start();
+        imagejpeg($canvas, null, 84);
+        $optimized = ob_get_clean();
+
+        imagedestroy($canvas);
+        imagedestroy($source);
+
+        if (!is_string($optimized) || $optimized === '') {
+            return [$raw, $file->getMimeType() ?: 'image/jpeg'];
+        }
+
+        return [$optimized, 'image/jpeg'];
+    }
+
+    /**
+     * Store the photo in the database as a durable fallback for hosts with
+     * ephemeral filesystems such as Render free web services.
+     */
+    private function storePhotoInDatabase($user, $file): void
+    {
+        [$binary, $mimeType] = $this->optimizeProfilePhoto($file);
+
+        UserProfilePhoto::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'mime_type' => $mimeType,
+                'image_data' => base64_encode($binary),
+                'size_bytes' => strlen($binary),
+            ]
+        );
+    }
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -52,11 +147,28 @@ class ProfileController extends Controller
     }
 
     /**
+     * Serve a database-backed profile photo to authenticated ESS users.
+     */
+    public function photo(Request $request, int $userId)
+    {
+        $photo = UserProfilePhoto::where('user_id', $userId)->firstOrFail();
+        $binary = base64_decode($photo->image_data, true);
+
+        abort_if($binary === false, 404);
+
+        return response($binary, 200, [
+            'Content-Type' => $photo->mime_type ?: 'image/jpeg',
+            'Content-Length' => (string) strlen($binary),
+            'Cache-Control' => 'private, max-age=3600',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    /**
      * Update profile details and profile photo.
      *
-     * Cloudinary is preferred in production. When Cloudinary credentials are
-     * not configured, the app falls back to Laravel's public disk so uploads
-     * still work instead of failing with a 500 error.
+     * Cloudinary remains preferred when configured. Otherwise, photos are
+     * stored in the database so they survive Render restarts and deploys.
      */
     public function update(Request $request): RedirectResponse
     {
@@ -102,42 +214,44 @@ class ProfileController extends Controller
                         ]
                     )->getSecurePath();
 
+                    UserProfilePhoto::where('user_id', $user->id)->delete();
                     $validated['profile_photo'] = $uploadedFileUrl;
-                    $photoStatus = 'Profile photo uploaded successfully.';
+                    $photoStatus = 'Profile photo saved permanently.';
                 } else {
-                    $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
-                    $filename = 'user_' . $user->id . '_' . time() . '.' . $extension;
-                    $validated['profile_photo'] = $file->storeAs('profile_photos', $filename, 'public');
-                    $photoStatus = 'Profile photo uploaded successfully.';
+                    $this->storePhotoInDatabase($user, $file);
+                    $validated['profile_photo'] = 'database';
+                    $photoStatus = 'Profile photo saved permanently.';
                 }
 
-                // Remove a previous local photo after the new upload succeeds.
-                if ($oldPhoto && !str_starts_with($oldPhoto, 'http://') && !str_starts_with($oldPhoto, 'https://')) {
+                // Clean up a previous local fallback file if it still exists.
+                if ($oldPhoto
+                    && $oldPhoto !== 'database'
+                    && !str_starts_with($oldPhoto, 'http://')
+                    && !str_starts_with($oldPhoto, 'https://')) {
                     $oldPath = ltrim(str_replace('storage/', '', $oldPhoto), '/');
                     if (Storage::disk('public')->exists($oldPath)) {
                         Storage::disk('public')->delete($oldPath);
                     }
                 }
             } catch (\Throwable $e) {
-                Log::warning('Cloud profile upload failed; attempting local fallback.', [
+                Log::warning('Cloud profile upload failed; using durable database fallback.', [
                     'user_id' => $user->id,
                     'error' => $e->getMessage(),
                 ]);
 
                 try {
-                    $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
-                    $filename = 'user_' . $user->id . '_' . time() . '.' . $extension;
-                    $validated['profile_photo'] = $file->storeAs('profile_photos', $filename, 'public');
-                    $photoStatus = 'Profile photo uploaded successfully.';
+                    $this->storePhotoInDatabase($user, $file);
+                    $validated['profile_photo'] = 'database';
+                    $photoStatus = 'Profile photo saved permanently.';
                 } catch (\Throwable $fallbackError) {
-                    Log::error('Profile photo fallback upload failed.', [
+                    Log::error('Persistent profile photo fallback failed.', [
                         'user_id' => $user->id,
                         'error' => $fallbackError->getMessage(),
                     ]);
 
                     return Redirect::route('profile.edit')
                         ->withInput($request->except('profile_photo'))
-                        ->withErrors(['profile_photo' => 'The image could not be saved. Please try another JPG, PNG, or WebP image.']);
+                        ->withErrors(['profile_photo' => 'The image could not be saved permanently. Please try another JPG, PNG, or WebP image.']);
                 }
             }
         }
