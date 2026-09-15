@@ -14,11 +14,6 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, LogsActivity;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -33,11 +28,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -69,20 +59,23 @@ class User extends Authenticatable implements MustVerifyEmail
         $photo = trim((string) $this->profile_photo);
 
         if ($photo === 'database') {
-            $version = $this->updated_at?->timestamp ?? 1;
-            return route('profile.photo', ['userId' => $this->id, 'v' => $version]);
+            $stored = UserProfilePhoto::where('user_id', $this->id)->first();
+
+            if ($stored && filled($stored->image_data)) {
+                return 'data:' . ($stored->mime_type ?: 'image/jpeg') . ';base64,' . $stored->image_data;
+            }
+
+            return asset('img/default-avatar.png');
         }
 
         if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://') || str_starts_with($photo, 'data:')) {
             return $photo;
         }
 
-        // Older/local records may already include the public storage prefix.
         if (str_starts_with($photo, '/storage/') || str_starts_with($photo, 'storage/')) {
             return asset(ltrim($photo, '/'));
         }
 
-        // Legacy local fallback path from earlier releases.
         return asset('storage/' . ltrim($photo, '/'));
     }
 
