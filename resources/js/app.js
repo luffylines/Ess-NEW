@@ -1,4 +1,5 @@
 import './bootstrap';
+import './navigation-speed';
 import '../css/premium-dashboard.css';
 import Alpine from 'alpinejs';
 
@@ -120,8 +121,9 @@ ready(() => {
         setTimeout(() => card.classList.add('pob-in'), 45 + Math.min(index, 10) * 38);
     });
 
-    // Employee dashboard enhancement. Workday state is synchronized from the
-    // real My Attendance page so the journey reflects today's actual record.
+    // Employee dashboard enhancement. Workday state is synchronized from a
+    // lightweight one-row endpoint so it does not block navigation with a full
+    // My Attendance page request on Render's single worker.
     if (window.location.pathname === '/dashboard') {
         const welcomeHeading = [...document.querySelectorAll('main h1')].find((el) => /welcome/i.test(el.textContent || ''));
         const attendanceCard = document.querySelector('main .stats-card.bg-primary');
@@ -191,42 +193,24 @@ ready(() => {
 
 async function syncWorkdayState(root) {
     try {
-        const response = await fetch('/attendance/my', {
+        const response = await fetch('/api/attendance/today-state', {
             method: 'GET',
             credentials: 'same-origin',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            headers: { 'Accept': 'application/json' },
             cache: 'no-store',
         });
 
         if (!response.ok) throw new Error(`Attendance sync failed: ${response.status}`);
 
-        const serverDate = response.headers.get('Date');
-        if (serverDate) {
-            const serverMs = Date.parse(serverDate);
-            if (Number.isFinite(serverMs)) serverClockOffsetMs = serverMs - Date.now();
-        }
+        const payload = await response.json();
+        const serverMs = Date.parse(payload.server_time || '');
+        if (Number.isFinite(serverMs)) serverClockOffsetMs = serverMs - Date.now();
 
-        const html = await response.text();
-        const state = detectWorkdayState(html);
-        applyWorkdayState(root, state);
+        applyWorkdayState(root, payload.state || 'unknown');
     } catch (error) {
         console.warn('Unable to synchronize dashboard workday state.', error);
         applyWorkdayState(root, 'unknown');
     }
-}
-
-function detectWorkdayState(html) {
-    const documentSnapshot = new DOMParser().parseFromString(html, 'text/html');
-
-    if (documentSnapshot.querySelector('button[name="action"][value="time_in"]')) return 'not_started';
-    if (documentSnapshot.querySelector('button[name="action"][value="break_in"]')) return 'working';
-    if (documentSnapshot.querySelector('button[name="action"][value="break_out"]')) return 'on_break';
-    if (documentSnapshot.querySelector('button[name="action"][value="time_out"]')) return 'working_resumed';
-
-    const pageText = documentSnapshot.body?.textContent || '';
-    if (/completed attendance for today/i.test(pageText)) return 'complete';
-
-    return 'unknown';
 }
 
 function applyWorkdayState(root, state) {
