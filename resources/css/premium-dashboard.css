@@ -69,6 +69,7 @@ body.dark .pob-workday-actions { background: rgba(255,255,255,.035); }
     line-height: 1;
     font-weight: 800;
     letter-spacing: -.055em;
+    font-variant-numeric: tabular-nums;
 }
 .pob-progress-orb {
     --progress: 0;
@@ -80,7 +81,7 @@ body.dark .pob-workday-actions { background: rgba(255,255,255,.035); }
     position: relative;
     flex: none;
     background: conic-gradient(var(--pob-rose) calc(var(--progress) * 1%), rgba(198,79,122,.11) 0);
-    animation: pobPulse 3s ease-in-out infinite;
+    transition: background .35s ease, transform .35s ease;
 }
 .pob-progress-orb::before {
     content: '';
@@ -90,6 +91,20 @@ body.dark .pob-workday-actions { background: rgba(255,255,255,.035); }
     background: var(--pob-surface-solid);
 }
 .pob-progress-orb span { position: relative; z-index: 1; font-weight: 800; }
+.pob-workday-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 82px;
+    padding: .32rem .58rem;
+    border-radius: 999px;
+    background: rgba(198,79,122,.08);
+    border: 1px solid rgba(198,79,122,.12);
+    color: var(--pob-rose-deep);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
 
 .pob-timeline {
     display: grid;
@@ -108,11 +123,13 @@ body.dark .pob-workday-actions { background: rgba(255,255,255,.035); }
     background: var(--pob-surface-solid);
     color: var(--pob-muted);
     font-size: .72rem;
+    transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease;
 }
 .pob-timeline-dot.done { background: rgba(40,122,93,.12); color: var(--pob-success); border-color: rgba(40,122,93,.18); }
-.pob-timeline-dot.live { background: rgba(198,79,122,.12); color: var(--pob-rose-deep); border-color: rgba(198,79,122,.18); animation: pobPulse 2.4s ease-in-out infinite; }
-.pob-timeline-line { height: 3px; border-radius: 999px; background: var(--pob-line); overflow: hidden; }
-.pob-timeline-line.active::after { content:''; display:block; height:100%; width:64%; background:linear-gradient(90deg,var(--pob-rose),var(--pob-violet)); border-radius:inherit; animation: workdayFlow 3.6s ease-in-out infinite; }
+.pob-timeline-dot.live { background: rgba(198,79,122,.12); color: var(--pob-rose-deep); border-color: rgba(198,79,122,.18); animation: pobPulse 2.1s ease-in-out infinite; }
+.pob-timeline-line { height: 3px; border-radius: 999px; background: var(--pob-line); overflow: hidden; position: relative; }
+.pob-timeline-line.active::after { content:''; display:block; height:100%; width:46%; background:linear-gradient(90deg,var(--pob-rose),var(--pob-violet)); border-radius:inherit; animation: workdayFlow 2.2s ease-in-out infinite; }
+.pob-timeline-line.done::after { content:''; display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--pob-success),#64b596); border-radius:inherit; }
 
 .pob-quick-action {
     display: flex;
@@ -184,7 +201,11 @@ main .payslip-card::before {
 .pob-auto-reveal { opacity:0; transform:translateY(14px); }
 .pob-auto-reveal.pob-in { opacity:1; transform:none; transition:opacity .48s ease,transform .48s cubic-bezier(.2,.7,.2,1); }
 
-@keyframes workdayFlow { 0%,100% { width:34%; opacity:.75; } 50% { width:86%; opacity:1; } }
+@keyframes workdayFlow {
+    0% { transform:translateX(-120%); width:42%; opacity:.55; }
+    50% { opacity:1; }
+    100% { transform:translateX(260%); width:42%; opacity:.75; }
+}
 
 @media (max-width: 992px) {
     body:has(.pob-sidebar) main { margin-left: 0 !important; padding-top: 76px !important; }
