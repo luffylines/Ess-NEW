@@ -2,136 +2,158 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
 use App\Models\LeaveRequest;
 use App\Models\OvertimeRequest;
 use App\Models\ActivityLog;
 use App\Models\Holiday;
-use App\Helpers\HolidayHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class EmployeeDashboardController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
+        $now = Carbon::now('Asia/Manila');
+        $today = $now->copy()->startOfDay();
+        $currentYear = $now->year;
+        $currentMonth = $now->month;
 
-        $monthStart = Carbon::create($currentYear, $currentMonth, 1)->startOfDay();
-        $monthEnd = Carbon::create($currentYear, $currentMonth, 1)->endOfMonth()->endOfDay();
+        $yearStart = Carbon::create($currentYear, 1, 1, 0, 0, 0, 'Asia/Manila');
+        $yearEnd = $yearStart->copy()->endOfYear();
+        $monthStart = Carbon::create($currentYear, $currentMonth, 1, 0, 0, 0, 'Asia/Manila');
+        $monthEnd = $monthStart->copy()->endOfMonth();
+        $thirtyDaysAgo = $today->copy()->subDays(30);
+        $sevenDaysAgo = $today->copy()->subDays(7);
+        $upcomingHolidayEnd = $today->copy()->addDays(30);
+        $holidayQueryEnd = $upcomingHolidayEnd->gt($yearEnd) ? $upcomingHolidayEnd : $yearEnd;
 
-        // Calculate working days in the month (excluding weekends and holidays)
-        $totalWorkingDays = HolidayHelper::getMonthlyWorkingDays($currentYear, $currentMonth);
-        
-        // Get remaining working days in current month from today
-        $remainingWorkingDays = HolidayHelper::getRemainingWorkingDaysThisMonth();
+        /*
+         * Performance note:
+         * The old dashboard executed dozens of sequential queries (30 daily attendance
+         * exists() checks + 12 monthly attendance queries + 12 holiday queries, plus
+         * separate leave/overtime queries). With a remote database this made navigation
+         * take many seconds. Load each dataset once and calculate the dashboard in memory.
+         */
+        $holidayRecords = Holiday::query()
+            ->where('is_active', true)
+            ->where('country', 'PH')
+            ->whereBetween('date', [$yearStart->toDateString(), $holidayQueryEnd->toDateString()])
+            ->orderBy('date')
+            ->get(['id', 'date', 'name', 'type', 'country', 'region', 'is_active']);
 
-        // Get holidays for the month (for display and calculations)
-        $holidays = Holiday::getHolidaysForMonth($currentYear, $currentMonth);
+        $holidayDates = $holidayRecords
+            ->map(fn ($holiday) => Carbon::parse($holiday->date)->format('Y-m-d'))
+            ->flip();
+
+        $holidays = $holidayRecords
+            ->filter(fn ($holiday) => Carbon::parse($holiday->date)->year === $currentYear
+                && Carbon::parse($holiday->date)->month === $currentMonth)
+            ->values();
         $holidayCount = $holidays->count();
+        $isTodayHoliday = $holidayDates->has($today->format('Y-m-d'));
+        $upcomingHolidays = $holidayRecords
+            ->filter(function ($holiday) use ($today, $upcomingHolidayEnd) {
+                $date = Carbon::parse($holiday->date)->startOfDay();
+                return $date->betweenIncluded($today, $upcomingHolidayEnd);
+            })
+            ->take(5)
+            ->values();
 
-        // Check if today is a holiday
-        $isTodayHoliday = Holiday::isHoliday(Carbon::now());
+        $totalWorkingDays = $this->countWorkingDays($monthStart, $monthEnd, $holidayDates);
+        $remainingWorkingDays = $today->lt($monthEnd)
+            ? $this->countWorkingDays($today->copy()->addDay(), $monthEnd, $holidayDates)
+            : 0;
 
-        // Attendance count in current month (reset monthly)
-        $attendanceCount = Attendance::where('user_id', $user->id)
-            ->whereBetween('date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')])
+        $attendanceRangeStart = $thirtyDaysAgo->lt($yearStart) ? $thirtyDaysAgo : $yearStart;
+        $attendanceRecords = Attendance::query()
+            ->where('user_id', $user->id)
+            ->whereBetween('date', [$attendanceRangeStart->toDateString(), $today->toDateString()])
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $attendanceCount = $attendanceRecords
+            ->filter(fn ($attendance) => Carbon::parse($attendance->date)->year === $currentYear
+                && Carbon::parse($attendance->date)->month === $currentMonth)
             ->count();
 
-        // Attendance percentage based on working days (excluding holidays/weekends)
-        $attendancePercentage = $totalWorkingDays > 0 ? round(($attendanceCount / $totalWorkingDays) * 100, 1) : 0;
+        $attendancePercentage = $totalWorkingDays > 0
+            ? round(($attendanceCount / $totalWorkingDays) * 100, 1)
+            : 0;
 
-        // Total overtime hours in last 30 days
-        $thirtyDaysAgo = Carbon::now()->subDays(30)->startOfDay();
-        $today = Carbon::now()->endOfDay();
+        $recentAttendance = $attendanceRecords
+            ->filter(fn ($attendance) => Carbon::parse($attendance->date)->startOfDay()->gte($sevenDaysAgo))
+            ->take(7)
+            ->values();
 
-        $totalOvertime = OvertimeRequest::where('user_id', $user->id)
-            ->where('status', 'approved')
-            ->whereBetween('overtime_date', [$thirtyDaysAgo, $today])
-            ->sum('total_hours');
+        $attendanceDateSet = $attendanceRecords
+            ->map(fn ($attendance) => Carbon::parse($attendance->date)->format('Y-m-d'))
+            ->flip();
 
-        // Total leave taken in the last 30 days (regardless of year)
-        $thirtyDaysAgo = Carbon::now()->subDays(30)->startOfDay();
-        $today = Carbon::now()->endOfDay();
-        $totalLeaveTaken = LeaveRequest::where('user_id', $user->id)
-            ->where('status', 'approved')
-            ->where(function($query) use ($thirtyDaysAgo, $today) {
-                $query->whereBetween('start_date', [$thirtyDaysAgo, $today])
-                      ->orWhereBetween('end_date', [$thirtyDaysAgo, $today])
-                      ->orWhere(function($q) use ($thirtyDaysAgo, $today) {
-                          $q->where('start_date', '<', $thirtyDaysAgo)
-                            ->where('end_date', '>', $today);
-                      });
+        $chartData = $this->buildAttendanceChartData($today, $attendanceDateSet);
+        $monthlyStats = $this->buildMonthlyAttendanceStats(
+            $currentYear,
+            $attendanceRecords,
+            $holidayDates
+        );
+
+        $leaveRequests = LeaveRequest::query()
+            ->where('user_id', $user->id)
+            ->get(['id', 'leave_type', 'start_date', 'end_date', 'status']);
+
+        $approvedLeaves = $leaveRequests->where('status', 'approved');
+        $totalLeaveTaken = $approvedLeaves
+            ->filter(function ($leave) use ($thirtyDaysAgo, $today) {
+                $start = Carbon::parse($leave->start_date)->startOfDay();
+                $end = Carbon::parse($leave->end_date)->startOfDay();
+                return $start->lte($today) && $end->gte($thirtyDaysAgo);
             })
-            ->get()
-            ->sum(function($leave) {
-                return Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
-            });
+            ->sum(fn ($leave) => Carbon::parse($leave->start_date)
+                ->diffInDays(Carbon::parse($leave->end_date)) + 1);
 
-        // Calculate leave balance (subtract all approved leaves, regardless of year)
-        $annualLeaveEntitlement = 15;
-        $totalLeaveTakenAllTime = LeaveRequest::where('user_id', $user->id)
-            ->where('status', 'approved')
-            ->get()
-            ->sum(function($leave) {
-                return Carbon::parse($leave->start_date)->diffInDays(Carbon::parse($leave->end_date)) + 1;
-            });
+        $totalLeaveTakenAllTime = $approvedLeaves
+            ->sum(fn ($leave) => Carbon::parse($leave->start_date)
+                ->diffInDays(Carbon::parse($leave->end_date)) + 1);
 
-        $leaveBalance = max(0, $annualLeaveEntitlement - $totalLeaveTakenAllTime);
-
-        // Upcoming leave
-        $upcomingLeave = LeaveRequest::where('user_id', $user->id)
-            ->where('status', 'approved')
-            ->where('start_date', '>=', Carbon::today())
-            ->orderBy('start_date', 'asc')
+        $leaveBalance = max(0, 15 - $totalLeaveTakenAllTime);
+        $upcomingLeave = $approvedLeaves
+            ->filter(fn ($leave) => Carbon::parse($leave->start_date)->startOfDay()->gte($today))
+            ->sortBy('start_date')
             ->first();
+        $pendingLeaveRequests = $leaveRequests->where('status', 'pending')->count();
 
-        // Recent activities
-        $recentActivities = ActivityLog::where('user_id', $user->id)
+        $overtimeRequests = OvertimeRequest::query()
+            ->where('user_id', $user->id)
+            ->get(['id', 'overtime_date', 'total_hours', 'status']);
+
+        $totalOvertime = $overtimeRequests
+            ->filter(function ($overtime) use ($thirtyDaysAgo, $today) {
+                if ($overtime->status !== 'approved') {
+                    return false;
+                }
+                $date = Carbon::parse($overtime->overtime_date)->startOfDay();
+                return $date->betweenIncluded($thirtyDaysAgo, $today);
+            })
+            ->sum(fn ($overtime) => (float) ($overtime->total_hours ?? 0));
+        $pendingOvertimeRequests = $overtimeRequests->where('status', 'pending')->count();
+
+        $recentActivities = ActivityLog::query()
+            ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
-
-        // Pending requests counts
-        $pendingLeaveRequests = LeaveRequest::where('user_id', $user->id)
-            ->where('status', 'pending')
-            ->count();
-
-        $pendingOvertimeRequests = OvertimeRequest::where('user_id', $user->id)
-            ->where('status', 'pending')
-            ->count();
-
-        // Recent attendance records (last 7 days)
-        $recentAttendance = Attendance::where('user_id', $user->id)
-            ->whereBetween('date', [Carbon::now()->subDays(7)->format('Y-m-d'), $today->format('Y-m-d')])
-            ->orderBy('date', 'desc')
-            ->limit(7)
-            ->get();
-
-        // Chart data for last 30 days attendance
-        $chartData = $this->getAttendanceChartData($user->id);
-
-        // Monthly attendance summary with holiday awareness
-        $monthlyStats = $this->getMonthlyAttendanceStats($user->id, $currentYear);
-
-        // Get upcoming holidays (next 30 days)
-        $upcomingHolidays = HolidayHelper::getHolidaysInRange(
-            Carbon::now(), 
-            Carbon::now()->addDays(30)
-        )->take(5);
 
         return view('dashboard', compact(
             'user',
             'attendanceCount',
             'totalWorkingDays',
-            'remainingWorkingDays',      // new: remaining working days this month
-            'holidayCount',              // holidays in current month
-            'holidays',                  // holiday collection for current month
-            'isTodayHoliday',           // new: is today a holiday
-            'upcomingHolidays',         // new: upcoming holidays
+            'remainingWorkingDays',
+            'holidayCount',
+            'holidays',
+            'isTodayHoliday',
+            'upcomingHolidays',
             'attendancePercentage',
             'totalOvertime',
             'totalLeaveTaken',
@@ -146,72 +168,62 @@ class EmployeeDashboardController extends Controller
         ));
     }
 
-    /**
-     * Calculate total days between start and end date inclusive
-     */
-    private function calculateTotalDays($startDate, $endDate)
+    private function countWorkingDays(Carbon $startDate, Carbon $endDate, Collection $holidayDates): int
     {
-        return $startDate->diffInDays($endDate) + 1;
+        $cursor = $startDate->copy()->startOfDay();
+        $end = $endDate->copy()->startOfDay();
+        $workingDays = 0;
+
+        while ($cursor->lte($end)) {
+            if (!$cursor->isWeekend() && !$holidayDates->has($cursor->format('Y-m-d'))) {
+                $workingDays++;
+            }
+            $cursor->addDay();
+        }
+
+        return $workingDays;
     }
 
-    /**
-     * Return list of holidays for given year and month (hardcoded example)
-     * You can replace this with DB call or config file as needed
-     */
-    private function getHolidays($year, $month)
-    {
-        $holidays = [
-            // Add your company holidays here
-            '2025-10-15',
-            '2025-10-31',
-            // Add more dates as needed...
-        ];
-
-        return collect($holidays)->filter(function ($date) use ($year, $month) {
-            $carbonDate = Carbon::parse($date);
-            return $carbonDate->year == $year && $carbonDate->month == $month;
-        })->values()->all();
-    }
-
-    private function getAttendanceChartData($userId)
+    private function buildAttendanceChartData(Carbon $today, Collection $attendanceDateSet): array
     {
         $labels = [];
         $data = [];
 
         for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
+            $date = $today->copy()->subDays($i);
             $labels[] = $date->format('M d');
-
-            $hasAttendance = Attendance::where('user_id', $userId)
-                ->where('date', $date->format('Y-m-d'))
-                ->exists();
-
-            $data[] = $hasAttendance ? 1 : 0;
+            $data[] = $attendanceDateSet->has($date->format('Y-m-d')) ? 1 : 0;
         }
 
         return compact('labels', 'data');
     }
 
-    private function getMonthlyAttendanceStats($userId, $year)
-    {
+    private function buildMonthlyAttendanceStats(
+        int $year,
+        Collection $attendanceRecords,
+        Collection $holidayDates
+    ): array {
+        $attendanceByMonth = array_fill(1, 12, 0);
+
+        foreach ($attendanceRecords as $attendance) {
+            $date = Carbon::parse($attendance->date);
+            if ($date->year === $year) {
+                $attendanceByMonth[$date->month]++;
+            }
+        }
+
         $stats = [];
-
         for ($month = 1; $month <= 12; $month++) {
-            $monthStart = Carbon::create($year, $month, 1)->startOfDay();
-            $monthEnd = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
-
-            $attendanceCount = Attendance::where('user_id', $userId)
-                ->whereBetween('date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')])
-                ->count();
-
-            // Use holiday-aware working days calculation
-            $workingDays = HolidayHelper::getMonthlyWorkingDays($year, $month);
+            $monthStart = Carbon::create($year, $month, 1, 0, 0, 0, 'Asia/Manila');
+            $monthEnd = $monthStart->copy()->endOfMonth();
+            $workingDays = $this->countWorkingDays($monthStart, $monthEnd, $holidayDates);
+            $attendance = $attendanceByMonth[$month];
 
             $stats[] = [
                 'month' => $monthStart->format('M'),
-                'attendance' => $attendanceCount,
+                'attendance' => $attendance,
                 'working_days' => $workingDays,
-                'percentage' => $workingDays > 0 ? round(($attendanceCount / $workingDays) * 100, 1) : 0
+                'percentage' => $workingDays > 0 ? round(($attendance / $workingDays) * 100, 1) : 0,
             ];
         }
 
