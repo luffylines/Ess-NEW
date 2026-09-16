@@ -5,10 +5,20 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 Alpine.start();
 
+let serverClockOffsetMs = 0;
+
 const ready = (fn) => {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
     else fn();
 };
+
+const manilaClockValue = () => new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Manila',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+}).format(new Date(Date.now() + serverClockOffsetMs));
 
 ready(() => {
     document.body.classList.add('page-enter');
@@ -56,13 +66,12 @@ ready(() => {
 
     const clocks = document.querySelectorAll('[data-live-clock]');
     const updateClocks = () => {
-        const now = new Date();
-        const value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const value = manilaClockValue();
         clocks.forEach((clock) => { clock.textContent = value; });
     };
     if (clocks.length) {
         updateClocks();
-        setInterval(updateClocks, 30000);
+        setInterval(updateClocks, 1000);
     }
 
     document.querySelectorAll('[data-count]').forEach((element) => {
@@ -111,8 +120,8 @@ ready(() => {
         setTimeout(() => card.classList.add('pob-in'), 45 + Math.min(index, 10) * 38);
     });
 
-    // Employee dashboard enhancement. It reads the existing Blade-rendered metrics,
-    // so no attendance/payroll business rules are duplicated client-side.
+    // Employee dashboard enhancement. Workday state is synchronized from the
+    // real My Attendance page so the journey reflects today's actual record.
     if (window.location.pathname === '/dashboard') {
         const welcomeHeading = [...document.querySelectorAll('main h1')].find((el) => /welcome/i.test(el.textContent || ''));
         const attendanceCard = document.querySelector('main .stats-card.bg-primary');
@@ -121,10 +130,12 @@ ready(() => {
             const nameMatch = (welcomeHeading.textContent || '').match(/Welcome,\s*(.*?)!/i);
             const name = nameMatch ? nameMatch[1].trim() : 'Employee';
             const metaText = welcomeHeading.parentElement?.querySelector('p')?.textContent?.trim() || 'Employee workspace';
-            const attendanceText = attendanceCard.textContent || '';
-            const percentMatch = attendanceText.match(/([0-9]+(?:\.[0-9]+)?)%/);
-            const attendancePercent = percentMatch ? Math.max(0, Math.min(100, Number(percentMatch[1]))) : 0;
-            const today = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+            const today = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Asia/Manila',
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+            }).format(new Date());
 
             const intro = document.createElement('section');
             intro.className = 'pob-dashboard-intro';
@@ -140,11 +151,22 @@ ready(() => {
                 <div class="pob-workday-grid position-relative" style="z-index:1;">
                     <div class="pob-workday-panel">
                         <div class="d-flex justify-content-between align-items-start gap-3">
-                            <div><div class="small text-secondary mb-1">Current time</div><div class="pob-clock" data-live-clock>--:--</div><div class="small text-secondary mt-2">Use My Attendance to record or review today's workday.</div></div>
-                            <div class="pob-progress-orb" style="--progress:${attendancePercent}"><span>${attendancePercent}%</span></div>
+                            <div>
+                                <div class="small text-secondary mb-1">Current time · Manila</div>
+                                <div class="pob-clock" data-live-clock>--:--:--</div>
+                                <div class="small text-secondary mt-2">Use My Attendance to record or review today's workday.</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="pob-progress-orb" style="--progress:0"><span data-workday-percent>0%</span></div>
+                                <div class="pob-workday-status mt-2" data-workday-status>Syncing…</div>
+                            </div>
                         </div>
                         <div class="pob-timeline" aria-label="Workday journey">
-                            <span class="pob-timeline-dot done"><i class="bi bi-check"></i></span><span class="pob-timeline-line active"></span><span class="pob-timeline-dot live"><i class="bi bi-briefcase"></i></span><span class="pob-timeline-line"></span><span class="pob-timeline-dot"><i class="bi bi-box-arrow-right"></i></span>
+                            <span class="pob-timeline-dot" data-stage="time-in"><i class="bi bi-clock"></i></span>
+                            <span class="pob-timeline-line" data-line="after-time-in"></span>
+                            <span class="pob-timeline-dot" data-stage="working"><i class="bi bi-briefcase"></i></span>
+                            <span class="pob-timeline-line" data-line="after-working"></span>
+                            <span class="pob-timeline-dot" data-stage="time-out"><i class="bi bi-box-arrow-right"></i></span>
                         </div>
                         <div class="d-flex justify-content-between small text-secondary mt-2"><span>Time In</span><span>Working</span><span>Time Out</span></div>
                     </div>
@@ -161,17 +183,107 @@ ready(() => {
             if (headingRow) {
                 headingRow.replaceWith(intro);
                 updateDynamicClock(intro);
+                syncWorkdayState(intro);
             }
         }
     }
 });
 
+async function syncWorkdayState(root) {
+    try {
+        const response = await fetch('/attendance/my', {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) throw new Error(`Attendance sync failed: ${response.status}`);
+
+        const serverDate = response.headers.get('Date');
+        if (serverDate) {
+            const serverMs = Date.parse(serverDate);
+            if (Number.isFinite(serverMs)) serverClockOffsetMs = serverMs - Date.now();
+        }
+
+        const html = await response.text();
+        const state = detectWorkdayState(html);
+        applyWorkdayState(root, state);
+    } catch (error) {
+        console.warn('Unable to synchronize dashboard workday state.', error);
+        applyWorkdayState(root, 'unknown');
+    }
+}
+
+function detectWorkdayState(html) {
+    const documentSnapshot = new DOMParser().parseFromString(html, 'text/html');
+
+    if (documentSnapshot.querySelector('button[name="action"][value="time_in"]')) return 'not_started';
+    if (documentSnapshot.querySelector('button[name="action"][value="break_in"]')) return 'working';
+    if (documentSnapshot.querySelector('button[name="action"][value="break_out"]')) return 'on_break';
+    if (documentSnapshot.querySelector('button[name="action"][value="time_out"]')) return 'working_resumed';
+
+    const pageText = documentSnapshot.body?.textContent || '';
+    if (/completed attendance for today/i.test(pageText)) return 'complete';
+
+    return 'unknown';
+}
+
+function applyWorkdayState(root, state) {
+    const states = {
+        not_started: { percent: 0, status: 'Not started', timeIn: 'pending', working: 'pending', timeOut: 'pending', firstLine: 'pending', secondLine: 'pending' },
+        working: { percent: 50, status: 'Working', timeIn: 'done', working: 'live', timeOut: 'pending', firstLine: 'done', secondLine: 'active' },
+        on_break: { percent: 50, status: 'On break', timeIn: 'done', working: 'live', timeOut: 'pending', firstLine: 'done', secondLine: 'active' },
+        working_resumed: { percent: 75, status: 'Working', timeIn: 'done', working: 'live', timeOut: 'pending', firstLine: 'done', secondLine: 'active' },
+        complete: { percent: 100, status: 'Complete', timeIn: 'done', working: 'done', timeOut: 'done', firstLine: 'done', secondLine: 'done' },
+        unknown: { percent: 0, status: 'Open Attendance', timeIn: 'pending', working: 'pending', timeOut: 'pending', firstLine: 'pending', secondLine: 'pending' },
+    };
+
+    const config = states[state] || states.unknown;
+    const orb = root.querySelector('.pob-progress-orb');
+    const percent = root.querySelector('[data-workday-percent]');
+    const status = root.querySelector('[data-workday-status]');
+
+    if (orb) orb.style.setProperty('--progress', String(config.percent));
+    if (percent) percent.textContent = `${config.percent}%`;
+    if (status) status.textContent = config.status;
+
+    setStage(root.querySelector('[data-stage="time-in"]'), config.timeIn, 'clock');
+    setStage(root.querySelector('[data-stage="working"]'), config.working, state === 'on_break' ? 'cup-hot' : 'briefcase');
+    setStage(root.querySelector('[data-stage="time-out"]'), config.timeOut, 'box-arrow-right');
+    setLine(root.querySelector('[data-line="after-time-in"]'), config.firstLine);
+    setLine(root.querySelector('[data-line="after-working"]'), config.secondLine);
+}
+
+function setStage(element, state, pendingIcon) {
+    if (!element) return;
+    element.classList.remove('done', 'live');
+    const icon = element.querySelector('i');
+
+    if (state === 'done') {
+        element.classList.add('done');
+        if (icon) icon.className = 'bi bi-check-lg';
+    } else if (state === 'live') {
+        element.classList.add('live');
+        if (icon) icon.className = `bi bi-${pendingIcon}`;
+    } else if (icon) {
+        icon.className = `bi bi-${pendingIcon}`;
+    }
+}
+
+function setLine(element, state) {
+    if (!element) return;
+    element.classList.remove('active', 'done');
+    if (state === 'active') element.classList.add('active');
+    if (state === 'done') element.classList.add('done');
+}
+
 function updateDynamicClock(root) {
     const clock = root.querySelector('[data-live-clock]');
     if (!clock) return;
-    const render = () => { clock.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); };
+    const render = () => { clock.textContent = manilaClockValue(); };
     render();
-    setInterval(render, 30000);
+    setInterval(render, 1000);
 }
 
 function escapeHtml(value) {
